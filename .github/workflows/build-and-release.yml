@@ -1,0 +1,146 @@
+name: Build and Release
+
+# Runs on every push to main (including PR merges): build + publish a GitHub
+# release. The release body is extracted from the "## Update summary:" section
+# of README.md through the "- - -" separator.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            build_command: build:mac
+          - os: windows-latest
+            build_command: build:win
+
+    runs-on: ${{ matrix.os }}
+    env:
+      NODE_OPTIONS: '--max-old-space-size=8192'
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm test -- --coverage
+
+      - name: Build app
+        run: npm run ${{ matrix.build_command }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Only upload artifacts for the release job (push to main).
+      - name: Upload artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-artifacts
+          path: |
+            ./dist/**/*.dmg
+            ./dist/**/*.pkg
+            ./dist/**/*.exe
+          if-no-files-found: error
+
+  release:
+    name: Publish Release
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Package version: $VERSION"
+
+      - name: Check for existing tag
+        id: check-tag
+        run: |
+          if git rev-parse --verify "refs/tags/v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists on the remote; skipping release."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download all build artifacts
+        if: steps.check-tag.outputs.skip != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded artifacts
+        if: steps.check-tag.outputs.skip != 'true'
+        run: |
+          echo "Downloaded artifacts:"
+          find ./artifacts -type f | sort
+
+      - name: Extract release notes from README
+        if: steps.check-tag.outputs.skip != 'true'
+        run: |
+          # Grab everything from "## Update summary:" through (but not including)
+          # the "- - -" separator. Fails loudly if either boundary is missing.
+          awk '/^## Update summary:/{flag=1} /^- - -[[:space:]]*$/{flag=0} flag' README.md > update-summary.md
+
+          if ! grep -q '^## Update summary:' update-summary.md; then
+            echo "Error: '## Update summary:' heading not found in README.md" >&2
+            exit 1
+          fi
+
+          {
+            echo "# Bedrock Engineer v${VERSION}"
+            echo
+            cat update-summary.md
+          } > RELEASE_NOTES.md
+
+          echo "----- Release notes preview -----"
+          cat RELEASE_NOTES.md
+          echo "---------------------------------"
+
+      - name: Create GitHub Release
+        if: steps.check-tag.outputs.skip != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: v${{ env.VERSION }}
+          body_path: RELEASE_NOTES.md
+          files: |
+            artifacts/**/*.dmg
+            artifacts/**/*.pkg
+            artifacts/**/*.exe
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

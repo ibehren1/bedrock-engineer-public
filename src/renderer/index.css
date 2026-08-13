@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   THEME SYSTEM
+   The app has three appearances, driven by data-theme on <html> (set from the
+   user's appTheme setting in useTheme.ts):
+     - light : the original look (Tailwind's light track, unchanged)
+     - dark  : the original dark look (data-theme="dark" activates dark: variants)
+     - dim   : a softened light view — a muted slate-gray canvas, not black.
+               Implemented as scoped overrides of the light-track utilities so
+               NO component markup has to change.
+
+   Accent tokens (blue = primary, violet = second accent, drawn from the app
+   icon's brain-diagram gradient) are exposed as CSS variables for the few
+   places that opt into the gradient highlight.
+   ============================================================================ */
+
+:root {
+  --accent: #2563eb;        /* blue-600  — primary accent */
+  --accent-strong: #1d4ed8; /* blue-700  */
+  --accent-2: #7c3aed;      /* violet-600 — second accent (from icon) */
+  --accent-2-strong: #6d28d9;
+}
+
+[data-theme='dark'] {
+  --accent: #4f7ffa;        /* icon mid-blue */
+  --accent-strong: #6a8dff;
+  --accent-2: #8b5cf6;      /* icon violet node */
+  --accent-2-strong: #7c5cf0;
+}
+
+[data-theme='dim'] {
+  --accent: #2f6bf0;
+  --accent-strong: #2456d6;
+  --accent-2: #7c5cf0;
+  --accent-2-strong: #6a49e0;
+}
+
+/* Reusable gradient highlight echoing the icon (blue -> violet). */
+.accent-gradient {
+  background-image: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+.accent-gradient-text {
+  background-image: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Accent-colored outlines for subtle/unselected controls (chips, toggles).
+   Resting state uses a soft tint of the accent; hover/focus goes full accent.
+   Two-class specificity (0,2,0) so hover wins over Tailwind border utilities. */
+.border-accent-soft {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.border-accent {
+  border-color: var(--accent);
+}
+.hover\:border-accent:hover {
+  border-color: var(--accent);
+}
+
+/* Accent-colored text/icon (theme-aware via --accent). */
+.text-accent {
+  color: var(--accent);
+}
+.hover\:text-accent-strong:hover {
+  color: var(--accent-strong);
+}
+
+/* Accent divider between user/assistant turns. Soft tint so it separates
+   without shouting; theme-aware via --accent. */
+.hr-accent {
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* Matches the app icon's dark navy-charcoal background. */
+.bg-icon {
+  background-color: #0f1117;
+}
+
+/* ---------------------------------------------------------------------------
+   DIM overrides.
+   Remap the light-track background/border utilities to a dimmer slate palette.
+   Selectors are [data-theme='dim'] + .utility (specificity 0,2,0) so they win
+   over Tailwind's single-class utilities (0,1,0) without !important.
+   The set below is the complete inventory of light bg/border utilities the app
+   actually uses (verified by grep); text stays dark, so contrast is preserved.
+   --------------------------------------------------------------------------- */
+[data-theme='dim'] {
+  --dim-canvas: #bcc2ce;   /* was gray-100 */
+  --dim-surface: #d2d7e0;  /* was white    */
+  --dim-surface-2: #c6ccd7;/* was gray-50  */
+  --dim-raised: #b1b8c5;   /* was gray-200 */
+  --dim-sunken: #a6adbc;   /* was gray-300 */
+  --dim-border: #a6adbc;   /* was gray-200/300 */
+  --dim-border-soft: #b4bac6; /* was gray-100 */
+}
+
+/* Backgrounds */
+[data-theme='dim'] .bg-white { background-color: var(--dim-surface); }
+[data-theme='dim'] .bg-white\/60 { background-color: rgb(210 215 224 / 0.6); }
+[data-theme='dim'] .bg-gray-50 { background-color: var(--dim-surface-2); }
+[data-theme='dim'] .bg-gray-50\/50 { background-color: rgb(198 204 215 / 0.5); }
+[data-theme='dim'] .bg-gray-100 { background-color: var(--dim-canvas); }
+[data-theme='dim'] .bg-gray-200 { background-color: var(--dim-raised); }
+[data-theme='dim'] .bg-gray-300 { background-color: var(--dim-sunken); }
+
+/* Hover backgrounds */
+[data-theme='dim'] .hover\:bg-gray-50:hover { background-color: var(--dim-surface-2); }
+[data-theme='dim'] .hover\:bg-gray-100:hover { background-color: var(--dim-canvas); }
+[data-theme='dim'] .hover\:bg-gray-200:hover { background-color: var(--dim-raised); }
+[data-theme='dim'] .hover\:bg-gray-300:hover { background-color: var(--dim-sunken); }
+
+/* Borders */
+[data-theme='dim'] .border-white { border-color: var(--dim-surface); }
+[data-theme='dim'] .border-gray-100 { border-color: var(--dim-border-soft); }
+[data-theme='dim'] .border-gray-200 { border-color: var(--dim-border); }
+[data-theme='dim'] .border-gray-300 { border-color: var(--dim-border); }
+[data-theme='dim'] .hover\:border-gray-300:hover { border-color: var(--dim-border); }
