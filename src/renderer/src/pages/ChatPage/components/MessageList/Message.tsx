@@ -14,8 +14,12 @@ import { toolIcons } from '@renderer/components/icons/ToolIcons'
 import { FaCheck } from 'react-icons/fa'
 import { MdErrorOutline } from 'react-icons/md'
 import { FiTrash2, FiCopy } from 'react-icons/fi'
+import { LuFileText } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
+import { renderToStaticMarkup } from 'react-dom/server'
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { ReasoningContent } from '../CodeBlocks/Reasoning/ReasoningContent'
 import { GuardContent } from '../CodeBlocks/GuardContent'
 
@@ -114,6 +118,27 @@ export const ChatMessage = memo(function ChatMessage({
       })
   }, [message, t])
 
+  // リッチテキストとしてコピーする。Markdown を HTML に変換し、text/html と text/plain の
+  // 両方をクリップボードに書き込むことで、リッチテキスト対応エディタでは書式付き（太字・斜体・
+  // 箇条書きなど）で、プレーンテキストエディタでは元の Markdown として貼り付けられる。
+  const handleCopyRichText = useCallback(async () => {
+    const markdown = extractMessageText(message)
+    try {
+      const html = renderToStaticMarkup(<Markdown remarkPlugins={[remarkGfm]}>{markdown}</Markdown>)
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([markdown], { type: 'text/plain' })
+        })
+      ])
+      toast.success(t('Message copied to clipboard'))
+      setIsDropdownOpen(false)
+    } catch (err) {
+      console.error('Failed to copy rich text: ', err)
+      toast.error(t('Failed to copy message'))
+    }
+  }, [message, t])
+
   const handleDeleteMessage = useCallback(() => {
     if (onDeleteMessage) {
       if (window.confirm(t('Are you sure you want to delete this message?'))) {
@@ -152,7 +177,7 @@ export const ChatMessage = memo(function ChatMessage({
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           title={t('Click for options')}
         >
-          <Avatar role={message.role} />
+          <Avatar role={message.role} modelId={message.metadata?.modelId} />
         </div>
         {isDropdownOpen && (
           <div className="absolute left-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 min-w-32 py-1 border dark:border-gray-700 whitespace-nowrap p-1">
@@ -161,7 +186,14 @@ export const ChatMessage = memo(function ChatMessage({
               onClick={handleCopyMessage}
             >
               <FiCopy className="text-blue-500" />
-              <span className="dark:text-gray-300">{t('Copy to clipboard')}</span>
+              <span className="dark:text-gray-300">{t('Copy (markdown)')}</span>
+            </button>
+            <button
+              className="flex items-center gap-2 px-4 py-2 w-full text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              onClick={handleCopyRichText}
+            >
+              <LuFileText className="text-blue-500" />
+              <span className="dark:text-gray-300">{t('Copy (rich text)')}</span>
             </button>
             <button
               className="flex items-center gap-2 px-4 py-2 w-full text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"

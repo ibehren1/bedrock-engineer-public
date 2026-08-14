@@ -8,6 +8,11 @@ i.e. Version: 2026.629.1 was the second daily build on 2026-06-29.
 
 ## Update summary:
 
+### 2026-08-14
+- Update assistant icon in chat interface to match the model's icon.
+- Hovering over the model icon in the chat interface now displays the specific model's name that produced the output.
+- Add options to copy message to clipboard in either markdown or rich text format.
+
 ### 2026-08-13
 - Update Claude Sonnet 5 pricing to $2/$10 per million input/output tokens.
 - Update to address open security vulnerabilities.

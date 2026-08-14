@@ -1,14 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { LLM } from '@/types/llm'
-import { LuBrainCircuit } from 'react-icons/lu'
 import { useSettings } from '@renderer/contexts/SettingsContext'
 import { PricingCalculator } from '@common/models/pricing'
 import { FiChevronDown } from 'react-icons/fi'
-import NovaLogo from './nova-color.svg'
-import ClaudeLogo from './claude-color.svg'
-import DeepSeekLogo from './deepseek-color.svg'
-import MetaLogo from './meta-color.svg'
-import OpenAILogo from './openai-color.svg'
+import { getModelIcon } from '@renderer/components/ModelIcon'
 
 type ModelSelectorProps = {
   openable: boolean
@@ -16,11 +11,6 @@ type ModelSelectorProps = {
   onChange?: (modelId: string) => void // 外部への変更通知
   className?: string // 追加のスタイリング
 }
-
-const MODEL_ICONS = {
-  claude: <ClaudeLogo />,
-  llama: <LuBrainCircuit className="size-4" />
-} as const
 
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
   openable,
@@ -57,19 +47,6 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       updateLLM(model)
     }
     setIsOpen(false)
-  }
-
-  const getModelIcon = (modelId: string, isInferenceProfile?: boolean) => {
-    // Show group icon for inference profiles
-    if (isInferenceProfile) return <LuBrainCircuit className="size-4 text-blue-600" />
-
-    if (modelId.includes('claude')) return MODEL_ICONS.claude
-    if (modelId.includes('llama')) return MODEL_ICONS.llama
-    if (modelId.includes('nova')) return <NovaLogo />
-    if (modelId.includes('deepseek')) return <DeepSeekLogo />
-    if (modelId.includes('meta')) return <MetaLogo />
-    if (modelId.includes('gpt-oss') || modelId.includes('openai')) return <OpenAILogo />
-    return <LuBrainCircuit />
   }
 
   const modelColors = {

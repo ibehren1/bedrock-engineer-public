@@ -14,6 +14,8 @@ export interface IdentifiableMessage extends BedrockMessage {
   metadata?: {
     converseMetadata?: ConverseStreamMetadataEvent | Record<string, any>
     sessionCost?: number
+    // メッセージを生成したモデルのID（アシスタントメッセージのアイコン表示に使用）
+    modelId?: string
     // 将来的に他のメタデータタイプも追加可能
   }
 }

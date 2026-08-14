@@ -469,7 +469,12 @@ export const useAgentChat = (
             }
             // 新しいメッセージIDを生成
             const messageId = generateMessageId()
-            const newMessage: IdentifiableMessage = { role, content, id: messageId }
+            const newMessage: IdentifiableMessage = {
+              role,
+              content,
+              id: messageId,
+              metadata: { modelId }
+            }
 
             // アシスタントメッセージの場合、最後のメッセージIDを保持
             if (role === 'assistant') {

@@ -28,6 +28,8 @@ export const messages = {
     'Failed to copy message': 'Failed to copy message',
     'Click for options': 'Click for options',
     'Copy to clipboard': 'Copy to clipboard',
+    'Copy (markdown)': 'Copy (markdown)',
+    'Copy (rich text)': 'Copy (rich text)',
     'Delete message': 'Delete message',
     'Toggle chat history': 'Toggle chat history',
     // キャッシュ関連の翻訳
@@ -77,6 +79,8 @@ export const messages = {
     'Failed to copy message': 'メッセージのコピーに失敗しました',
     'Click for options': 'オプションを表示',
     'Copy to clipboard': 'クリップボードにコピー',
+    'Copy (markdown)': 'コピー（Markdown）',
+    'Copy (rich text)': 'コピー（リッチテキスト）',
     'Delete message': 'メッセージを削除',
     'Toggle chat history': 'チャット履歴の表示/非表示',
     // キャッシュ関連の翻訳
