@@ -8,6 +8,20 @@ i.e. Version: 2026.629.1 was the second daily build on 2026-06-29.
 
 ## Update summary:
 
+### 2026-08-20
+- Add username along side the avatar.
+- Add a floating toolbar to copy just the highlighted text of a chat message as markdown or rich text.
+- Make the stop-generation button red while inference is running.
+- Make the new-chat button green.
+- Add an "Export chat to Word (.docx)" button. Exports rich text (excluding ToolUse/ToolResult like the Markdown export), labels each turn as "Assistant – <model ID>" / "User – <username>", and embeds the user/assistant avatars as images.
+- Markdown export now also embeds the avatar images and uses the "Assistant – <model ID>" / "User – <username>" headings.
+- Publish the GitHub release even when the build job fails or produces no installers (notes-only release; any binaries that did build are still attached).
+
+### 2026-08-19
+- Serve OpenAI GPT-5.6 (Sol/Terra/Luna) models through the standard Bedrock Converse API and remove the OpenAI Responses API translation layer.
+- Remove the GPT-5.5 and GPT-5.4 models, which are not available through Converse.
+- Update the release workflow to keep build artifacts only for the most current release.
+
 ### 2026-08-14
 - Update assistant icon in chat interface to match the model's icon.
 - Hovering over the model icon in the chat interface now displays the specific model's name that produced the output.

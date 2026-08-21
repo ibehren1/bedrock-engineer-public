@@ -16,6 +16,7 @@ import { MdErrorOutline } from 'react-icons/md'
 import { FiTrash2, FiCopy } from 'react-icons/fi'
 import { LuFileText } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
+import useSetting from '@renderer/hooks/useSetting'
 import toast from 'react-hot-toast'
 import { renderToStaticMarkup } from 'react-dom/server'
 import Markdown from 'react-markdown'
@@ -72,6 +73,7 @@ export const ChatMessage = memo(function ChatMessage({
   isLast
 }: ChatMessageProps) {
   const { t } = useTranslation()
+  const { userName } = useSetting()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [showMetadataModal, setShowMetadataModal] = useState(false)
   const avatarRef = useRef<HTMLDivElement>(null)
@@ -207,7 +209,9 @@ export const ChatMessage = memo(function ChatMessage({
       </div>
       <div className="flex flex-col gap-2 w-full">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 relative">{message.role}</span>
+          <span className="text-xs text-gray-500 relative">
+            {message.role === 'user' && userName ? userName : message.role}
+          </span>
           {message.metadata && (
             <button
               onClick={() => setShowMetadataModal(true)}
@@ -223,6 +227,7 @@ export const ChatMessage = memo(function ChatMessage({
               <div
                 key={index}
                 className="relative"
+                data-message-text="true"
                 data-answer-anchor={isLast && index === firstTextBlockIndex ? 'true' : undefined}
               >
                 <CodeRenderer text={c.text} />

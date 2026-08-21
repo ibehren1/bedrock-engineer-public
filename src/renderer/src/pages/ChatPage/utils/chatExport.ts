@@ -16,6 +16,18 @@ export interface ChatExportResult {
   images: ChatExportImage[]
 }
 
+/** One rendered conversation turn: the originating message and its markdown body. */
+export interface ChatSection {
+  message: IdentifiableMessage
+  /** Markdown body (text + rasterized image/diagram refs), tool/reasoning blocks excluded. */
+  body: string
+}
+
+export interface ChatSectionsResult {
+  sections: ChatSection[]
+  images: ChatExportImage[]
+}
+
 /** Optional rasterizer for DrawIO XML. Returns a PNG data URL, or null on failure. */
 export type DrawioRasterizer = (xml: string) => Promise<string | null>
 
@@ -23,18 +35,18 @@ const FENCE_RE = /```([^\n`]*)\n([\s\S]*?)```/g
 const MXFILE_RE = /<mxfile[\s\S]*?<\/mxfile>/gi
 
 /**
- * Build a standard CommonMark document from a chat session.
+ * Extract the exportable conversation turns from a chat session.
  *
  * Only user prompts and assistant answers are included (text + image content
  * blocks). Tool calls, tool results, reasoning, and metadata are intentionally
  * excluded. Mermaid diagrams, DrawIO diagrams, and embedded images are
- * rasterized to PNG and referenced via relative `images/` links.
+ * rasterized to PNG and referenced via relative `images/` links. Turns with no
+ * renderable body are skipped.
  */
-export async function buildChatMarkdown(
-  title: string,
+export async function buildChatSections(
   messages: IdentifiableMessage[],
   options: { rasterizeDrawio?: DrawioRasterizer } = {}
-): Promise<ChatExportResult> {
+): Promise<ChatSectionsResult> {
   const images: ChatExportImage[] = []
   let diagramCount = 0
   let imageCount = 0
@@ -48,10 +60,9 @@ export async function buildChatMarkdown(
     return `![${prefix}](images/${filename})`
   }
 
-  const sections: string[] = [`# ${title}`, '']
+  const sections: ChatSection[] = []
 
   for (const message of messages) {
-    const role = message.role === 'assistant' ? 'Assistant' : 'User'
     const blocks = message.content ?? []
 
     const rendered: string[] = []
@@ -70,10 +81,50 @@ export async function buildChatMarkdown(
     const body = rendered.join('\n\n').trim()
     if (!body) continue
 
-    sections.push(`## ${role}`, '', body, '')
+    sections.push({ message, body })
   }
 
-  return { markdown: sections.join('\n').trim() + '\n', images }
+  return { sections, images }
+}
+
+/**
+ * Build a standard CommonMark document from a chat session. See
+ * {@link buildChatSections} for the content rules.
+ */
+export async function buildChatMarkdown(
+  title: string,
+  messages: IdentifiableMessage[],
+  options: {
+    rasterizeDrawio?: DrawioRasterizer
+    /** Override the role heading text per message (e.g. `Assistant – <modelId>`). */
+    roleLabel?: (message: IdentifiableMessage) => string
+    /** Per-message avatar as a PNG data URL; embedded as an image in the role heading. */
+    avatarDataUrl?: (message: IdentifiableMessage) => Promise<string | null>
+  } = {}
+): Promise<ChatExportResult> {
+  const { sections, images } = await buildChatSections(messages, options)
+
+  const lines: string[] = [`# ${title}`, '']
+  let avatarCount = 0
+  for (const { message, body } of sections) {
+    const role =
+      options.roleLabel?.(message) ?? (message.role === 'assistant' ? 'Assistant' : 'User')
+
+    let heading = role
+    if (options.avatarDataUrl) {
+      const dataUrl = await options.avatarDataUrl(message)
+      const base64 = dataUrl ? stripDataUrlPrefix(dataUrl) : ''
+      if (base64) {
+        const filename = `avatar-${++avatarCount}.png`
+        images.push({ filename, base64 })
+        heading = `![avatar](images/${filename}) ${role}`
+      }
+    }
+
+    lines.push(`## ${heading}`, '', body, '')
+  }
+
+  return { markdown: lines.join('\n').trim() + '\n', images }
 }
 
 /**
@@ -136,7 +187,7 @@ async function rasterizeMermaid(code: string): Promise<string | null> {
 }
 
 /** Convert an SVG string to a white-background PNG data URL (3x resolution). */
-function svgToPngDataUrl(svg: string, scale = 3): Promise<string | null> {
+export function svgToPngDataUrl(svg: string, scale = 3): Promise<string | null> {
   return new Promise((resolve) => {
     let width = 800
     let height = 600

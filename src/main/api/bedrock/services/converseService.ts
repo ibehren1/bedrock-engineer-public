@@ -105,6 +105,12 @@ export class ConverseService {
     // Thinking対応モデルのIDリストを取得
     const thinkingSupportedModelIds = getThinkingSupportedModelIds()
 
+    // OpenAI GPT-5.x models on Bedrock Converse do NOT accept temperature/topP
+    // or the Anthropic-style `thinking` field. They take only maxTokens plus an
+    // optional reasoning effort via additionalModelRequestFields, so they need
+    // dedicated handling instead of the Claude-style thinking path below.
+    const isOpenAiReasoningModel = modelId.includes('openai.gpt-5')
+
     // Claude系モデル（anthropic）の場合、temperatureとtop_pの両方が設定されていたらtop_pを削除
     // これはClaude Sonnet 4.5などの新しいモデルでtemperatureとtop_pを同時に指定できない制約に対応
     if (modelId.includes('anthropic') || modelId.includes('claude')) {
@@ -136,6 +142,7 @@ export class ConverseService {
     // ただし、リクエストで明示的に無効化された場合（例: タイトル生成）はスキップ
     if (
       !isFable5 &&
+      !isOpenAiReasoningModel &&
       !props.disableThinking &&
       thinkingSupportedModelIds.some((id) => modelId.includes(id)) &&
       thinkingMode?.type !== 'disabled' &&
@@ -183,6 +190,34 @@ export class ConverseService {
         budgetTokens: thinkingMode.budget_tokens,
         messageCount: messages.length,
         assistantMessages: messages.filter((m) => m.role === 'assistant').length
+      })
+    }
+
+    if (isOpenAiReasoningModel) {
+      // These models reject temperature/topP outright — send neither.
+      delete inferenceConfig.temperature
+      delete inferenceConfig.topP
+
+      // Translate the app's thinking toggle into an OpenAI reasoning effort.
+      // Disabled (or explicitly disabled, e.g. title generation) => let the
+      // model use its default reasoning; enabled => map the thinking budget to
+      // an effort level accepted by the model (none/low/medium/high/xhigh/max).
+      const reasoningEnabled =
+        !props.disableThinking &&
+        thinkingMode?.type !== 'disabled' &&
+        thinkingMode?.type !== undefined
+      if (reasoningEnabled) {
+        const budget = thinkingMode?.budget_tokens ?? 0
+        const effort = budget >= 8000 ? 'high' : budget >= 2000 ? 'medium' : 'low'
+        additionalModelRequestFields = { reasoning: { effort } }
+      } else {
+        // Never let a Claude-style thinking field leak to an OpenAI model.
+        additionalModelRequestFields = undefined
+      }
+
+      converseLogger.debug('Adjusted inference config for OpenAI reasoning model', {
+        modelId,
+        reasoningEffort: (additionalModelRequestFields?.reasoning as { effort?: string })?.effort
       })
     }
 

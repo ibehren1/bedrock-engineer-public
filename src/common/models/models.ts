@@ -87,14 +87,6 @@ export interface ModelConfig {
   supportedThinkingTypes?: ThinkingType[] // Which thinking API types the model accepts
   supportsStreamingToolUse?: boolean // Support for Tool Use with streaming
 
-  /**
-   * Which Bedrock inference API this model is invoked through.
-   * - 'converse' (default): standard Bedrock Converse API on bedrock-runtime.
-   * - 'responses': OpenAI-compatible Responses API on the bedrock-mantle
-   *   endpoint (e.g. GPT-5.5, which does NOT support Converse/Invoke).
-   */
-  apiInterface?: 'converse' | 'responses'
-
   // Inference profiles (new design)
   inferenceProfiles: InferenceProfile[]
 
@@ -893,9 +885,9 @@ const MODEL_REGISTRY: ModelConfig[] = [
   },
 
   // OpenAI GPT-5.6 Sol
-  // Responses-API-only model on the bedrock-mantle endpoint (does NOT support
-  // Converse/Invoke/ChatCompletions). Invoked as `openai.gpt-5.6-sol`. See
-  // mantle/ for the Responses<->Converse translation layer. Most capable of the
+  // Invoked through the Bedrock Converse API via a cross-region inference
+  // profile (`us.openai.gpt-5.6-sol` / `global.openai.gpt-5.6-sol`); on-demand
+  // invocation of the bare model ID is not supported. Most capable of the
   // GPT-5.6 family; frontier reasoning + agentic performance.
   // Pricing: $5.50/$33.00 per 1M in/out (stored per 1K).
   {
@@ -907,11 +899,18 @@ const MODEL_REGISTRY: ModelConfig[] = [
     maxTokensLimit: 128000,
     supportsThinking: true,
     supportedThinkingTypes: ['enabled'],
-    apiInterface: 'responses',
     inferenceProfiles: [
       {
-        type: 'base',
-        regions: ['us-east-1', 'us-east-2']
+        type: 'global',
+        prefix: 'global',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(US)'
       }
     ],
     pricing: {
@@ -923,8 +922,9 @@ const MODEL_REGISTRY: ModelConfig[] = [
   },
 
   // OpenAI GPT-5.6 Terra
-  // Responses-API-only model on bedrock-mantle. Invoked as `openai.gpt-5.6-terra`.
-  // Balanced everyday model; better than GPT-5.5 at lower cost.
+  // Invoked through the Bedrock Converse API via a cross-region inference
+  // profile (`us.openai.gpt-5.6-terra` / `global.openai.gpt-5.6-terra`).
+  // Balanced everyday model.
   // Pricing: $2.20/$13.20 per 1M in/out (stored per 1K).
   {
     baseId: 'gpt-5.6-terra',
@@ -935,11 +935,18 @@ const MODEL_REGISTRY: ModelConfig[] = [
     maxTokensLimit: 128000,
     supportsThinking: true,
     supportedThinkingTypes: ['enabled'],
-    apiInterface: 'responses',
     inferenceProfiles: [
       {
-        type: 'base',
-        regions: ['us-east-1', 'us-east-2', 'us-west-2']
+        type: 'global',
+        prefix: 'global',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(US)'
       }
     ],
     pricing: {
@@ -951,7 +958,8 @@ const MODEL_REGISTRY: ModelConfig[] = [
   },
 
   // OpenAI GPT-5.6 Luna
-  // Responses-API-only model on bedrock-mantle. Invoked as `openai.gpt-5.6-luna`.
+  // Invoked through the Bedrock Converse API via a cross-region inference
+  // profile (`us.openai.gpt-5.6-luna` / `global.openai.gpt-5.6-luna`).
   // Fast/affordable; high-volume classification, summarization, routing.
   // Pricing: $0.22/$1.32 per 1M in/out (stored per 1K).
   {
@@ -963,11 +971,18 @@ const MODEL_REGISTRY: ModelConfig[] = [
     maxTokensLimit: 128000,
     supportsThinking: true,
     supportedThinkingTypes: ['enabled'],
-    apiInterface: 'responses',
     inferenceProfiles: [
       {
-        type: 'base',
-        regions: ['us-east-1', 'us-east-2', 'us-west-2']
+        type: 'global',
+        prefix: 'global',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(US)'
       }
     ],
     pricing: {
@@ -975,65 +990,6 @@ const MODEL_REGISTRY: ModelConfig[] = [
       output: 0.00132,
       cacheRead: 0.000022,
       cacheWrite: 0.000275
-    }
-  },
-
-  // OpenAI GPT-5.5
-  // Responses-API-only model on the bedrock-mantle endpoint. Does NOT support
-  // Converse/Invoke/ChatCompletions. Invoked as `openai.gpt-5.5`, in-region
-  // only in us-east-1 / us-east-2. See mantle/ for the Responses<->Converse
-  // translation layer. Pricing: $5.50/$33.00 per 1M in/out (stored per 1K);
-  // cache-write price not published.
-  {
-    baseId: 'gpt-5.5',
-    name: 'GPT-5.5',
-    provider: 'openai',
-    category: 'text',
-    toolUse: true,
-    maxTokensLimit: 128000,
-    supportsThinking: true,
-    supportedThinkingTypes: ['enabled'],
-    apiInterface: 'responses',
-    inferenceProfiles: [
-      {
-        type: 'base',
-        regions: ['us-east-1', 'us-east-2']
-      }
-    ],
-    pricing: {
-      input: 0.0055,
-      output: 0.033,
-      cacheRead: 0.00055,
-      cacheWrite: 0
-    }
-  },
-
-  // OpenAI GPT-5.4
-  // Responses-API-only model on bedrock-mantle. Invoked as `openai.gpt-5.4`.
-  // Frontier reasoning, coding, computer use, long-context, tool use.
-  // (Also offered in GovCloud us-gov-west-1, which this app does not support.)
-  // Pricing: $2.75/$16.50 per 1M in/out (stored per 1K); cache-write not published.
-  {
-    baseId: 'gpt-5.4',
-    name: 'GPT-5.4',
-    provider: 'openai',
-    category: 'text',
-    toolUse: true,
-    maxTokensLimit: 128000,
-    supportsThinking: true,
-    supportedThinkingTypes: ['enabled'],
-    apiInterface: 'responses',
-    inferenceProfiles: [
-      {
-        type: 'base',
-        regions: ['us-east-1', 'us-east-2', 'us-west-2']
-      }
-    ],
-    pricing: {
-      input: 0.00275,
-      output: 0.0165,
-      cacheRead: 0.000275,
-      cacheWrite: 0
     }
   },
 
@@ -1431,15 +1387,6 @@ export const getModelConfig = (modelId: string): ModelConfig | undefined => {
   return MODEL_REGISTRY.find(
     (c) => baseModelId.includes(c.baseId) || baseModelId.includes(`${c.provider}.${c.baseId}`)
   )
-}
-
-/**
- * Whether a model is invoked through the OpenAI-compatible Responses API on the
- * bedrock-mantle endpoint (rather than the standard Bedrock Converse API).
- */
-export const usesResponsesApi = (modelId: string): boolean => {
-  const config = getModelConfig(modelId)
-  return config?.apiInterface === 'responses'
 }
 
 /**

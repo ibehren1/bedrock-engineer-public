@@ -9,7 +9,7 @@ import { useTheme } from '@renderer/hooks/useTheme'
 
 export const UserAvatarSection: React.FC = () => {
   const { t } = useTranslation()
-  const { userEmoji, setUserEmoji } = useSetting()
+  const { userEmoji, setUserEmoji, userName, setUserName } = useSetting()
   const { isDarkMode } = useTheme()
   const [isPickerOpen, setIsPickerOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -83,6 +83,26 @@ export const UserAvatarSection: React.FC = () => {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1 mt-4">
+        <label
+          htmlFor="user-name-input"
+          className="text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
+          {t('userName.title')}
+        </label>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{t('userName.description')}</p>
+        <input
+          id="user-name-input"
+          type="text"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          placeholder={t('userName.placeholder')}
+          className="mt-1 w-full max-w-sm rounded-lg border border-gray-300 dark:border-gray-600
+            bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100
+            focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400"
+        />
       </div>
     </SettingSection>
   )

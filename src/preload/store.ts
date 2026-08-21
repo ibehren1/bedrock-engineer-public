@@ -191,6 +191,9 @@ type StoreScheme = {
 
   /** チャットのユーザーアバターに表示する絵文字（空の場合はデフォルトアイコン） */
   userEmoji?: string
+
+  /** チャットのユーザーラベルに表示する名前（空の場合はデフォルトの "user" ラベル） */
+  userName?: string
 }
 
 const electronStore = new Store<StoreScheme>()
@@ -328,6 +331,12 @@ const init = () => {
   const userEmoji = electronStore.get('userEmoji')
   if (userEmoji === undefined) {
     electronStore.set('userEmoji', '')
+  }
+
+  // Initialize userName if not present (empty string = use default "user" label)
+  const userName = electronStore.get('userName')
+  if (userName === undefined) {
+    electronStore.set('userName', '')
   }
 
   // Initialize sidebarHiddenItems if not present

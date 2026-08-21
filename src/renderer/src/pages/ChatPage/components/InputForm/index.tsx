@@ -5,7 +5,7 @@ import { AttachmentsButton } from './AttachmentsButton'
 import { DirectorySelector } from './DirectorySelector'
 import { SendMsgKey } from '@/types/agent-chat'
 import { FiStopCircle } from 'react-icons/fi'
-import { TbMarkdown, TbMessagePlus } from 'react-icons/tb'
+import { TbMarkdown, TbMessagePlus, TbFileTypeDocx } from 'react-icons/tb'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from 'flowbite-react'
 
@@ -22,6 +22,8 @@ type InputFormProps = {
   onClearChat: () => void
   onExportChat?: () => void // Markdown エクスポートのハンドラ
   isExporting?: boolean
+  onExportWord?: () => void // Word (.docx) エクスポートのハンドラ
+  isExportingWord?: boolean
   onStopGeneration?: () => void // 停止ボタンのハンドラ
   hasMessages: boolean
   onHeightChange?: (height: number) => void // Text area height change handler
@@ -41,6 +43,8 @@ export const InputForm: React.FC<InputFormProps> = ({
   onClearChat,
   onExportChat,
   isExporting,
+  onExportWord,
+  isExportingWord,
   onStopGeneration,
   hasMessages,
   onHeightChange,
@@ -80,7 +84,7 @@ export const InputForm: React.FC<InputFormProps> = ({
                 <Tooltip content={t('Stop generation')} placement="top" animation="duration-500">
                   <button
                     onClick={onStopGeneration}
-                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                    className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
                   >
                     <FiStopCircle />
                   </button>
@@ -95,16 +99,31 @@ export const InputForm: React.FC<InputFormProps> = ({
                   <button
                     onClick={onExportChat}
                     disabled={isExporting}
-                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <TbMarkdown />
+                  </button>
+                </Tooltip>
+              )}
+              {onExportWord && (
+                <Tooltip
+                  content={t('Export chat to Word')}
+                  placement="top"
+                  animation="duration-500"
+                >
+                  <button
+                    onClick={onExportWord}
+                    disabled={isExportingWord}
+                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <TbFileTypeDocx />
                   </button>
                 </Tooltip>
               )}
               <Tooltip content={t('New chat')} placement="top" animation="duration-500">
                 <button
                   onClick={onClearChat}
-                  className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                  className="p-2 text-green-500 hover:text-green-600 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors duration-200"
                 >
                   <TbMessagePlus />
                 </button>

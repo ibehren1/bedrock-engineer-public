@@ -64,12 +64,21 @@ jobs:
             ./dist/**/*.dmg
             ./dist/**/*.pkg
             ./dist/**/*.exe
-          if-no-files-found: error
+          # A build that failed to produce installers shouldn't fail this step —
+          # the release job runs regardless and will publish notes without assets.
+          if-no-files-found: warn
+          # These are only needed to hand builds to the release job; don't let
+          # them linger in the Actions tab.
+          retention-days: 1
 
   release:
     name: Publish Release
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Publish the release even if the build job failed or produced no installers.
+    # `!cancelled()` runs on build success OR failure (but not on manual cancel);
+    # any binaries that did build are attached, otherwise a notes-only release is
+    # published.
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -96,7 +105,9 @@ jobs:
           fi
 
       - name: Download all build artifacts
+        # Don't fail the release if a build produced no artifacts to download.
         if: steps.check-tag.outputs.skip != 'true'
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           path: artifacts
@@ -105,7 +116,7 @@ jobs:
         if: steps.check-tag.outputs.skip != 'true'
         run: |
           echo "Downloaded artifacts:"
-          find ./artifacts -type f | sort
+          find ./artifacts -type f 2>/dev/null | sort || echo "(none — build produced no installers)"
 
       - name: Extract release notes from README
         if: steps.check-tag.outputs.skip != 'true'
@@ -140,7 +151,42 @@ jobs:
             artifacts/**/*.dmg
             artifacts/**/*.pkg
             artifacts/**/*.exe
+          # Publish even when no installers were built (notes-only release).
+          fail_on_unmatched_files: false
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Keep binaries only on the release we just published. Older releases keep
+      # their tag and notes but shed their (large) downloadable assets.
+      - name: Prune assets from older releases
+        if: steps.check-tag.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_TAG: v${{ env.VERSION }}
+        run: |
+          set -euo pipefail
+
+          # All release tags except the one we just published.
+          tags=$(gh release list --limit 1000 --json tagName --jq '.[].tagName' \
+            | grep -vxF "$CURRENT_TAG" || true)
+
+          if [ -z "$tags" ]; then
+            echo "No older releases to prune."
+            exit 0
+          fi
+
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            assets=$(gh release view "$tag" --json assets --jq '.assets[].name' || true)
+            if [ -z "$assets" ]; then
+              echo "Release $tag has no assets; nothing to prune."
+              continue
+            fi
+            while IFS= read -r asset; do
+              [ -z "$asset" ] && continue
+              echo "Deleting asset '$asset' from release $tag"
+              gh release delete-asset "$tag" "$asset" --yes
+            done <<< "$assets"
+          done <<< "$tags"

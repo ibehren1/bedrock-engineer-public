@@ -18,8 +18,6 @@ import type { GenerateMovieRequest, GeneratedMovie } from './types/movie'
 import type { ApplicationInferenceProfile } from '../../../types/llm'
 import { GuardrailService } from './services/guardrailService'
 import { ApplyGuardrailRequest } from '@aws-sdk/client-bedrock-runtime'
-import { ResponsesService } from './mantle/responsesService'
-import { usesResponsesApi } from '../../../common/models/models'
 
 export class BedrockService {
   private converseService: ConverseService
@@ -33,11 +31,9 @@ export class BedrockService {
   private videoService: VideoService
   private inferenceProfileService: InferenceProfileService
   private structuredOutputService: StructuredOutputService
-  private responsesService: ResponsesService
 
   constructor(context: ServiceContext) {
     this.converseService = new ConverseService(context)
-    this.responsesService = new ResponsesService(context)
     this.modelService = new ModelService(context)
     this.agentService = new AgentService(context)
     this.imageService = new ImageService(context)
@@ -55,18 +51,10 @@ export class BedrockService {
   }
 
   async converse(props: Parameters<ConverseService['converse']>[0]) {
-    // OpenAI GPT models (e.g. GPT-5.5) are only reachable through the Responses
-    // API on bedrock-mantle; route them to the dedicated translating service.
-    if (usesResponsesApi(props.modelId)) {
-      return this.responsesService.converse(props)
-    }
     return this.converseService.converse(props)
   }
 
   async converseStream(props: Parameters<ConverseService['converseStream']>[0]) {
-    if (usesResponsesApi(props.modelId)) {
-      return this.responsesService.converseStream(props)
-    }
     return this.converseService.converseStream(props)
   }
 

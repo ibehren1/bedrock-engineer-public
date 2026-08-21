@@ -19,6 +19,8 @@ type InputFormContainerProps = {
   onClearChat: () => void
   onExportChat?: () => void
   isExporting?: boolean
+  onExportWord?: () => void
+  isExportingWord?: boolean
   onStopGeneration?: () => void
   hasMessages: boolean
   onHeightChange?: (height: number) => void // Text area height change handler
@@ -42,6 +44,8 @@ const InputFormContainer = React.forwardRef<InputFormContainerRef, InputFormCont
       onClearChat,
       onExportChat,
       isExporting,
+      onExportWord,
+      isExportingWord,
       onStopGeneration,
       hasMessages,
       onHeightChange,
@@ -85,6 +89,8 @@ const InputFormContainer = React.forwardRef<InputFormContainerRef, InputFormCont
         onClearChat={handleClearChat}
         onExportChat={onExportChat}
         isExporting={isExporting}
+        onExportWord={onExportWord}
+        isExportingWord={isExportingWord}
         onStopGeneration={onStopGeneration}
         hasMessages={hasMessages}
         onHeightChange={onHeightChange}

@@ -225,6 +225,27 @@ async function exportChatMarkdown(data: {
 }
 
 /**
+ * Export a chat session to a Word (.docx) file under <projectPath>/<title>/.
+ * The provided HTML (rich text, with inline base64 images) is converted to docx in main.
+ * @param data The export title and self-contained HTML body
+ * @returns Result with success status and the written file path / directory
+ */
+async function exportChatDocx(data: {
+  title: string
+  html: string
+}): Promise<{ success: boolean; filePath?: string; directory?: string; error?: string }> {
+  try {
+    return await ipcRenderer.invoke('save-chat-to-docx', data)
+  } catch (error) {
+    console.error('Error exporting chat to docx:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+}
+
+/**
  * Extensions accepted when a document is dropped onto the chat input. These map
  * to formats the readFiles tool can extract text from: PDF, Word, Excel, and a
  * range of plain-text / structured-text formats. Anything not on this list is
@@ -351,6 +372,7 @@ export const file = {
   loadOrganizationAgents,
   saveAgentToOrganization,
   exportChatMarkdown,
+  exportChatDocx,
   saveDroppedDocument,
   isAllowedDocument,
   openAttachmentsDirectory: (): Promise<{ success: boolean; path?: string; error?: string }> =>

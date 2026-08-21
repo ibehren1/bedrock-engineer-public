@@ -269,6 +269,8 @@ export interface SettingsContextType {
   // User Avatar Settings
   userEmoji: string
   setUserEmoji: (emoji: string) => void
+  userName: string
+  setUserName: (name: string) => void
 
   // Translation Settings
   translationEnabled: boolean
@@ -467,6 +469,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // User Avatar Settings (empty string = use default user icon)
   const [userEmoji, setStateUserEmoji] = useState<string>('')
+  // User Name Settings (empty string = use default "user" label)
+  const [userName, setStateUserName] = useState<string>('')
 
   // Translation Settings
   const [translationEnabled, setStateTranslationEnabled] = useState<boolean>(false)
@@ -757,6 +761,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const storedUserEmoji = window.store.get('userEmoji') as string
     if (typeof storedUserEmoji === 'string') {
       setStateUserEmoji(storedUserEmoji)
+    }
+
+    // Load User Name Settings
+    const storedUserName = window.store.get('userName') as string
+    if (typeof storedUserName === 'string') {
+      setStateUserName(storedUserName)
     }
 
     // Load Translation Settings
@@ -1858,6 +1868,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     window.store.set('userEmoji', emoji)
   }, [])
 
+  // User Name Settings function
+  const setUserName = useCallback((name: string) => {
+    setStateUserName(name)
+    window.store.set('userName', name)
+  }, [])
+
   // Translation Settings functions
   const setTranslationEnabled = useCallback((enabled: boolean) => {
     setStateTranslationEnabled(enabled)
@@ -2074,6 +2090,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // User Avatar Settings
     userEmoji,
     setUserEmoji,
+    userName,
+    setUserName,
 
     // Translation Settings
     translationEnabled,

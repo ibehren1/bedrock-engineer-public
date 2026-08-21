@@ -24,6 +24,7 @@ export const messages = {
     'Are you sure you want to delete this message?':
       'Are you sure you want to delete this message?',
     'Message copied to clipboard': 'Message copied to clipboard',
+    'Selection copied to clipboard': 'Selection copied to clipboard',
     'Message deleted successfully': 'Message deleted successfully',
     'Failed to copy message': 'Failed to copy message',
     'Click for options': 'Click for options',
@@ -75,6 +76,7 @@ export const messages = {
     confirmClearChat: '新しいチャットを開始してもよろしいですか？',
     'Are you sure you want to delete this message?': 'このメッセージを削除してもよろしいですか？',
     'Message copied to clipboard': 'メッセージをクリップボードにコピーしました',
+    'Selection copied to clipboard': '選択範囲をクリップボードにコピーしました',
     'Message deleted successfully': 'メッセージを削除しました',
     'Failed to copy message': 'メッセージのコピーに失敗しました',
     'Click for options': 'オプションを表示',

@@ -2,6 +2,8 @@ import { IpcMainInvokeEvent, shell } from 'electron'
 import { handleFileOpen } from '../../preload/file'
 import fs from 'fs'
 import path from 'path'
+import HTMLtoDOCX from 'html-to-docx'
+import JSZip from 'jszip'
 import { log } from '../../common/logger'
 import { store } from '../../preload/store'
 
@@ -311,8 +313,107 @@ export const fileHandlers = {
         error: error instanceof Error ? error.message : String(error)
       }
     }
+  },
+
+  'save-chat-to-docx': async (
+    _event: IpcMainInvokeEvent,
+    { title, html }: { title: string; html: string }
+  ) => {
+    try {
+      // プロジェクトパスを取得（未設定時はカレントディレクトリ）
+      const projectPath = store.get('projectPath') || process.cwd()
+
+      // タイトルをファイルシステムで安全な名前に変換
+      const safeTitle = sanitizeForFilesystem(title) || 'chat-export'
+
+      // 出力先: <projectPath>/<title>/（Markdown 版と同じ場所）
+      const exportDir = path.join(projectPath, safeTitle)
+      await fs.promises.mkdir(exportDir, { recursive: true })
+
+      // 自己完結した HTML（インライン画像付き）を docx に変換する
+      const document = `<!DOCTYPE html><html><head><meta charset="utf-8" /></head><body>${html}</body></html>`
+      const generated = await HTMLtoDOCX(document, null, {
+        table: { row: { cantSplit: true } },
+        footer: false,
+        pageNumber: false
+      })
+      let fileBuffer = Buffer.isBuffer(generated) ? generated : Buffer.from(generated)
+
+      // Tighten the message-separator rules (html-to-docx surrounds tables with blank
+      // paragraphs and fixed cell margins that can't be controlled from HTML). Best-effort:
+      // if anything fails, fall back to the untouched, still-valid document.
+      try {
+        fileBuffer = await tightenMessageRules(fileBuffer)
+      } catch (error) {
+        log.warn('Failed to tighten docx message rules; using untouched document', {
+          error: error instanceof Error ? error.message : String(error)
+        })
+      }
+
+      const docxPath = path.join(exportDir, `${safeTitle}.docx`)
+      await fs.promises.writeFile(docxPath, fileBuffer)
+
+      log.info('Chat exported to docx successfully', { docxPath })
+
+      return {
+        success: true,
+        filePath: docxPath,
+        directory: exportDir
+      }
+    } catch (error) {
+      log.error('Failed to export chat to docx', {
+        title,
+        error: error instanceof Error ? error.message : String(error)
+      })
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      }
+    }
   }
 } as const
+
+/**
+ * Remove the blank space html-to-docx puts around the message-separator rules. The rule is a
+ * single-cell table whose only visible edge is a light-gray (CCCCCC) bottom border; the
+ * library gives it fixed 80-dxa cell margins, a full-height empty cell paragraph, and an
+ * auto-inserted empty paragraph after the table. This rewrites `word/document.xml` to zero the
+ * rule's cell margins, collapse its cell paragraph, and drop the trailing empty paragraph.
+ * Only rule tables (identified by the CCCCCC border) are touched; body/markdown tables are
+ * left intact. Returns the original buffer unchanged if there is nothing to tighten.
+ */
+async function tightenMessageRules(buffer: Buffer): Promise<Buffer> {
+  const zip = await JSZip.loadAsync(buffer)
+  const docXml = zip.file('word/document.xml')
+  if (!docXml) return buffer
+
+  const xml = await docXml.async('string')
+  let out = xml
+
+  // Drop the empty paragraph inserted immediately after each rule table.
+  out = out.replace(
+    /(<w:tbl>[\s\S]*?<\/w:tbl>)(\s*<w:p>\s*<w:pPr>\s*<w:spacing w:lineRule="auto"\s*\/>\s*<\/w:pPr>\s*<w:r>\s*<w:rPr\s*\/>\s*<\/w:r>\s*<\/w:p>)/g,
+    (whole, table) => (table.includes('w:color="CCCCCC"') ? table : whole)
+  )
+
+  // Zero the rule cell's top/bottom margins and collapse its (empty) cell paragraph.
+  out = out.replace(/<w:tbl>[\s\S]*?<\/w:tbl>/g, (table) => {
+    if (!table.includes('w:color="CCCCCC"')) return table
+    return table
+      .replace(/(<w:tblCellMar>[\s\S]*?<w:top w:type="dxa" w:w=")\d+("\/>)/, '$10$2')
+      .replace(/(<w:tblCellMar>[\s\S]*?<w:bottom w:type="dxa" w:w=")\d+("\/>)/, '$10$2')
+      .replace(
+        /<w:p\/>/,
+        '<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="1" w:lineRule="exact"/></w:pPr></w:p>'
+      )
+  })
+
+  if (out === xml) return buffer
+
+  zip.file('word/document.xml', out)
+  return zip.generateAsync({ type: 'nodebuffer' })
+}
 
 /**
  * Sanitize a string for safe use as a file or directory name across platforms.

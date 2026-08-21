@@ -1,6 +1,7 @@
 import { IdentifiableMessage } from '@/types/chat/message'
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useRef } from 'react'
 import { ChatMessage } from './Message'
+import { SelectionCopyToolbar } from './SelectionCopyToolbar'
 import AILogo from '@renderer/assets/images/icons/bedrock-color.png'
 
 type MessageListProps = {
@@ -77,8 +78,11 @@ const MessageListBase: React.FC<MessageListProps> = ({
     [deleteMessage]
   )
 
+  const listRef = useRef<HTMLDivElement>(null)
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4" ref={listRef}>
+      <SelectionCopyToolbar containerRef={listRef} />
       {messages.map((message, index) => {
         // Divider at each user <-> assistant boundary (role changes from
         // the previous message).

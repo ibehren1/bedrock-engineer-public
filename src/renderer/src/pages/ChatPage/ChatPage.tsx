@@ -24,7 +24,10 @@ import { useStreamingAutoScroll } from '@renderer/hooks/useStreamingAutoScroll'
 import { useLightProcessingModel } from '@renderer/lib/modelSelection'
 import { generateSessionTitle } from './utils/titleGenerator'
 import { buildChatMarkdown } from './utils/chatExport'
+import { buildChatHtml, avatarDataUrl } from './utils/chatDocxExport'
 import { DrawioRasterizer, DrawioRasterizerRef } from './utils/DrawioRasterizer'
+import { allModels } from '@common/models/models'
+import { IdentifiableMessage } from '@/types/chat/message'
 import toast from 'react-hot-toast'
 
 export default function ChatPage() {
@@ -39,7 +42,10 @@ export default function ChatPage() {
     setSelectedAgentId,
     agents,
     currentAgent,
-    currentAgentSystemPrompt: systemPrompt
+    currentAgentSystemPrompt: systemPrompt,
+    availableModels,
+    userEmoji,
+    userName
   } = useSetting()
 
   const currentScenarios = currentAgent?.scenarios || []
@@ -74,6 +80,29 @@ export default function ChatPage() {
   // DrawIO diagrams render in an iframe, so a live component is needed to rasterize them.
   const drawioRasterizerRef = useRef<DrawioRasterizerRef>(null)
   const [isExporting, setIsExporting] = useState(false)
+  const [isExportingWord, setIsExportingWord] = useState(false)
+
+  // モデルIDから表示情報を解決する（チャットのアバターと同じロジック）。
+  const resolveModel = useCallback(
+    (modelId?: string) =>
+      modelId
+        ? availableModels.find((m) => m.modelId === modelId) ??
+          allModels.find((m) => m.modelId === modelId)
+        : undefined,
+    [availableModels]
+  )
+
+  // 見出しは「Assistant – <モデルID>」「User – <ユーザー名>」の形式にする。
+  const roleLabel = useCallback(
+    (message: IdentifiableMessage): string => {
+      if (message.role === 'assistant') {
+        const modelId = message.metadata?.modelId
+        return modelId ? `Assistant – ${modelId}` : 'Assistant'
+      }
+      return userName ? `User – ${userName}` : 'User'
+    },
+    [userName]
+  )
 
   const handleDeleteMessage = (index: number) => {
     // メッセージの配列のコピーを作成
@@ -180,9 +209,12 @@ export default function ChatPage() {
       const title = session?.title?.trim() || 'Chat Export'
 
       // 2. Markdown を構築し、図表・画像を PNG にラスタライズする
+      //    見出しは docx 版と同じ「Assistant – <modelId>」「User – <userName>」＋アバター画像
       const { markdown, images } = await buildChatMarkdown(title, messages, {
         rasterizeDrawio: (xml) =>
-          drawioRasterizerRef.current?.rasterize(xml) ?? Promise.resolve(null)
+          drawioRasterizerRef.current?.rasterize(xml) ?? Promise.resolve(null),
+        roleLabel,
+        avatarDataUrl: (message) => avatarDataUrl(message, { userEmoji, resolveModel })
       })
 
       // 3. ディスクに書き込む
@@ -201,7 +233,73 @@ export default function ChatPage() {
     } finally {
       setIsExporting(false)
     }
-  }, [currentSessionId, messages, isExporting, getSession, updateSessionTitle, getLightModelId, t])
+  }, [
+    currentSessionId,
+    messages,
+    isExporting,
+    getSession,
+    updateSessionTitle,
+    getLightModelId,
+    roleLabel,
+    userEmoji,
+    resolveModel,
+    t
+  ])
+
+  // チャットを Word (.docx) にエクスポートするハンドラ（Markdown 版と同じ内容ルール）
+  const handleExportWord = useCallback(async () => {
+    if (!currentSessionId || messages.length === 0 || isExportingWord) return
+
+    setIsExportingWord(true)
+    const loadingToast = toast.loading(t('Exporting chat...'))
+    try {
+      // 1. タイトルを確定する（未生成のデフォルトタイトルなら生成する）
+      let session = getSession(currentSessionId)
+      if (session && session.title.startsWith('Chat ')) {
+        const newTitle = await generateSessionTitle(session, getLightModelId(), t)
+        if (newTitle) {
+          await updateSessionTitle(currentSessionId, newTitle)
+          session = getSession(currentSessionId)
+        }
+      }
+      const title = session?.title?.trim() || 'Chat Export'
+
+      // 2. リッチテキスト HTML を構築する（見出し・アバター・図表を埋め込む）
+      const { html } = await buildChatHtml(title, messages, {
+        rasterizeDrawio: (xml) =>
+          drawioRasterizerRef.current?.rasterize(xml) ?? Promise.resolve(null),
+        roleLabel,
+        avatar: { userEmoji, resolveModel }
+      })
+
+      // 3. ディスクに書き込む
+      const result = await window.file.exportChatDocx({ title, html })
+
+      toast.dismiss(loadingToast)
+      if (result.success) {
+        toast.success(`${t('Chat exported to')} ${result.directory}`)
+      } else {
+        toast.error(`${t('Failed to export chat')}: ${result.error ?? ''}`)
+      }
+    } catch (error) {
+      console.error('Failed to export chat to Word:', error)
+      toast.dismiss(loadingToast)
+      toast.error(t('Failed to export chat'))
+    } finally {
+      setIsExportingWord(false)
+    }
+  }, [
+    currentSessionId,
+    messages,
+    isExportingWord,
+    getSession,
+    updateSessionTitle,
+    getLightModelId,
+    roleLabel,
+    userEmoji,
+    resolveModel,
+    t
+  ])
 
   // シナリオ選択ハンドラ
   const handleSelectScenario = useCallback((scenario: string) => {
@@ -436,6 +534,8 @@ export default function ChatPage() {
                 onClearChat={handleClearChat}
                 onExportChat={handleExportChat}
                 isExporting={isExporting}
+                onExportWord={handleExportWord}
+                isExportingWord={isExportingWord}
                 onStopGeneration={stopGeneration}
                 hasMessages={messages.length > 0}
                 onHeightChange={setTextareaHeight}
