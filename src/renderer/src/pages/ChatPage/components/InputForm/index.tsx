@@ -5,7 +5,7 @@ import { AttachmentsButton } from './AttachmentsButton'
 import { DirectorySelector } from './DirectorySelector'
 import { SendMsgKey } from '@/types/agent-chat'
 import { FiStopCircle } from 'react-icons/fi'
-import { TbMarkdown, TbMessagePlus, TbFileTypeDocx } from 'react-icons/tb'
+import { TbMarkdown, TbMessagePlus, TbFileTypeDocx, TbFileTypePdf } from 'react-icons/tb'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from 'flowbite-react'
 
@@ -24,6 +24,8 @@ type InputFormProps = {
   isExporting?: boolean
   onExportWord?: () => void // Word (.docx) エクスポートのハンドラ
   isExportingWord?: boolean
+  onExportPdf?: () => void // PDF エクスポートのハンドラ
+  isExportingPdf?: boolean
   onStopGeneration?: () => void // 停止ボタンのハンドラ
   hasMessages: boolean
   onHeightChange?: (height: number) => void // Text area height change handler
@@ -45,6 +47,8 @@ export const InputForm: React.FC<InputFormProps> = ({
   isExporting,
   onExportWord,
   isExportingWord,
+  onExportPdf,
+  isExportingPdf,
   onStopGeneration,
   hasMessages,
   onHeightChange,
@@ -117,6 +121,17 @@ export const InputForm: React.FC<InputFormProps> = ({
                     className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <TbFileTypeDocx />
+                  </button>
+                </Tooltip>
+              )}
+              {onExportPdf && (
+                <Tooltip content={t('Export chat to PDF')} placement="top" animation="duration-500">
+                  <button
+                    onClick={onExportPdf}
+                    disabled={isExportingPdf}
+                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <TbFileTypePdf />
                   </button>
                 </Tooltip>
               )}

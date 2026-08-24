@@ -24,7 +24,9 @@ import { useStreamingAutoScroll } from '@renderer/hooks/useStreamingAutoScroll'
 import { useLightProcessingModel } from '@renderer/lib/modelSelection'
 import { generateSessionTitle } from './utils/titleGenerator'
 import { buildChatMarkdown } from './utils/chatExport'
-import { buildChatHtml, avatarDataUrl } from './utils/chatDocxExport'
+import { buildChatHtml } from './utils/chatDocxExport'
+import { buildChatPdfHtml } from './utils/chatPdfExport'
+import { avatarDataUrl } from './utils/chatHtmlExport'
 import { DrawioRasterizer, DrawioRasterizerRef } from './utils/DrawioRasterizer'
 import { allModels } from '@common/models/models'
 import { IdentifiableMessage } from '@/types/chat/message'
@@ -81,6 +83,7 @@ export default function ChatPage() {
   const drawioRasterizerRef = useRef<DrawioRasterizerRef>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [isExportingWord, setIsExportingWord] = useState(false)
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
 
   // モデルIDから表示情報を解決する（チャットのアバターと同じロジック）。
   const resolveModel = useCallback(
@@ -190,6 +193,21 @@ export default function ChatPage() {
     }
   }, [clearChat, t])
 
+  // エクスポート用のタイトルを確定する（未生成のデフォルトタイトルなら生成する）
+  const resolveExportTitle = useCallback(async (): Promise<string> => {
+    if (!currentSessionId) return 'Chat Export'
+
+    let session = getSession(currentSessionId)
+    if (session && session.title.startsWith('Chat ')) {
+      const newTitle = await generateSessionTitle(session, getLightModelId(), t)
+      if (newTitle) {
+        await updateSessionTitle(currentSessionId, newTitle)
+        session = getSession(currentSessionId)
+      }
+    }
+    return session?.title?.trim() || 'Chat Export'
+  }, [currentSessionId, getSession, updateSessionTitle, getLightModelId, t])
+
   // チャットを Markdown にエクスポートするハンドラ
   const handleExportChat = useCallback(async () => {
     if (!currentSessionId || messages.length === 0 || isExporting) return
@@ -197,19 +215,10 @@ export default function ChatPage() {
     setIsExporting(true)
     const loadingToast = toast.loading(t('Exporting chat...'))
     try {
-      // 1. タイトルを確定する（未生成のデフォルトタイトルなら生成する）
-      let session = getSession(currentSessionId)
-      if (session && session.title.startsWith('Chat ')) {
-        const newTitle = await generateSessionTitle(session, getLightModelId(), t)
-        if (newTitle) {
-          await updateSessionTitle(currentSessionId, newTitle)
-          session = getSession(currentSessionId)
-        }
-      }
-      const title = session?.title?.trim() || 'Chat Export'
+      const title = await resolveExportTitle()
 
-      // 2. Markdown を構築し、図表・画像を PNG にラスタライズする
-      //    見出しは docx 版と同じ「Assistant – <modelId>」「User – <userName>」＋アバター画像
+      // Markdown を構築し、図表・画像を PNG にラスタライズする
+      // 見出しは docx 版と同じ「Assistant – <modelId>」「User – <userName>」＋アバター画像
       const { markdown, images } = await buildChatMarkdown(title, messages, {
         rasterizeDrawio: (xml) =>
           drawioRasterizerRef.current?.rasterize(xml) ?? Promise.resolve(null),
@@ -217,7 +226,7 @@ export default function ChatPage() {
         avatarDataUrl: (message) => avatarDataUrl(message, { userEmoji, resolveModel })
       })
 
-      // 3. ディスクに書き込む
+      // ディスクに書き込む
       const result = await window.file.exportChatMarkdown({ title, markdown, images })
 
       toast.dismiss(loadingToast)
@@ -237,9 +246,7 @@ export default function ChatPage() {
     currentSessionId,
     messages,
     isExporting,
-    getSession,
-    updateSessionTitle,
-    getLightModelId,
+    resolveExportTitle,
     roleLabel,
     userEmoji,
     resolveModel,
@@ -253,18 +260,9 @@ export default function ChatPage() {
     setIsExportingWord(true)
     const loadingToast = toast.loading(t('Exporting chat...'))
     try {
-      // 1. タイトルを確定する（未生成のデフォルトタイトルなら生成する）
-      let session = getSession(currentSessionId)
-      if (session && session.title.startsWith('Chat ')) {
-        const newTitle = await generateSessionTitle(session, getLightModelId(), t)
-        if (newTitle) {
-          await updateSessionTitle(currentSessionId, newTitle)
-          session = getSession(currentSessionId)
-        }
-      }
-      const title = session?.title?.trim() || 'Chat Export'
+      const title = await resolveExportTitle()
 
-      // 2. リッチテキスト HTML を構築する（見出し・アバター・図表を埋め込む）
+      // リッチテキスト HTML を構築する（見出し・アバター・図表を埋め込む）
       const { html } = await buildChatHtml(title, messages, {
         rasterizeDrawio: (xml) =>
           drawioRasterizerRef.current?.rasterize(xml) ?? Promise.resolve(null),
@@ -272,7 +270,7 @@ export default function ChatPage() {
         avatar: { userEmoji, resolveModel }
       })
 
-      // 3. ディスクに書き込む
+      // ディスクに書き込む
       const result = await window.file.exportChatDocx({ title, html })
 
       toast.dismiss(loadingToast)
@@ -292,9 +290,51 @@ export default function ChatPage() {
     currentSessionId,
     messages,
     isExportingWord,
-    getSession,
-    updateSessionTitle,
-    getLightModelId,
+    resolveExportTitle,
+    roleLabel,
+    userEmoji,
+    resolveModel,
+    t
+  ])
+
+  // チャットを PDF にエクスポートするハンドラ（Markdown 版と同じ内容ルール）
+  const handleExportPdf = useCallback(async () => {
+    if (!currentSessionId || messages.length === 0 || isExportingPdf) return
+
+    setIsExportingPdf(true)
+    const loadingToast = toast.loading(t('Exporting chat...'))
+    try {
+      const title = await resolveExportTitle()
+
+      // 印刷用の HTML を構築する（画像はすべてインライン化される）
+      const { html } = await buildChatPdfHtml(title, messages, {
+        rasterizeDrawio: (xml) =>
+          drawioRasterizerRef.current?.rasterize(xml) ?? Promise.resolve(null),
+        roleLabel,
+        avatar: { userEmoji, resolveModel }
+      })
+
+      // main プロセスで PDF に印刷して書き込む
+      const result = await window.file.exportChatPdf({ title, html })
+
+      toast.dismiss(loadingToast)
+      if (result.success) {
+        toast.success(`${t('Chat exported to')} ${result.directory}`)
+      } else {
+        toast.error(`${t('Failed to export chat')}: ${result.error ?? ''}`)
+      }
+    } catch (error) {
+      console.error('Failed to export chat to PDF:', error)
+      toast.dismiss(loadingToast)
+      toast.error(t('Failed to export chat'))
+    } finally {
+      setIsExportingPdf(false)
+    }
+  }, [
+    currentSessionId,
+    messages,
+    isExportingPdf,
+    resolveExportTitle,
     roleLabel,
     userEmoji,
     resolveModel,
@@ -536,6 +576,8 @@ export default function ChatPage() {
                 isExporting={isExporting}
                 onExportWord={handleExportWord}
                 isExportingWord={isExportingWord}
+                onExportPdf={handleExportPdf}
+                isExportingPdf={isExportingPdf}
                 onStopGeneration={stopGeneration}
                 hasMessages={messages.length > 0}
                 onHeightChange={setTextareaHeight}

@@ -8,6 +8,15 @@ i.e. Version: 2026.629.1 was the second daily build on 2026-06-29.
 
 ## Update summary:
 
+### 2026-08-24
+- Add an "Export chat to PDF" button. Same content as the Markdown export in a single self-contained PDF (Letter, 1" margins), typeset like the Word export.
+- Write each avatar image once instead of once per turn (`user-avatar.png`, `assistant-avatar-<model ID>.png`).
+- Group consecutive turns from the same party under a single heading.
+- Word: Calibri, 10pt body, 18/16/14pt Heading 1/2/3, 1" margins, and half the space above each heading.
+- Word: code blocks in 8pt Courier New, with line breaks and indentation preserved.
+- Word: tighter table spacing — a one-line row is about half as tall as before.
+- Diagrams (Mermaid/DrawIO) render at half size; Word also centers them.
+
 ### 2026-08-20
 - Add username along side the avatar.
 - Add a floating toolbar to copy just the highlighted text of a chat message as markdown or rich text.

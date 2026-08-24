@@ -21,6 +21,8 @@ type InputFormContainerProps = {
   isExporting?: boolean
   onExportWord?: () => void
   isExportingWord?: boolean
+  onExportPdf?: () => void
+  isExportingPdf?: boolean
   onStopGeneration?: () => void
   hasMessages: boolean
   onHeightChange?: (height: number) => void // Text area height change handler
@@ -46,6 +48,8 @@ const InputFormContainer = React.forwardRef<InputFormContainerRef, InputFormCont
       isExporting,
       onExportWord,
       isExportingWord,
+      onExportPdf,
+      isExportingPdf,
       onStopGeneration,
       hasMessages,
       onHeightChange,
@@ -91,6 +95,8 @@ const InputFormContainer = React.forwardRef<InputFormContainerRef, InputFormCont
         isExporting={isExporting}
         onExportWord={onExportWord}
         isExportingWord={isExportingWord}
+        onExportPdf={onExportPdf}
+        isExportingPdf={isExportingPdf}
         onStopGeneration={onStopGeneration}
         hasMessages={hasMessages}
         onHeightChange={onHeightChange}

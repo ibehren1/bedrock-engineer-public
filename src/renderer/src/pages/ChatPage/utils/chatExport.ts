@@ -45,19 +45,34 @@ const MXFILE_RE = /<mxfile[\s\S]*?<\/mxfile>/gi
  */
 export async function buildChatSections(
   messages: IdentifiableMessage[],
-  options: { rasterizeDrawio?: DrawioRasterizer } = {}
+  options: {
+    rasterizeDrawio?: DrawioRasterizer
+    /** Resize rasterized diagrams by this factor before writing them (1 = as rendered). */
+    diagramScale?: number
+    /**
+     * Display width for diagrams, as an HTML `width` attribute value (e.g. `50%`). Set only for
+     * targets that render inline HTML: it makes the reference an `<img>` tag instead of a
+     * markdown image, which is the only way to control how large a diagram is shown.
+     */
+    diagramWidth?: string
+  } = {}
 ): Promise<ChatSectionsResult> {
   const images: ChatExportImage[] = []
+  const diagramScale = options.diagramScale ?? 1
   let diagramCount = 0
   let imageCount = 0
 
-  const pushImage = (dataUrl: string, prefix: 'diagram' | 'image'): string => {
-    const base64 = stripDataUrlPrefix(dataUrl)
+  const pushImage = async (dataUrl: string, prefix: 'diagram' | 'image'): Promise<string> => {
+    const isDiagram = prefix === 'diagram'
+    const scale = isDiagram ? diagramScale : 1
+    const resized = scale === 1 ? dataUrl : (await scalePngDataUrl(dataUrl, scale)) ?? dataUrl
+    const base64 = stripDataUrlPrefix(resized)
     if (!base64) return ''
-    const filename =
-      prefix === 'diagram' ? `diagram-${++diagramCount}.png` : `image-${++imageCount}.png`
+    const filename = isDiagram ? `diagram-${++diagramCount}.png` : `image-${++imageCount}.png`
     images.push({ filename, base64 })
-    return `![${prefix}](images/${filename})`
+    return isDiagram && options.diagramWidth
+      ? `<img src="images/${filename}" alt="diagram" width="${options.diagramWidth}" />`
+      : `![${prefix}](images/${filename})`
   }
 
   const sections: ChatSection[] = []
@@ -72,7 +87,7 @@ export async function buildChatSections(
       } else if (block && 'image' in block && block.image) {
         const dataUrl = await imageBlockToPngDataUrl(block.image)
         if (dataUrl) {
-          rendered.push(pushImage(dataUrl, 'image'))
+          rendered.push(await pushImage(dataUrl, 'image'))
         }
       }
       // All other block types (toolUse, toolResult, reasoningContent, ...) are skipped.
@@ -88,8 +103,22 @@ export async function buildChatSections(
 }
 
 /**
- * Build a standard CommonMark document from a chat session. See
- * {@link buildChatSections} for the content rules.
+ * Diagrams are shown at half the width of the text column. Markdown has no image-sizing syntax,
+ * so this is applied through an inline `<img width="50%">` tag; renderers that fit wide images
+ * to the column ignore the PNG's own pixel size, which is why halving the raster alone is not
+ * enough to make a diagram render smaller.
+ */
+const MARKDOWN_DIAGRAM_WIDTH = '50%'
+
+/**
+ * Diagram PNGs are also written at half the size they were rendered at, which keeps them sharp
+ * for {@link MARKDOWN_DIAGRAM_WIDTH} while cutting the exported file size by roughly 4x.
+ */
+const MARKDOWN_DIAGRAM_SCALE = 0.5
+
+/**
+ * Build a markdown document from a chat session. See {@link buildChatSections} for the content
+ * rules. The output is CommonMark apart from the sized `<img>` tag used for diagrams.
  */
 export async function buildChatMarkdown(
   title: string,
@@ -98,26 +127,53 @@ export async function buildChatMarkdown(
     rasterizeDrawio?: DrawioRasterizer
     /** Override the role heading text per message (e.g. `Assistant – <modelId>`). */
     roleLabel?: (message: IdentifiableMessage) => string
-    /** Per-message avatar as a PNG data URL; embedded as an image in the role heading. */
+    /**
+     * Avatar for a message as a PNG data URL; embedded as an image in the role heading.
+     * Called once per participant (the user, and each distinct assistant model) rather than
+     * once per turn, since all turns of a participant share one avatar file.
+     */
     avatarDataUrl?: (message: IdentifiableMessage) => Promise<string | null>
   } = {}
 ): Promise<ChatExportResult> {
-  const { sections, images } = await buildChatSections(messages, options)
+  const { sections, images } = await buildChatSections(messages, {
+    rasterizeDrawio: options.rasterizeDrawio,
+    diagramScale: MARKDOWN_DIAGRAM_SCALE,
+    diagramWidth: MARKDOWN_DIAGRAM_WIDTH
+  })
 
   const lines: string[] = [`# ${title}`, '']
-  let avatarCount = 0
+
+  // Avatars are shared per participant, not per turn: the user's avatar and each distinct
+  // assistant model are rasterized and written once, then referenced from every heading that
+  // uses them. Values are the raw base64 payload, or null when rasterization failed.
+  const avatars = new Map<string, string | null>()
+
+  // Consecutive turns from the same participant sit under a single heading; a new heading is
+  // only emitted when the speaker changes (including a switch to a different assistant model).
+  let previousSpeaker: string | null = null
+
   for (const { message, body } of sections) {
     const role =
       options.roleLabel?.(message) ?? (message.role === 'assistant' ? 'Assistant' : 'User')
+    const speaker = `${participantKey(message)}|${role}`
+
+    if (speaker === previousSpeaker) {
+      lines.push(body, '')
+      continue
+    }
+    previousSpeaker = speaker
 
     let heading = role
     if (options.avatarDataUrl) {
-      const dataUrl = await options.avatarDataUrl(message)
-      const base64 = dataUrl ? stripDataUrlPrefix(dataUrl) : ''
-      if (base64) {
-        const filename = `avatar-${++avatarCount}.png`
-        images.push({ filename, base64 })
-        heading = `![avatar](images/${filename}) ${role}`
+      const filename = avatarFilename(message)
+      if (!avatars.has(filename)) {
+        const dataUrl = await options.avatarDataUrl(message)
+        const base64 = dataUrl ? stripDataUrlPrefix(dataUrl) : ''
+        avatars.set(filename, base64 || null)
+        if (base64) images.push({ filename, base64 })
+      }
+      if (avatars.get(filename)) {
+        heading = `![${message.role === 'assistant' ? 'assistant' : 'user'} avatar](images/${filename}) ${role}`
       }
     }
 
@@ -128,13 +184,42 @@ export async function buildChatMarkdown(
 }
 
 /**
+ * Identity of the party speaking in a message: the user, or a specific assistant model.
+ * Two messages with the same key share an avatar and a heading.
+ */
+export function participantKey(message: IdentifiableMessage): string {
+  return message.role === 'assistant' ? `assistant:${message.metadata?.modelId ?? ''}` : 'user'
+}
+
+/**
+ * Stable avatar filename for a message's participant: one file for the user, and one per
+ * distinct assistant model (named after the model id so multiple models don't collide).
+ */
+function avatarFilename(message: IdentifiableMessage): string {
+  if (message.role !== 'assistant') return 'user-avatar.png'
+  const modelId = message.metadata?.modelId
+  return modelId ? `assistant-avatar-${sanitizeForFilename(modelId)}.png` : 'assistant-avatar.png'
+}
+
+/**
+ * Reduce a model id to filesystem-safe characters (model ids contain `:` and inference
+ * profiles may be full ARNs). Over-long values keep their tail, which is the part that
+ * distinguishes one ARN or model version from another.
+ */
+function sanitizeForFilename(value: string): string {
+  const safe = value.replace(/[^A-Za-z0-9._-]+/g, '-')
+  const capped = safe.length > 80 ? safe.slice(safe.length - 80) : safe
+  return capped.replace(/^[-.]+|[-.]+$/g, '') || 'model'
+}
+
+/**
  * Process a single text block: rasterize any mermaid / DrawIO fenced blocks (and
  * bare `<mxfile>` XML) into PNG image references, leaving all other markdown
  * untouched so it remains portable.
  */
 async function processText(
   text: string,
-  pushImage: (dataUrl: string, prefix: 'diagram' | 'image') => string,
+  pushImage: (dataUrl: string, prefix: 'diagram' | 'image') => Promise<string>,
   rasterizeDrawio?: DrawioRasterizer
 ): Promise<string> {
   // Pass 1: fenced code blocks
@@ -150,11 +235,11 @@ async function processText(
 
     if (lang === 'mermaid') {
       const dataUrl = await rasterizeMermaid(code)
-      out += dataUrl ? pushImage(dataUrl, 'diagram') : original
+      out += dataUrl ? await pushImage(dataUrl, 'diagram') : original
     } else if (lang === 'xml' || lang === 'drawio' || (lang === '' && isDrawioXml(code))) {
       const xml = extractDrawioXml(code)
       const dataUrl = xml && rasterizeDrawio ? await rasterizeDrawio(xml) : null
-      out += dataUrl ? pushImage(dataUrl, 'diagram') : original
+      out += dataUrl ? await pushImage(dataUrl, 'diagram') : original
     } else {
       out += original
     }
@@ -168,7 +253,7 @@ async function processText(
     out = await replaceAsync(out, MXFILE_RE, async (xmlMatch) => {
       const xml = extractDrawioXml(xmlMatch)
       const dataUrl = xml ? await rasterizeDrawio(xml) : null
-      return dataUrl ? pushImage(dataUrl, 'diagram') : xmlMatch
+      return dataUrl ? await pushImage(dataUrl, 'diagram') : xmlMatch
     })
   }
 
@@ -184,6 +269,36 @@ async function rasterizeMermaid(code: string): Promise<string | null> {
     console.error('Failed to rasterize mermaid diagram for export:', error)
     return null
   }
+}
+
+/**
+ * Re-encode a PNG data URL at a fraction of its pixel size. Returns null on failure, so callers
+ * can fall back to the unscaled image.
+ */
+function scalePngDataUrl(dataUrl: string, factor: number): Promise<string | null> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const width = Math.max(1, Math.round((img.naturalWidth || img.width) * factor))
+      const height = Math.max(1, Math.round((img.naturalHeight || img.height) * factor))
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        resolve(null)
+        return
+      }
+      ctx.fillStyle = 'white'
+      ctx.fillRect(0, 0, width, height)
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+      ctx.drawImage(img, 0, 0, width, height)
+      resolve(canvas.toDataURL('image/png'))
+    }
+    img.onerror = () => resolve(null)
+    img.src = dataUrl
+  })
 }
 
 /** Convert an SVG string to a white-background PNG data URL (3x resolution). */
