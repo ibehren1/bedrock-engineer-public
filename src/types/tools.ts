@@ -28,6 +28,7 @@ export type BuiltInToolName =
   | 'todo'
   | 'todoInit'
   | 'todoUpdate'
+  | 'invokeAgent'
 
 // MCPツール名の型安全な定義（元のツール名をそのまま使用）
 export type McpToolName = string
@@ -36,7 +37,7 @@ export type McpToolName = string
 export type ToolName = BuiltInToolName | McpToolName
 
 // 組み込みツールの定数配列（型ガード用）
-const BUILT_IN_TOOLS: readonly BuiltInToolName[] = [
+export const BUILT_IN_TOOLS: readonly BuiltInToolName[] = [
   'createFolder',
   'readFiles',
   'writeToFile',
@@ -62,7 +63,8 @@ const BUILT_IN_TOOLS: readonly BuiltInToolName[] = [
   'cameraCapture',
   'todo',
   'todoInit',
-  'todoUpdate'
+  'todoUpdate',
+  'invokeAgent'
 ] as const
 
 // 組み込みツール名であるかを判定する型ガード
@@ -397,6 +399,53 @@ export type TodoUpdateInput = {
   updates: TodoItemUpdate[]
 }
 
+// invokeAgent ツールの入力型
+// _ 付きフィールドは呼び出し側が注入するメタデータで、モデルは生成しない。
+// toolInput の組み立て時は必ずモデル入力の後ろに展開すること（上書き防止）。
+export type InvokeAgentInput = {
+  type: 'invokeAgent'
+  agentId: string
+  task: string
+  context?: string
+  expectedOutput?: string
+  _agentId?: string
+  _mcpServers?: any[]
+  _delegationDepth?: number
+  _delegationLineage?: string[]
+  _allowedAgentIds?: string[]
+  _modelId?: string
+}
+
+// invokeAgent ツールの結果型（親モデルのコンテキストに入るため意図的にフラット）
+export type InvokeAgentResult = {
+  name: 'invokeAgent'
+  success: boolean
+  message: string
+  result: {
+    agentId: string
+    agentName: string
+    agentIcon?: string
+    agentIconColor?: string
+    task: string
+    finalText: string
+    truncated?: boolean
+    toolCallCount: number
+    toolNames: string[]
+    durationMs: number
+    depth: number
+    stoppedReason: 'completed' | 'maxToolExecutions'
+    usage?: {
+      inputTokens?: number
+      outputTokens?: number
+      totalTokens?: number
+      cacheReadInputTokens?: number
+      cacheWriteInputTokens?: number
+    }
+    sessionId: string
+  }
+  error?: string
+}
+
 // MCPツールの入力型
 export type McpToolInput = {
   type: string // MCPツール名
@@ -433,6 +482,7 @@ export type ToolInput =
   | TodoInput
   | TodoInitInput
   | TodoUpdateInput
+  | InvokeAgentInput
   | McpToolInput // MCPツール入力を追加
 
 // ツール名から入力型を取得するユーティリティ型
@@ -462,5 +512,6 @@ export type ToolInputTypeMap = {
   todo: TodoInput
   todoInit: TodoInitInput
   todoUpdate: TodoUpdateInput
+  invokeAgent: InvokeAgentInput
   [key: string]: any // MCPツールに対応するためのインデックスシグネチャ
 }

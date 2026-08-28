@@ -16,6 +16,7 @@ import { createBedrockTools } from './handlers/bedrock'
 import { createCodeInterpreterTools } from './handlers/interpreter'
 import { createSystemTools } from './handlers/system'
 import { createTodoTools } from './handlers/todo'
+import { createAgentTools } from './handlers/agent'
 
 // Global instances
 let toolRegistry: ToolRegistry | null = null
@@ -48,7 +49,8 @@ export function initializeToolSystem(): void {
     ...createBedrockTools(dependencies),
     ...createCodeInterpreterTools(dependencies),
     ...createSystemTools(dependencies),
-    ...createTodoTools(dependencies)
+    ...createTodoTools(dependencies),
+    ...createAgentTools(dependencies)
   ]
 
   allTools.forEach(({ tool, category }) => {

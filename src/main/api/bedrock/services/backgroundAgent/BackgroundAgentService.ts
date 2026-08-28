@@ -18,10 +18,46 @@ import { agentHandlers } from '../../../../handlers/agent-handlers'
 import { CustomAgent, ToolState, EnvironmentContextSettings } from '../../../../../types/agent-chat'
 import { pubSubManager } from '../../../../lib/pubsub-manager'
 import { MainToolSpecProvider } from './MainToolSpecProvider'
+import {
+  buildInvokeAgentToolSpec,
+  canDelegate,
+  filterDelegationTargets,
+  MAX_DELEGATION_DEPTH,
+  type DelegationContext,
+  type DelegationTarget
+} from '../../../../../common/agents/delegation'
 import { v4 as uuidv4 } from 'uuid'
 import { BrowserWindow, ipcMain } from 'electron'
 
 const logger = createCategoryLogger('background-agent')
+
+/**
+ * preload-tool-response の待機中リクエスト（requestId → resolve）
+ *
+ * リスナーをリクエストごとに登録すると、1件のタイムアウトで
+ * removeAllListeners を呼んだ際に他の実行中リクエストのリスナーまで
+ * 破棄され、それらが永久に解決しなくなる。
+ * また並列実行時にリスナー数が増え MaxListenersExceededWarning が出る。
+ * そのためチャンネル全体で単一のディスパッチャを共有する。
+ */
+const pendingPreloadToolRequests = new Map<string, (result: ToolResult) => void>()
+let preloadResponseListenerInstalled = false
+
+function ensurePreloadResponseListener(): void {
+  if (preloadResponseListenerInstalled) return
+
+  ipcMain.on('preload-tool-response', (_event, data: { requestId: string; result: ToolResult }) => {
+    const resolve = pendingPreloadToolRequests.get(data?.requestId)
+    if (!resolve) {
+      // タイムアウト後の遅延レスポンスや重複レスポンスは無視する
+      return
+    }
+    pendingPreloadToolRequests.delete(data.requestId)
+    resolve(data.result)
+  })
+
+  preloadResponseListenerInstalled = true
+}
 
 export class BackgroundAgentService {
   private bedrockService: BedrockService
@@ -92,21 +128,11 @@ export class BackgroundAgentService {
    */
   private async getAgentById(agentId: string): Promise<CustomAgent | null> {
     try {
-      // 1. sharedAgentsを取得
-      const sharedResult = await agentHandlers['read-shared-agents'](null as any)
-      const sharedAgents = sharedResult.agents || []
-
-      // 2. customAgentsを取得（storeから）
-      const customAgents = this.context.store.get('customAgents') || []
-
-      // 3. 統合して検索（フロントエンドと同じロジック）
-      const allAgents = [...customAgents, ...sharedAgents]
+      const allAgents = await this.getAllAgents()
       const agent = allAgents.find((a) => a.id === agentId)
 
       logger.debug('Agent search completed', {
         agentId,
-        customAgentsCount: customAgents.length,
-        sharedAgentsCount: sharedAgents.length,
         totalAgentsCount: allAgents.length,
         found: !!agent,
         availableIds: allAgents.map((a) => a.id)
@@ -124,16 +150,67 @@ export class BackgroundAgentService {
   }
 
   /**
+   * 利用可能な全エージェントを取得
+   * フロントエンドのSettingsContextと同じロジックでcustomAgentsとsharedAgentsを統合
+   */
+  async getAllAgents(): Promise<CustomAgent[]> {
+    // 1. sharedAgentsを取得
+    const sharedResult = await agentHandlers['read-shared-agents'](null as any)
+    const sharedAgents = sharedResult.agents || []
+
+    // 2. customAgentsを取得（storeから）
+    const customAgents = this.context.store.get('customAgents') || []
+
+    // 3. 統合（フロントエンドと同じロジック）
+    return [...customAgents, ...sharedAgents]
+  }
+
+  /**
    * エージェント固有のツール設定からToolStateを生成
    * IPC経由でpreloadツール仕様を取得
    */
   private async generateToolSpecs(
     toolNames: ToolName[],
     agent: CustomAgent,
-    projectDirectory?: string
+    projectDirectory?: string,
+    delegation?: DelegationContext
   ): Promise<ToolState[]> {
     try {
       const toolStates: ToolState[] = []
+
+      // invokeAgent の可否と委譲先を決定する
+      // enum はモデルへのヒントに過ぎないため、深さ・系譜による除外はここで強制する
+      let effectiveToolNames = toolNames
+      let delegationTargets: DelegationTarget[] = []
+
+      if (toolNames.includes('invokeAgent')) {
+        const depth = delegation?.depth ?? 0
+        const remainingIds = filterDelegationTargets(
+          delegation?.allowedAgentIds ?? [],
+          delegation?.lineage ?? [],
+          agent.id
+        )
+
+        if (!canDelegate(depth, remainingIds.length)) {
+          effectiveToolNames = toolNames.filter((name) => name !== 'invokeAgent')
+          logger.debug('Stripped invokeAgent from sub-agent tools', {
+            agentId: agent.id,
+            depth,
+            maxDepth: MAX_DELEGATION_DEPTH,
+            remainingTargetCount: remainingIds.length
+          })
+        } else {
+          const allAgents = await this.getAllAgents()
+          delegationTargets = remainingIds
+            .map((id) => allAgents.find((a) => a.id === id))
+            .filter((a): a is CustomAgent => !!a)
+            .map((a) => ({ id: a.id!, name: a.name, description: a.description }))
+
+          if (delegationTargets.length === 0) {
+            effectiveToolNames = toolNames.filter((name) => name !== 'invokeAgent')
+          }
+        }
+      }
 
       // プレースホルダー値を準備
       const workingDirectory = projectDirectory || this.context.store.get('projectPath') || ''
@@ -151,19 +228,24 @@ export class BackgroundAgentService {
       const allToolSpecs = await this.toolSpecProvider.getPreloadToolSpecs()
 
       // 1. 静的ツールの処理（toolNamesに基づく）
-      for (const toolName of toolNames) {
+      for (const toolName of effectiveToolNames) {
         // 静的ツール仕様から対応するツール仕様を検索
         const toolSpec = allToolSpecs.find((spec) => spec.toolSpec?.name === toolName)
 
         if (toolSpec && toolSpec.toolSpec) {
+          // invokeAgent は許可されたエージェントに enum を絞った仕様に差し替える
+          const resolvedSpec =
+            toolName === 'invokeAgent'
+              ? buildInvokeAgentToolSpec(toolSpec.toolSpec, delegationTargets)
+              : toolSpec.toolSpec
+
+          if (!resolvedSpec) continue
+
           const toolState: ToolState = {
             enabled: true,
             toolSpec: {
-              ...toolSpec.toolSpec,
-              description: replacePlaceholders(
-                toolSpec.toolSpec.description || '',
-                placeholderValues
-              )
+              ...resolvedSpec,
+              description: replacePlaceholders(resolvedSpec.description || '', placeholderValues)
             }
           }
           toolStates.push(toolState)
@@ -226,7 +308,7 @@ export class BackgroundAgentService {
       }
 
       logger.info('Generated tool specs from static and MCP tools', {
-        staticToolsRequested: toolNames.length,
+        staticToolsRequested: effectiveToolNames.length,
         totalGeneratedCount: toolStates.length,
         mcpServersCount: agent.mcpServers?.length || 0,
         tools: toolStates.map((ts) => ts.toolSpec?.name).filter(Boolean)
@@ -298,15 +380,22 @@ export class BackgroundAgentService {
     const toolStates = await this.generateToolSpecs(
       agent.tools || [],
       agent,
-      config.projectDirectory
+      config.projectDirectory,
+      {
+        depth: config.delegationDepth ?? 0,
+        lineage: config.delegationLineage ?? [],
+        allowedAgentIds: config.allowedDelegationAgentIds ?? []
+      }
     )
 
     // セッション履歴を取得
     const conversationHistory = this.sessionManager.getHistory(sessionId)
 
     // セッションが存在しない場合は作成（プロジェクトディレクトリ情報を含む）
+    // await しないと直後の addMessage が並行してセッションを作り直し、
+    // 最初のユーザーメッセージが欠落することがある
     if (!this.sessionManager.hasSession(sessionId)) {
-      this.sessionManager.createSession(sessionId, {
+      await this.sessionManager.createSession(sessionId, {
         projectDirectory: config.projectDirectory,
         agentId: config.agentId,
         modelId: config.modelId
@@ -467,7 +556,8 @@ export class BackgroundAgentService {
           config,
           [...messages, responseMessage],
           maxToolExecutions,
-          toolStates
+          toolStates,
+          system
         )
       } else {
         // ツール使用がない場合は通常通り保存
@@ -550,7 +640,8 @@ export class BackgroundAgentService {
     config: BackgroundAgentConfig,
     messages: BackgroundMessage[],
     maxExecutions: number,
-    toolStates: ToolState[]
+    toolStates: ToolState[],
+    system: { text: string }[]
   ): Promise<BackgroundChatResult> {
     const toolExecutions: BackgroundChatResult['toolExecutions'] = []
     const currentMessages = [...messages]
@@ -645,7 +736,10 @@ export class BackgroundAgentService {
       const nextResponse = await this.bedrockService.converse({
         modelId: config.modelId,
         messages: currentMessages,
-        system: config.systemPrompt ? [{ text: config.systemPrompt }] : [],
+        // chat() が構築したエージェントのシステムプロンプトを引き継ぐ。
+        // config.systemPrompt は呼び出し側が設定しないため、参照するとツール実行後に
+        // エージェントがシステムプロンプトを失う
+        system,
         toolConfig:
           toolStates.length > 0 ? { tools: toolStates.filter((tool) => tool.enabled) } : undefined,
         inferenceConfig: config.inferenceConfig
@@ -687,44 +781,56 @@ export class BackgroundAgentService {
    * IPC経由でpreloadツールを実行
    */
   private async executePreloadToolViaIPC(toolInput: ToolInput): Promise<ToolResult> {
-    return new Promise((resolve, reject) => {
+    ensurePreloadResponseListener()
+
+    return new Promise((resolve) => {
       const requestId = uuidv4()
       const timeoutMs = 300000 // 300秒タイムアウト
 
-      // タイムアウト設定
-      const timeout = setTimeout(() => {
-        ipcMain.removeAllListeners(`preload-tool-response`)
-        reject(new Error('Preload tool execution timeout'))
-      }, timeoutMs)
-
-      // レスポンスリスナーを設定
-      const responseHandler = (_event: any, data: { requestId: string; result: ToolResult }) => {
-        if (data.requestId === requestId) {
-          clearTimeout(timeout)
-          ipcMain.removeListener('preload-tool-response', responseHandler)
-          resolve(data.result)
-        }
+      // 失敗時も reject せず ToolResult を返し、呼び出し側の分岐を一本化する
+      const settle = (result: ToolResult) => {
+        clearTimeout(timeout)
+        pendingPreloadToolRequests.delete(requestId)
+        resolve(result)
       }
 
-      ipcMain.on('preload-tool-response', responseHandler)
+      const errorResult = (error: string, message: string): ToolResult => ({
+        name: toolInput.type as any,
+        success: false,
+        result: null,
+        error,
+        message
+      })
+
+      // タイムアウト設定（該当リクエストのみを破棄し、並列実行中の他リクエストには影響しない）
+      const timeout = setTimeout(() => {
+        pendingPreloadToolRequests.delete(requestId)
+        logger.warn('Preload tool execution timeout', {
+          requestId,
+          toolType: toolInput.type,
+          timeoutMs
+        })
+        resolve(
+          errorResult(
+            `Preload tool execution timeout after ${timeoutMs / 1000}s`,
+            'Preload tool execution timeout'
+          )
+        )
+      }, timeoutMs)
+
+      pendingPreloadToolRequests.set(requestId, settle)
 
       // 既存のBrowserWindowを取得
       const allWindows = BrowserWindow.getAllWindows()
       const mainWindow = allWindows.find((window) => !window.isDestroyed())
 
       if (!mainWindow || !mainWindow.webContents) {
-        clearTimeout(timeout)
-        ipcMain.removeListener('preload-tool-response', responseHandler)
-
-        const noWindowResult: ToolResult = {
-          name: toolInput.type as any,
-          success: false,
-          result: null,
-          error: 'No active window available for preload tool execution',
-          message: 'No active window for preload tools'
-        }
-
-        resolve(noWindowResult)
+        settle(
+          errorResult(
+            'No active window available for preload tool execution',
+            'No active window for preload tools'
+          )
+        )
         return
       }
 
@@ -740,18 +846,12 @@ export class BackgroundAgentService {
           toolType: toolInput.type
         })
       } catch (sendError: any) {
-        clearTimeout(timeout)
-        ipcMain.removeListener('preload-tool-response', responseHandler)
-
-        const sendErrorResult: ToolResult = {
-          name: toolInput.type as any,
-          success: false,
-          result: null,
-          error: sendError.message || 'Failed to send preload tool request',
-          message: 'Failed to send preload tool request'
-        }
-
-        resolve(sendErrorResult)
+        settle(
+          errorResult(
+            sendError.message || 'Failed to send preload tool request',
+            'Failed to send preload tool request'
+          )
+        )
       }
     })
   }
@@ -772,12 +872,21 @@ export class BackgroundAgentService {
         input: toolUse.input
       })
 
+      const currentDepth = config.delegationDepth ?? 0
+      const lineage = config.delegationLineage ?? [config.agentId]
+
       const toolInput: ToolInput = {
+        ...toolUse.input,
         type: toolUse.name,
         // BackgroundAgentService用のメタデータを追加
+        // モデルが生成した input で上書きされないよう、必ず後ろに展開する
         _agentId: config.agentId,
         _mcpServers: agent.mcpServers,
-        ...toolUse.input
+        // 委譲メタデータ。invokeAgent 以外では未使用
+        _delegationDepth: currentDepth,
+        _delegationLineage: lineage,
+        _allowedAgentIds: config.allowedDelegationAgentIds ?? [],
+        _modelId: config.modelId
       } as ToolInput
 
       // IPC経由でpreloadツールを実行
@@ -830,7 +939,7 @@ export class BackgroundAgentService {
   /**
    * セッション作成
    */
-  createSession(
+  async createSession(
     sessionId: string,
     options?: {
       taskId?: string
@@ -838,8 +947,8 @@ export class BackgroundAgentService {
       agentId?: string
       modelId?: string
     }
-  ): void {
-    this.sessionManager.createSession(sessionId, {
+  ): Promise<void> {
+    await this.sessionManager.createSession(sessionId, {
       taskId: options?.taskId,
       agentId: options?.agentId,
       modelId: options?.modelId,

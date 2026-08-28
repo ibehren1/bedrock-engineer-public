@@ -500,7 +500,7 @@ export class BackgroundAgentScheduler {
 
       // セッションを明示的に作成（新規セッションの場合）
       if (!isSessionContinuation) {
-        this.backgroundAgentService.createSession(sessionId, {
+        await this.backgroundAgentService.createSession(sessionId, {
           taskId: task.id,
           agentId: task.agentId,
           modelId: task.modelId,

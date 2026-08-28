@@ -50,6 +50,12 @@ export const TOOL_CATEGORIES: ToolCategory[] = [
     tools: ['think', 'todo']
   },
   {
+    id: 'agent-delegation',
+    name: 'Agent Delegation',
+    description: 'Tools for delegating tasks to other configured agents',
+    tools: ['invokeAgent']
+  },
+  {
     id: 'mcp',
     name: 'MCP',
     description: 'Model Context Protocol Tools',

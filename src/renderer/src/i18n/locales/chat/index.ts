@@ -45,7 +45,25 @@ export const chatPage = {
           removeImage: 'Remove image',
           sendMessage: 'Send message',
           sending: 'Sending...'
+        },
+        mention: {
+          ariaLabel: 'Agents you can delegate to'
         }
+      },
+      delegation: {
+        toolDisabled:
+          'You mentioned an agent, but "{{agent}}" does not have the invokeAgent tool enabled, so it cannot delegate.',
+        unavailableInPlanMode:
+          'Delegation is unavailable in Plan mode. Switch to Act mode to use it.'
+      },
+      invokeAgentResult: {
+        depth: 'depth {{depth}}',
+        truncated: "The sub-agent's answer was truncated because it was very long.",
+        toolBudgetReached:
+          'The sub-agent stopped after reaching its tool-call budget, so this answer may be incomplete.',
+        toolCalls: '{{count}} tool call',
+        toolCalls_plural: '{{count}} tool calls',
+        tokens: '{{count}} tokens'
       },
       ignoreFiles: {
         title: 'Ignore Files',
@@ -107,7 +125,24 @@ export const chatPage = {
           removeImage: '画像を削除',
           sendMessage: 'メッセージを送信',
           sending: '送信中...'
+        },
+        mention: {
+          ariaLabel: '委譲できるエージェント'
         }
+      },
+      delegation: {
+        toolDisabled:
+          'エージェントをメンションしましたが、「{{agent}}」では invokeAgent ツールが有効になっていないため委譲できません。',
+        unavailableInPlanMode:
+          'Plan モードでは委譲を利用できません。Act モードに切り替えてください。'
+      },
+      invokeAgentResult: {
+        depth: '深さ {{depth}}',
+        truncated: 'サブエージェントの回答が長いため省略されました。',
+        toolBudgetReached:
+          'サブエージェントがツール実行上限に達して停止したため、この回答は不完全な可能性があります。',
+        toolCalls: 'ツール実行 {{count}} 回',
+        tokens: '{{count}} トークン'
       },
       ignoreFiles: {
         title: '無視ファイル設定',

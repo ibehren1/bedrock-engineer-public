@@ -1,4 +1,4 @@
-import { ToolInput, ToolResult } from './tools'
+import { InvokeAgentResult, ToolInput, ToolResult } from './tools'
 
 // IPC通信の型定義を一元管理
 export interface IPCChannelDefinitions {
@@ -173,6 +173,27 @@ export interface IPCChannelDefinitions {
       result: ToolResult
     }
     result: void
+  }
+
+  // エージェント間委譲（invokeAgent ツール）
+  'sub-agent:invoke': {
+    params: {
+      agentId: string
+      task: string
+      context?: string
+      expectedOutput?: string
+      callerAgentId?: string
+      depth: number // 呼び出し側の深さ（0 = トップレベルのチャット）
+      lineage: string[] // ルートから呼び出し側までのagentId
+      allowedAgentIds: string[]
+      projectDirectory?: string
+      modelId?: string
+      options?: {
+        maxToolExecutions?: number
+        timeoutMs?: number
+      }
+    }
+    result: InvokeAgentResult['result'] & { success: boolean; error?: string }
   }
 
   // 背景エージェント関連

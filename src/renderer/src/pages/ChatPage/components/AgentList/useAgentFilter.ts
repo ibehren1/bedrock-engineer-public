@@ -4,6 +4,19 @@ import { CustomAgent } from '@/types/agent-chat'
 export type SortKey = 'name' | 'description' | 'tags' | 'status' | null
 export type SortOrder = 'asc' | 'desc'
 
+/**
+ * Special agents that back other pages and should never be offered as a chat
+ * agent — neither in the agent list nor as an @mention delegation target.
+ */
+export const EXCLUDED_CHAT_AGENT_IDS = [
+  'reactGeneratorAgent',
+  'vueGeneratorAgent',
+  'svelteGeneratorAgent',
+  // 'diagramGeneratorAgent',
+  'softwareArchitectureAgent',
+  'businessProcessAgent'
+]
+
 export const useAgentFilter = (agents: CustomAgent[]) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -16,15 +29,7 @@ export const useAgentFilter = (agents: CustomAgent[]) => {
     // Filter agents by search query (excluding selected tags filter)
     const searchFiltered = agents.filter((agent) => {
       // Don't display special agents used on other pages
-      const excludedAgentIds = [
-        'reactGeneratorAgent',
-        'vueGeneratorAgent',
-        'svelteGeneratorAgent',
-        // 'diagramGeneratorAgent',
-        'softwareArchitectureAgent',
-        'businessProcessAgent'
-      ]
-      if (excludedAgentIds.includes(agent.id)) return false
+      if (EXCLUDED_CHAT_AGENT_IDS.includes(agent.id)) return false
 
       // If no search query, include all agents
       if (searchQuery === '') return true
@@ -52,15 +57,7 @@ export const useAgentFilter = (agents: CustomAgent[]) => {
     const filtered = [...agents]
       .filter((agent) => {
         // Don't display special agents used on other pages
-        const excludedAgentIds = [
-          'reactGeneratorAgent',
-          'vueGeneratorAgent',
-          'svelteGeneratorAgent',
-          // 'diagramGeneratorAgent',
-          'softwareArchitectureAgent',
-          'businessProcessAgent'
-        ]
-        return !excludedAgentIds.includes(agent.id)
+        return !EXCLUDED_CHAT_AGENT_IDS.includes(agent.id)
       })
       .filter((agent) => {
         // Search in name, description, and tags (matching AgentDirectory implementation)

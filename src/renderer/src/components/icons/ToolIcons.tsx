@@ -21,7 +21,8 @@ import {
   FaPlay,
   FaClock,
   FaDownload,
-  FaDesktop
+  FaDesktop,
+  FaUsers
 } from 'react-icons/fa'
 import { FaListCheck } from 'react-icons/fa6'
 import { BiFace } from 'react-icons/bi'
@@ -57,7 +58,8 @@ const standardToolIcons = {
   cameraCapture: <FaVideo className="text-blue-500 size-6" />,
   todo: <FaListCheck className="text-blue-600 size-6" />,
   todoInit: <FaListCheck className="text-blue-600 size-6" />,
-  todoUpdate: <FaListCheck className="text-blue-600 size-6" />
+  todoUpdate: <FaListCheck className="text-blue-600 size-6" />,
+  invokeAgent: <FaUsers className="text-fuchsia-500 size-6" />
 }
 
 // MCPツール用のアイコン（すべてのMCPツールで共通）

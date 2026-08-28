@@ -31,6 +31,7 @@ import { ScreenCaptureTool } from './handlers/system/ScreenCaptureTool'
 import { CameraCaptureTool } from './handlers/system/CameraCaptureTool'
 import { TodoInitTool } from './handlers/todo/TodoInitTool'
 import { TodoUpdateTool } from './handlers/todo/TodoUpdateTool'
+import { InvokeAgentTool } from './handlers/agent/InvokeAgentTool'
 
 /**
  * Registry for managing tools
@@ -57,7 +58,8 @@ export class ToolRegistry {
       'thinking',
       'mcp',
       'interpreter',
-      'system'
+      'system',
+      'agent'
     ]
     categories.forEach((category) => {
       this.categories.set(category, new Set())
@@ -457,6 +459,11 @@ export class ToolMetadataCollector {
 
     if (TodoUpdateTool.toolSpec) {
       specs.push({ toolSpec: TodoUpdateTool.toolSpec })
+    }
+
+    // Phase 8: Agent Delegation Tools
+    if (InvokeAgentTool.toolSpec) {
+      specs.push({ toolSpec: InvokeAgentTool.toolSpec })
     }
 
     return specs

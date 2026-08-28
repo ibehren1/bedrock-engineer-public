@@ -56,6 +56,7 @@ export type ToolCategory =
   | 'mcp'
   | 'interpreter'
   | 'system'
+  | 'agent'
 
 /**
  * Tool execution context

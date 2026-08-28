@@ -8,6 +8,9 @@ i.e. Version: 2026.629.1 was the second daily build on 2026-06-29.
 
 ## Update summary:
 
+### 2026-08-27
+- Add ability for user to specify that the agent use another agent profile (via @<profile name>) to accomplish a task.  Results come back to the current agent.  i.e. use @email to find email from Kevin and compose a reply.  This allows the current agent to use the results of another agent's task (tools) without needing to switch back and forth.
+
 ### 2026-08-24
 - Add an "Export chat to PDF" button. Same content as the Markdown export in a single self-contained PDF (Letter, 1" margins), typeset like the Word export.
 - Write each avatar image once instead of once per turn (`user-avatar.png`, `assistant-avatar-<model ID>.png`).

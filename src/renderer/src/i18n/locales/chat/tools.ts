@@ -228,9 +228,14 @@ export const tools = {
       generateVideo: 'Generate high-quality videos from text descriptions using Amazon Nova Reel',
       checkVideoStatus: 'Check the status of video generation jobs',
       downloadVideo: 'Download generated videos from S3 to local storage',
-      screenCapture: 'Capture the current screen for AI analysis and debugging'
+      screenCapture: 'Capture the current screen for AI analysis and debugging',
+      invokeAgent: 'Delegate a task to another configured agent'
     },
     'tool info': {
+      invokeAgent: {
+        description:
+          'The invokeAgent tool lets the current agent hand a self-contained task to another agent you have configured, then use its answer. The sub-agent runs with its own system prompt and its own tool set, and returns only its final text — it cannot see this conversation.'
+      },
       retrieve: {
         description:
           'The retrieve tool allows the AI assistant to search and retrieve information from your Amazon Bedrock Knowledge Bases.',
@@ -281,6 +286,11 @@ export const tools = {
       }
     },
     'tool usage': {
+      invokeAgent: {
+        description:
+          'Enables the AI to delegate a task to another agent you have configured. Type @ in the chat box to pick which agents are allowed for a message; the current agent then decides whether to delegate.',
+        tip: 'Use this when a task needs a different persona or tool set than the current agent has. The sub-agent starts with no context, so the current agent must restate everything it needs.'
+      },
       think: {
         description:
           'Enables the AI to perform complex reasoning steps without consuming your context window. This tool allows Claude to work through difficult problems step by step, showing its thought process and reasoning in detail.',
@@ -691,9 +701,14 @@ export const tools = {
       generateVideo: 'Amazon Nova Reelを使用してテキスト説明から高品質な動画を生成',
       checkVideoStatus: '動画生成ジョブのステータスを確認',
       downloadVideo: '生成された動画をS3からローカルストレージにダウンロード',
-      screenCapture: 'AI分析とデバッグのために現在の画面をキャプチャ'
+      screenCapture: 'AI分析とデバッグのために現在の画面をキャプチャ',
+      invokeAgent: '設定済みの別のエージェントにタスクを委譲'
     },
     'tool info': {
+      invokeAgent: {
+        description:
+          'invokeAgent ツールを使用すると、現在のエージェントは独立したタスクを設定済みの別のエージェントに委譲し、その回答を利用できます。サブエージェントは独自のシステムプロンプトとツールセットで実行され、最終的なテキストのみを返します。この会話の内容は見えません。'
+      },
       retrieve: {
         description:
           'retrieve ツールを使用すると、AIアシスタントはAmazon Bedrock Knowledge Basesから情報を検索して取得できます。',
@@ -740,6 +755,11 @@ export const tools = {
       }
     },
     'tool usage': {
+      invokeAgent: {
+        description:
+          'AIが設定済みの別のエージェントにタスクを委譲できるようにします。チャット欄で @ を入力すると、そのメッセージで許可するエージェントを選択できます。委譲するかどうかは現在のエージェントが判断します。',
+        tip: '現在のエージェントとは異なるペルソナやツールセットが必要なタスクに使用します。サブエージェントはコンテキストを持たないため、必要な情報はすべて伝える必要があります。'
+      },
       think: {
         description:
           'AIがコンテキストウィンドウを消費せずに複雑な推論ステップを実行できるようにします。このツールを使用すると、Claudeは難しい問題をステップバイステップで解決し、その思考プロセスと推論を詳細に示すことができます。',

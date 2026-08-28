@@ -35,6 +35,7 @@ import {
 } from './handlers/background-agent-handlers'
 import { pubsubHandlers } from './handlers/pubsub-handlers'
 import { todoHandlers } from './handlers/todo-handlers'
+import { subAgentHandlers } from './handlers/sub-agent-handlers'
 import { mcpHandlers, cleanupMcpHandlers } from './handlers/mcp-handlers'
 import { cleanupMcpClients } from './mcp/index'
 
@@ -456,6 +457,7 @@ app.whenReady().then(async () => {
   registerIpcHandlers(screenHandlers, { loggerCategory: 'screen:ipc' })
   registerIpcHandlers(cameraHandlers, { loggerCategory: 'camera:ipc' })
   registerIpcHandlers(backgroundAgentHandlers, { loggerCategory: 'background-agent:ipc' })
+  registerIpcHandlers(subAgentHandlers, { loggerCategory: 'sub-agent:ipc' })
   registerIpcHandlers(pubsubHandlers, { loggerCategory: 'pubsub:ipc' })
   registerIpcHandlers(todoHandlers, { loggerCategory: 'todo:ipc' })
   registerIpcHandlers(mcpHandlers, { loggerCategory: 'mcp:ipc' })

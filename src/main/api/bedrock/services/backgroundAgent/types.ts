@@ -11,6 +11,10 @@ export interface BackgroundAgentConfig {
   agentId: string // エージェントIDを必須にして、エージェント設定から取得
   projectDirectory?: string // 作業ディレクトリを指定
   inferenceConfig?: InferenceConfiguration // タスク固有の推論設定
+  // エージェント間委譲（invokeAgent）用。通常のBackground Agent実行では未設定
+  delegationDepth?: number // このエージェントが動作する深さ（0 = トップレベルのチャット）
+  delegationLineage?: string[] // ルートからこのエージェントまでのagentId（自身を含む）
+  allowedDelegationAgentIds?: string[] // ユーザーの@メンションで許可されたagentId
 }
 
 export interface BackgroundMessage extends Message {

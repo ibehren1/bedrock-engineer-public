@@ -4,7 +4,13 @@
     "esModuleInterop": true,
     "types": ["jest", "node"],
     "module": "CommonJS",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@renderer/*": ["src/renderer/src/*"],
+      "@/*": ["src/*"],
+      "@common/*": ["src/common/*"]
+    }
   },
   "include": ["src/**/*.test.ts", "src/**/*.integration.test.ts"]
 }

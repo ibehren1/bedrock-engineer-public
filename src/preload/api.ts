@@ -8,6 +8,7 @@ import { BedrockSupportRegion } from '../types/llm'
 import { CodeInterpreterTool } from './tools/handlers/interpreter/CodeInterpreterTool'
 import { ToolMetadataCollector } from './tools/registry'
 import { executeTool } from './tools'
+import { IPCChannelDefinitions } from '../types/ipc'
 
 export type CallConverseAPIProps = {
   modelId: string
@@ -399,6 +400,13 @@ export const api = {
   strandsConverter: {
     convertAndSave: async (agentId: string, outputDirectory: string) => {
       return ipcRenderer.invoke('convert-agent-to-strands', agentId, outputDirectory)
+    }
+  },
+  subAgent: {
+    invoke: async (
+      params: IPCChannelDefinitions['sub-agent:invoke']['params']
+    ): Promise<IPCChannelDefinitions['sub-agent:invoke']['result']> => {
+      return ipcRenderer.invoke('sub-agent:invoke', params)
     }
   }
 }

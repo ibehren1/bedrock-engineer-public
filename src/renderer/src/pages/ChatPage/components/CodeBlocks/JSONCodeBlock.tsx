@@ -10,6 +10,7 @@ import { CodeInterpreterResult } from './CodeInterpreter/CodeInterpreterResult'
 import { ScreenCaptureResult } from './ScreenCapture/ScreenCaptureResult'
 import { CameraCaptureResult } from './CameraCapture/CameraCaptureResult'
 import { ApplyDiffEditResult } from './ApplyDiffEdit/ApplyDiffEditResult'
+import { InvokeAgentResult } from './InvokeAgent/InvokeAgentResult'
 import { AsyncTaskCard, AsyncTaskInfo } from '../CodeInterpreter/AsyncTaskCard'
 
 interface RetrieveResponse {
@@ -144,6 +145,14 @@ export const JSONCodeBlock: React.FC<{ json: any }> = ({ json }) => {
 
   if (json.name === 'applyDiffEdit') {
     return <ApplyDiffEditResult response={json} />
+  }
+
+  if (json.name === 'invokeAgent') {
+    return (
+      <div className="max-h-[50vh] overflow-y-auto">
+        <InvokeAgentResult response={json} />
+      </div>
+    )
   }
 
   const jsonStr = JSON.stringify(json, null, 2)

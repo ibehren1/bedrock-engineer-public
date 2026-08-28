@@ -26,6 +26,22 @@ import { limitContextLength } from '@renderer/lib/contextLength'
 import { IdentifiableMessage } from '@/types/chat/message'
 import { PromptCacheManager } from '@common/models/promptCache'
 import { PricingCalculator } from '@common/models/pricing'
+import {
+  applyDelegationAllowlist,
+  hasInvokeAgentTool,
+  INVOKE_AGENT_TOOL_NAME,
+  parseAgentMentions
+} from '../utils/agentMentions'
+
+/**
+ * ターン単位のツール構成。
+ * @メンションによる委譲許可はこのターン限りなので、State ではなく引数で引き回す
+ * （中断と再送信が絡むと ref では所属ターンが曖昧になる）
+ */
+type TurnContext = {
+  tools: ToolState[]
+  allowedAgentIds: string[]
+}
 
 // メッセージの送信時に、Trace を全て載せると InputToken が逼迫するので取り除く
 function removeTraces(messages) {
@@ -843,7 +859,11 @@ export const useAgentChat = (
     )
   }
 
-  const recursivelyExecTool = async (contentBlocks: ContentBlock[], currentMessages: Message[]) => {
+  const recursivelyExecTool = async (
+    contentBlocks: ContentBlock[],
+    currentMessages: Message[],
+    turnCtx: TurnContext
+  ) => {
     const contentBlock = contentBlocks.find((block) => block.toolUse)
     if (!contentBlock) {
       return
@@ -860,6 +880,17 @@ export const useAgentChat = (
       const toolInput = {
         type: toolUse.name!,
         ...(toolUse.input as any)
+      }
+
+      // 委譲メタデータはモデル入力の後ろに注入し、上書きを防ぐ
+      if (toolInput.type === INVOKE_AGENT_TOOL_NAME) {
+        Object.assign(toolInput, {
+          _agentId: agentId,
+          _delegationDepth: 0,
+          _delegationLineage: agentId ? [agentId] : [],
+          _allowedAgentIds: turnCtx.allowedAgentIds,
+          _modelId: modelId
+        })
       }
 
       // 実行中ツールセットに追加
@@ -1018,7 +1049,7 @@ export const useAgentChat = (
         messages: currentMessages,
         modelId,
         system: systemPrompt ? [{ text: systemPrompt }] : undefined,
-        toolConfig: enabledTools.length ? { tools: enabledTools } : undefined
+        toolConfig: turnCtx.tools.length ? { tools: turnCtx.tools } : undefined
       },
       currentMessages
     )
@@ -1056,7 +1087,7 @@ export const useAgentChat = (
           return
         }
 
-        await recursivelyExecTool(lastMessage, currentMessages)
+        await recursivelyExecTool(lastMessage, currentMessages, turnCtx)
         return
       }
     }
@@ -1069,6 +1100,25 @@ export const useAgentChat = (
 
     if (!modelId) {
       return toast.error('Please select a model')
+    }
+
+    // @メンションからこのターンだけの委譲許可リストを導出する。
+    // enabledTools は静的な仕様のままなので、ここでターン専用のツール構成を作る
+    const mentionedAgents = parseAgentMentions(userInput, agents, agentId)
+    const turnCtx: TurnContext = {
+      tools: applyDelegationAllowlist(enabledTools, mentionedAgents),
+      allowedAgentIds: mentionedAgents.map((agent) => agent.id!)
+    }
+
+    if (mentionedAgents.length > 0 && !hasInvokeAgentTool(enabledTools)) {
+      // メンションしても invokeAgent が無効なら委譲は起きないため明示的に伝える
+      if (hasInvokeAgentTool(rawEnabledTools)) {
+        // Plan モードでフィルタされた（invokeAgent は読み取り専用ではない）
+        toast(t('delegation.unavailableInPlanMode'))
+      } else {
+        const currentAgentName = agents.find((a) => a.id === agentId)?.name || agentId
+        toast(t('delegation.toolDisabled', { agent: currentAgentName }))
+      }
     }
 
     let result
@@ -1130,7 +1180,7 @@ export const useAgentChat = (
           messages: currentMessages,
           modelId,
           system: systemPrompt ? [{ text: systemPrompt }] : undefined,
-          toolConfig: enabledTools.length ? { tools: enabledTools } : undefined
+          toolConfig: turnCtx.tools.length ? { tools: turnCtx.tools } : undefined
         },
         currentMessages
       )
@@ -1141,7 +1191,7 @@ export const useAgentChat = (
           console.warn(lastMessage)
           result = null
         } else {
-          result = await recursivelyExecTool(lastMessage.content, currentMessages)
+          result = await recursivelyExecTool(lastMessage.content, currentMessages, turnCtx)
         }
       }
 

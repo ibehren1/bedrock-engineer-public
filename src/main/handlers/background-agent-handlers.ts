@@ -19,7 +19,7 @@ let backgroundAgentScheduler: BackgroundAgentScheduler | null = null
 let isSchedulerInitializing = false
 const toggleOperationMutex = new Map<string, Promise<boolean>>()
 
-function getBackgroundAgentService(): BackgroundAgentService {
+export function getBackgroundAgentService(): BackgroundAgentService {
   if (!backgroundAgentService) {
     const context: ServiceContext = {
       store: store
@@ -143,7 +143,7 @@ export const backgroundAgentHandlers = {
 
     try {
       const service = getBackgroundAgentService()
-      service.createSession(params.sessionId, params.options)
+      await service.createSession(params.sessionId, params.options)
 
       logger.info('Session created', {
         sessionId: params.sessionId,

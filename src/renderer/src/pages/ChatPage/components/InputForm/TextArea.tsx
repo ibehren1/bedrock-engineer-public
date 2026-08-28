@@ -7,6 +7,8 @@ import { ThinkingModeSelector } from '../ThinkingModeSelector'
 import { InterleaveThinkingToggle } from '../InterleaveThinkingToggle'
 import { PlanActToggle } from './PlanActToggle'
 import { useSettings } from '@renderer/contexts/SettingsContext'
+import { AgentMentionPopup } from './AgentMentionPopup'
+import { useAgentMention } from './useAgentMention'
 
 export type AttachedImage = {
   file: File
@@ -43,6 +45,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
   const [textareaHeight, setTextareaHeight] = useState<number>(72) // Initial height for 3 lines (24px * 3)
   const [isHovering, setIsHovering] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const mention = useAgentMention(textareaRef, value, onChange)
 
   // プラットフォームに応じた Modifire キーの表示を決定
   const modifierKey = useMemo(() => {
@@ -222,6 +225,34 @@ export const TextArea: React.FC<TextAreaProps> = ({
     // メッセージ送信のキー入力処理
     if (isComposing) {
       return
+    }
+
+    // @メンションのポップアップが開いている間は送信より先にキーを処理する
+    if (mention.open) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        e.stopPropagation()
+        mention.moveActive(1)
+        return
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        e.stopPropagation()
+        mention.moveActive(-1)
+        return
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault()
+        e.stopPropagation()
+        mention.selectActive()
+        return
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
+        mention.close()
+        return
+      }
     }
 
     const cmdenter = e.key === 'Enter' && (e.metaKey || e.ctrlKey)
@@ -481,17 +512,43 @@ export const TextArea: React.FC<TextAreaProps> = ({
             value={value}
             onChange={(e) => {
               onChange(e.target.value)
+              // 値の反映後にキャレット位置を測るため次フレームで判定する
+              requestAnimationFrame(mention.refresh)
             }}
+            onKeyUp={(e) => {
+              // 矢印キーやクリックでキャレットだけが動いた場合にも追従する
+              if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                mention.refresh()
+              }
+            }}
+            onClick={mention.refresh}
+            onBlur={mention.close}
             onKeyDown={(e) => !disabled && handleKeyDown(e)}
-            onPaste={handlePaste}
+            onPaste={(e) => {
+              mention.close()
+              handlePaste(e)
+            }}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
-            onDrop={handleDrop}
+            onDrop={(e) => {
+              mention.close()
+              handleDrop(e)
+            }}
             required
             rows={3}
             style={{ height: `${textareaHeight}px` }}
           />
+
+          {mention.open && mention.coordinates && (
+            <AgentMentionPopup
+              items={mention.items}
+              activeIndex={mention.activeIndex}
+              coordinates={mention.coordinates}
+              textareaRef={textareaRef}
+              onSelect={mention.select}
+            />
+          )}
         </div>
 
         {/* Controls at the bottom */}

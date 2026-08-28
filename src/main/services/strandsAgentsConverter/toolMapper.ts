@@ -156,6 +156,13 @@ export const TOOL_MAPPING: Record<BuiltInToolName, StrandsTool> = {
     importPath: '',
     supported: false,
     reason: 'TODO tools are excluded from conversion. Can be replaced with Workflow tools'
+  },
+  invokeAgent: {
+    strandsName: '',
+    importPath: '',
+    supported: false,
+    reason:
+      'Agent-to-agent delegation has no direct Strands equivalent. Use the Strands multi-agent patterns (agent-as-tool, swarm, or graph) instead'
   }
 }
 
