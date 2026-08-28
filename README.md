@@ -5,115 +5,125 @@ This repository is a fork of the original code with personal updates that deviat
 Code built from this repo is versioned based on the date of the build rather than the original versioning scheme.
 i.e. Version: 2026.629.1 was the second daily build on 2026-06-29.
 
+## What's different in this fork
 
-## Update summary:
+Everything below the [upstream documentation](#-bedrock-engineer) still applies. This section covers
+what this fork adds or changes. The dated changelog lives in [CHANGELOG.md](./CHANGELOG.md), whose
+newest dated section is published as the release notes for each build.
 
-### 2026-08-27
-- Add ability for user to specify that the agent use another agent profile (via @<profile name>) to accomplish a task.  Results come back to the current agent.  i.e. use @email to find email from Kevin and compose a reply.  This allows the current agent to use the results of another agent's task (tools) without needing to switch back and forth.
+### My Agents
 
-### 2026-08-24
-- Add an "Export chat to PDF" button. Same content as the Markdown export in a single self-contained PDF (Letter, 1" margins), typeset like the Word export.
-- Write each avatar image once instead of once per turn (`user-avatar.png`, `assistant-avatar-<model ID>.png`).
-- Group consecutive turns from the same party under a single heading.
-- Word: Calibri, 10pt body, 18/16/14pt Heading 1/2/3, 1" margins, and half the space above each heading.
-- Word: code blocks in 8pt Courier New, with line breaks and indentation preserved.
-- Word: tighter table spacing — a one-line row is about half as tall as before.
-- Diagrams (Mermaid/DrawIO) render at half size; Word also centers them.
+Agents are created and maintained on a **My Agents** page that opens in the main window, with its
+own sidebar button. It replaces the "Custom Agents" overlay that upstream opens on top of the chat.
 
-### 2026-08-20
-- Add username along side the avatar.
-- Add a floating toolbar to copy just the highlighted text of a chat message as markdown or rich text.
-- Make the stop-generation button red while inference is running.
-- Make the new-chat button green.
-- Add an "Export chat to Word (.docx)" button. Exports rich text (excluding ToolUse/ToolResult like the Markdown export), labels each turn as "Assistant – <model ID>" / "User – <username>", and embeds the user/assistant avatars as images.
-- Markdown export now also embeds the avatar images and uses the "Assistant – <model ID>" / "User – <username>" headings.
-- Publish the GitHub release even when the build job fails or produces no installers (notes-only release; any binaries that did build are still attached).
+![my-agents](./assets/my-agents.png)
 
-### 2026-08-19
-- Serve OpenAI GPT-5.6 (Sol/Terra/Luna) models through the standard Bedrock Converse API and remove the OpenAI Responses API translation layer.
-- Remove the GPT-5.5 and GPT-5.4 models, which are not available through Converse.
-- Update the release workflow to keep build artifacts only for the most current release.
+- Create, edit, duplicate, export and remove agents from one place. Clicking an agent opens its
+  editor rather than switching the active agent.
+- **Remove default agents you don't use.** Upstream re-seeds its built-in agents into the store on
+  every launch, so deleting one never stuck. Removals now persist, and **Restore default agents**
+  brings them back. Agents that other pages depend on (Website Generator, Diagram Generator) can't
+  be removed.
+- **Rearrange agents by drag and drop**, in either card or table view. The arrangement is saved and
+  is reused by the agent dropdown and `@` mentions. Dragging is disabled while a table column sort
+  is active.
 
-### 2026-08-14
-- Update assistant icon in chat interface to match the model's icon.
-- Hovering over the model icon in the chat interface now displays the specific model's name that produced the output.
-- Add options to copy message to clipboard in either markdown or rich text format.
+![my-agents-table](./assets/my-agents-table.png)
 
-### 2026-08-13
-- Update Claude Sonnet 5 pricing to $2/$10 per million input/output tokens.
-- Update to address open security vulnerabilities.
+### Picking an agent icon from ~38,000 icons
 
-### 2026-08-04
-- Update OpenAI model pricing. 
-- Address new Dependabot security alerts.
+The icon button in an agent's **Name & Icon** row opens a picker that still starts on the curated,
+categorised list, and adds ten icon collections to browse or search by name — Tabler, Lucide,
+Phosphor, Material, Heroicons, Bootstrap, Font Awesome (plus brands), Simple Icons and Game Icons.
+Choose **All libraries** to search across all of them at once; long result lists are capped, so
+narrow the search to see more. Collections are loaded the first time you open one, so app startup is
+unaffected, and icons chosen before this change keep working.
 
-### 2026-07-30
-- Fix timezone issues for scheduled tasks.
-- Create select/delete function for chat history.
-- Address Dependabot security alerts.
+### Choosing an agent from the message entry area
 
-### 2026-07-28
-- Add support for OpenAI API / GPT-5.6 models..
+The agent picker is a dropdown in the message entry area, left of the model selector, and the three
+controls there are labeled **Agent**, **Model** and **Thinking**. "Edit agents" jumps to the My
+Agents page.
 
-### 2026-07-27
-- Visual updates to add Dim and Dark themes.
+![agent-dropdown](./assets/agent-dropdown.png)
 
-### 2026-07-24
-- Added support for Opus 5 model.
+### Delegating a task to another agent with `@`
 
-### 2026-07-23
-- Remove gloss/glare from app icon.
-- Add option in settings to allowlist models.
-  - This to shrink the list of models shown in the model selection dropdown in the chat interface.
-  - Simplfication for less technical users.
-- Updated pricing and display costs of models in the chat interface dropdown.
-- Allow users to pick an avatar from a picker for display in the chat interface.
-- Removed prompt routers from model selection since they do not support modern models.
-- Added support for Kimi 2.5 model.
+Type `@` followed by an agent name to hand one step of a task to that agent. The other agent runs
+with its own tools and system prompt, and its result comes back to the agent you are talking to — no
+switching back and forth. For example, `use @email to find the email from Kevin and compose a reply`.
 
-### 2026-07-22
-- Add setting to hide various route shortcuts from the sidebar.
-- Update to name the app from productName in package.json.
-- Update icon for the app.
-- Update the agent chat assistant icon to the Bedrock logo.
+![agent-mention](./assets/agent-mention.png)
 
-### 2026-07-21
-- Add drag-and-drop support for file attachments.
-- Update versioning scheme to use date-based versioning from the last git commit.
+### Finding MCP servers
 
-### 2026-07-13
-- Add conversation cost to the top right of the display.
-- Update the ToDo list icon to flash as items change status.
+The agent editor's **MCP Servers** tab searches the
+[official MCP Registry](https://registry.modelcontextprotocol.io) — type a term, or press **Suggest
+for this agent** to have the model derive the search terms from the agent's description, system
+prompt and enabled tools.
 
-### 2026-07-08
-- Fix non-working Nova Sonic voice chat.
-- Force chat naming at second user prompt.
-- Update clear chat icon to a new-conversation icon.
+![mcp-market](./assets/mcp-market.png)
 
-### 2026-06-30
-- Add Sonnet 5 model support.
+Every server listed comes from the registry, so names, versions, package identifiers, required
+environment variables and hosted endpoints are real: "Load config" fills the JSON editor with a
+version-pinned command (or the remote URL) for you to review before adding it. The model only ever
+produces the search terms, never a package name.
 
-### 2026-06-29
-- Replace the unconditional auto-scroll-to-bottom with a hook that follows streaming output through the tool-use phase, then stops once the first line of the main response reaches the top of the message area. Respects manual scroll-up (pauses until the user returns to the bottom).
-- Fix issue with title generation for chats.
-- Add function to export chat history as a markdown file.
-- Update to Electron 42.x.x.
+Those terms have to be grounded in the agent's own configuration — its system prompt, scenarios,
+allowed shell commands, description and additional instruction — and each one is shown with the
+phrase it came from. A support agent whose prompt mentions Zendesk, Stripe, Snowflake, Linear and
+Slack gets exactly those five searches, not "automation" or "devops"; generic category words are
+rejected, and if nothing in the configuration names a system, it says so rather than guessing.
 
-### 2026-06-10
-- Add support for Anthropic Fable 5 model.
+[MCP Market](https://mcpmarket.com) is linked for browsing by category, chosen from the same agent
+signals. It's link-out only: it publishes no API, its `robots.txt` disallows `/api/` for everyone,
+and automated requests get a Vercel bot challenge, so the app doesn't read it.
 
-### 2026-06-01
-- Added Makefile targets for easy local building, installing, signing, and cleaning the project.
-  - `make build-mac`: Build the project for macOS.
-  - `make install`: Install the project.
-  - `make sign`: Sign the project.
-- Add Claude Opus 4.8 to model registry with global/JP/US inference profiles
-- Add adaptive thinking mode for newer models (Sonnet 4.6, Opus 4.6/4.7/4.8) that use type: 'adaptive' without budget_tokens, while older models keep type: 'enabled' with budget_tokens
-- Auto-translate thinking type in converse service based on model capabilities to prevent 400 errors when switching between model generations
-- Fix Opus 4.7 supportsThinking (was incorrectly set to false)
-- Remove duplicate Amazon Nova Premier entry from model registry
-- Add date-based versioning via Makefile (YYYY.MMDD.N format)
-- Add CLAUDE.md for codebase documentation
+### Chat interface
+
+![chat-conversation](./assets/chat-conversation.png)
+
+- Each turn is labeled with your configured **user name** and avatar, and with the **model icon** of
+  the model that produced the answer (hover it for the model name).
+- The **running conversation cost** is shown at the top right, next to the token analytics and TODO
+  icons.
+- **Export the conversation** as Markdown, Word (`.docx`) or PDF from the buttons above the input
+  box. All three exclude tool use/results, label turns as `Assistant – <model ID>` / `User – <name>`,
+  embed the avatars, and render Mermaid/DrawIO diagrams as images.
+- Select text in a message to get a **floating toolbar** that copies just the selection as Markdown
+  or rich text; whole messages can be copied either way too.
+- The stop-generation button is red while inference runs; the new-conversation button is green.
+- Streaming output auto-scrolls through the tool-use phase and then stops, and respects a manual
+  scroll up.
+- Attachments can be dropped onto the window, and chat history supports multi-select delete.
+
+### Models
+
+- Added Claude Fable 5, Opus 5, Sonnet 5 and Opus 4.8, Kimi 2.5, and the OpenAI GPT-5.6
+  (Sol/Terra/Luna) models, all served through the standard Bedrock Converse API.
+- Adaptive thinking for newer Claude models, with the thinking type translated per model so
+  switching model generations doesn't 400.
+- Model pricing kept current, and per-model input/output pricing shown in the model dropdown.
+- **Model allowlist** in settings, so the dropdown can be trimmed to the handful of models a given
+  user should see.
+
+### Appearance and layout
+
+![settings-sidebar](./assets/settings-sidebar.png)
+
+- Dim (default) and Dark themes alongside Light, with accent colors derived from the app icon.
+- **Sidebar Settings** hides any navigation icon you don't use.
+- Pick an emoji avatar and a display name for yourself in the chat.
+- App name comes from `productName` in `package.json`, with a reworked app icon.
+
+### Build and release
+
+- `Makefile` targets for local work: `make build-mac`, `make install`, `make sign`.
+- Date-based versioning (`YYYY.MMDD.N`) derived from the build date.
+- A single GitHub Actions build-and-release pipeline that runs on pushes to `main` (and on PRs
+  targeting `main`), keeps artifacts only for the current release, and publishes release notes even
+  when a build produces no installers.
+- `CLAUDE.md` documents the codebase layout for AI coding agents.
 
 - - -
  
@@ -140,13 +150,13 @@ Bedrock Engineer is a native app, you can download the app or build the source c
 
 ### Download
 
-MacOS:
+Builds of **this fork** are published on its releases page (installers are attached per release):
 
-[<img src="https://img.shields.io/badge/Download_FOR_MAC-Latest%20Release-blue?style=for-the-badge&logo=apple" alt="Download Latest Release" height="40">](https://github.com/aws-samples/bedrock-engineer/releases/latest/download/bedrock-engineer-1.21.0.pkg)
+[<img src="https://img.shields.io/badge/Download_THIS_FORK-Latest%20Release-blue?style=for-the-badge&logo=github" alt="Download Latest Release of this fork" height="40">](https://github.com/ibehren1/bedrock-engineer-public/releases/latest)
 
-Windows:
+Upstream builds (quite old):
 
-[<img src="https://img.shields.io/badge/Download_FOR_WINDOWS-Latest%20Release-blue?style=for-the-badge" alt="Download Latest Release" height="40">](https://github.com/aws-samples/bedrock-engineer/releases/latest/download/bedrock-engineer-1.21.0-setup.exe)
+[<img src="https://img.shields.io/badge/Upstream_FOR_MAC-Latest%20Release-lightgrey?style=for-the-badge&logo=apple" alt="Upstream Latest Release" height="40">](https://github.com/aws-samples/bedrock-engineer/releases/latest) [<img src="https://img.shields.io/badge/Upstream_FOR_WINDOWS-Latest%20Release-lightgrey?style=for-the-badge" alt="Upstream Latest Release" height="40">](https://github.com/aws-samples/bedrock-engineer/releases/latest)
 
 It is optimized for MacOS, but can also be built and used on Windows and Linux OS. If you have any problems, please report an issue.
 
@@ -171,7 +181,7 @@ When opening the PKG file, you may see this security warning:
 1. Click "Done" to dismiss the warning dialog
 2. Open System Preferences → Privacy & Security
 3. Scroll down to the Security section
-4. Find "bedrock-engineer-1.19.2.pkg was blocked to protect your Mac"
+4. Find "`<installer file name>`.pkg was blocked to protect your Mac"
 5. Click "Open Anyway" button
 
 This security warning appears because the application is not distributed through the Mac App Store.
@@ -192,7 +202,11 @@ This ad-hoc code signing is required to ensure the application functions correct
 
 If a configuration file error occurs when starting the application, please check the following configuration files. If you cannot start the application even after deleting the configuration files and restarting it, please file an issue.
 
-`/Users/{{username}}/Library/Application Support/bedrock-engineer/config.json`
+This fork stores its settings under the app's `productName` (`Behrens AI`), not `bedrock-engineer`:
+
+`/Users/{{username}}/Library/Application Support/Behrens AI/config.json`
+
+Chat history lives next to it, in `chat-sessions/` and `chat-sessions-meta.json`.
 
 </details>
 
@@ -248,15 +262,15 @@ The autonomous AI agent capable of development assists your development process.
 
 ### Select an Agent
 
-Choose an agent from the menu in the top left. By default, it includes a Software Developer specialized in general software development, a Programming Mentor that assists with programming learning, and a Product Designer that supports the conceptual stage of services and products.
+Choose an agent from the Agent dropdown in the message entry area, to the left of the Model and Thinking controls. By default, it includes a Software Developer specialized in general software development, a Programming Mentor that assists with programming learning, and a Product Designer that supports the conceptual stage of services and products.
 
-![select-agents](./assets/select-agents.png)
+![agent-dropdown](./assets/agent-dropdown.png)
 
 ### Customize Agents
 
-Enter the agent's name, description, and system prompt. The system prompt is a crucial element that determines the agent's behavior. By clearly defining the agent's purpose, regulations, role, and when to use available tools, you can obtain more appropriate responses.
+Open **My Agents** from the sidebar (or "Edit agents" in the agent dropdown) to create and maintain your agents. Enter the agent's name, description, and system prompt. The system prompt is a crucial element that determines the agent's behavior. By clearly defining the agent's purpose, regulations, role, and when to use available tools, you can obtain more appropriate responses. Default agents you don't want can be removed from this page and restored later with "Restore default agents".
 
-![custom-agents](./assets/custom-agents.png)
+![agent-editor](./assets/agent-editor.png)
 
 ### Select Tools / Customize Tools
 
@@ -476,7 +490,7 @@ Detailed documentation is available for advanced features and configuration meth
 - [MCP Server Configuration Guide](./docs/mcp-server/MCP_SERVER_CONFIGURATION.md) - How to configure Model Context Protocol (MCP) servers
 - [Organization Sharing Guide](./docs/agent-directory-organization/README.md) - How to set up agent sharing within organizations in Agent Directory
 
-## Star History
+## Star History (upstream)
 
 [![Star History Chart](https://api.star-history.com/svg?repos=aws-samples/bedrock-engineer&type=Date)](https://star-history.com/#aws-samples/bedrock-engineer&Date)
 

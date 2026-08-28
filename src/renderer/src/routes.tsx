@@ -4,6 +4,7 @@ import { LuCombine, LuBookDown } from 'react-icons/lu'
 import { HiOutlineChatAlt2 } from 'react-icons/hi'
 import { BsLayoutWtf } from 'react-icons/bs'
 import { PiPulse } from 'react-icons/pi'
+import { TbRobot } from 'react-icons/tb'
 import HomePage from './pages/HomePage/HomePage'
 import SettingPage from './pages/SettingPage/SettingPage'
 import StepFunctionsGeneratorPage from './pages/StepFunctionsGeneratorPage/StepFunctionsGeneratorPage'
@@ -11,6 +12,7 @@ import WebsiteGeneratorPage from './pages/WebsiteGeneratorPage/WebsiteGeneratorP
 import ChatPage from './pages/ChatPage/ChatPage'
 import DiagramGeneratorPage from './pages/DiagramGeneratorPage/DiagramGeneratorPage'
 import { AgentDirectoryPage } from './pages/AgentDirectoryPage/AgentDirectoryPage'
+import { MyAgentsPage } from './pages/MyAgentsPage/MyAgentsPage'
 import BackgroundAgentPage from './pages/BackgroundAgentPage/BackgroundAgentPage'
 import TaskExecutionHistoryPage from './pages/BackgroundAgentPage/TaskExecutionHistoryPage'
 import SpeakPage from './pages/SpeakPage'
@@ -44,6 +46,13 @@ export const routes: AppRoute[] = [
     icon: FiMic,
     position: 'top',
     element: <SpeakPage />
+  },
+  {
+    name: 'My Agents',
+    href: '/my-agents',
+    icon: TbRobot,
+    position: 'top',
+    element: <MyAgentsPage />
   },
   {
     name: 'Agent Directory',

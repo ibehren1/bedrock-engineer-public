@@ -3,6 +3,7 @@ import { ipcRenderer } from 'electron'
 import { store } from './store'
 import { BedrockService } from '../main/api/bedrock'
 import { McpServerConfig } from '../types/agent-chat'
+import { McpRegistryServer } from '../common/mcp/registry'
 import { getImageGenerationModelsForRegion } from '../common/models/models'
 import { BedrockSupportRegion } from '../types/llm'
 import { CodeInterpreterTool } from './tools/handlers/interpreter/CodeInterpreterTool'
@@ -264,6 +265,14 @@ export const api = {
         throw new Error(result.error)
       }
       return result.results
+    },
+    // 公式MCPレジストリの検索
+    searchRegistry: async (query: string, limit?: number): Promise<McpRegistryServer[]> => {
+      const result = await ipcRenderer.invoke('mcp:searchRegistry', query, limit)
+      if (!result.success) {
+        throw new Error(result.error)
+      }
+      return result.servers
     },
     // クリーンアップ
     cleanup: async () => {

@@ -8,6 +8,7 @@ import { AgentViewToggle } from './AgentViewToggle'
 import { EmptyState } from './EmptyState'
 import { TagFilter } from './TagFilter'
 import { useAgentFilter } from './useAgentFilter'
+import { useAgentDragOrder } from './useAgentDragOrder'
 import { useSettings } from '@renderer/contexts/SettingsContext'
 
 interface AgentListProps {
@@ -21,6 +22,11 @@ interface AgentListProps {
   onSaveAsShared?: (agent: CustomAgent) => void
   onShareToOrganization?: (agent: CustomAgent) => void
   onConvertToStrands?: (agentId: string) => void
+  /** Number of default agents the user removed; enables the restore button */
+  hiddenDefaultCount?: number
+  onRestoreDefaults?: () => void
+  /** Allow rearranging agents by drag & drop (My Agents page) */
+  allowReorder?: boolean
 }
 
 export const AgentList: React.FC<AgentListProps> = ({
@@ -33,7 +39,10 @@ export const AgentList: React.FC<AgentListProps> = ({
   onDeleteAgent,
   onSaveAsShared,
   onShareToOrganization,
-  onConvertToStrands
+  onConvertToStrands,
+  hiddenDefaultCount = 0,
+  onRestoreDefaults,
+  allowReorder = false
 }) => {
   const { t } = useTranslation()
   const { agentListViewMode, setAgentListViewMode } = useSettings()
@@ -55,6 +64,10 @@ export const AgentList: React.FC<AgentListProps> = ({
     setAgentListViewMode(viewMode)
   }, [viewMode, setAgentListViewMode])
 
+  // A column sort would fight the manual arrangement, so dragging is off then
+  const isDragEnabled = allowReorder && sortKey === null
+  const dragOrder = useAgentDragOrder(agents, isDragEnabled)
+
   return (
     <div className="p-4 bg-white dark:bg-gray-900">
       <div className="flex items-center justify-between gap-4 mb-4">
@@ -74,6 +87,17 @@ export const AgentList: React.FC<AgentListProps> = ({
           />
         </div>
         <div className="flex items-center gap-2">
+          {hiddenDefaultCount > 0 && onRestoreDefaults && (
+            <button
+              onClick={onRestoreDefaults}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white
+                dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm
+                hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2
+                focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 whitespace-nowrap"
+            >
+              {t('myAgents.restoreDefaults', { count: hiddenDefaultCount })}
+            </button>
+          )}
           <AgentViewToggle viewMode={viewMode} onToggle={setViewMode} />
           <button
             onClick={onAddNewAgent}
@@ -108,10 +132,12 @@ export const AgentList: React.FC<AgentListProps> = ({
                 onSelect={onSelectAgent}
                 onEdit={isEditable ? onEditAgent : undefined}
                 onDuplicate={onDuplicateAgent}
-                onDelete={isEditable ? onDeleteAgent : undefined}
+                onDelete={onDeleteAgent}
                 onSaveAsShared={onSaveAsShared}
                 onShareToOrganization={isEditable ? onShareToOrganization : undefined}
                 onConvertToStrands={onConvertToStrands}
+                dragProps={dragOrder.dragProps(agent.id)}
+                dragClassName={dragOrder.dragClassName(agent.id)}
               />
             )
           })}
@@ -130,6 +156,9 @@ export const AgentList: React.FC<AgentListProps> = ({
           sortKey={sortKey}
           sortOrder={sortOrder}
           onSort={handleSort}
+          dragProps={dragOrder.dragProps}
+          dragClassName={dragOrder.dragClassName}
+          dragEnabled={isDragEnabled}
         />
       )}
     </div>

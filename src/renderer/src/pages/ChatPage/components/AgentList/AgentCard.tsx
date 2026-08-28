@@ -1,8 +1,9 @@
 import React from 'react'
 import { CustomAgent } from '@/types/agent-chat'
 import { TbRobot } from 'react-icons/tb'
+import { MdDragIndicator } from 'react-icons/md'
 import { useTranslation } from 'react-i18next'
-import { AGENT_ICONS } from '@renderer/components/icons/AgentIcons'
+import { AgentIconView } from '@renderer/components/icons/AgentIconView'
 import { AgentActionsDropdown } from './AgentActionsDropdown'
 
 interface AgentCardProps {
@@ -16,6 +17,9 @@ interface AgentCardProps {
   onSaveAsShared?: (agent: CustomAgent) => void
   onShareToOrganization?: (agent: CustomAgent) => void
   onConvertToStrands?: (agentId: string) => void
+  /** HTML5 drag handlers from useAgentDragOrder; empty when reordering is off */
+  dragProps?: React.HTMLAttributes<HTMLDivElement> & { draggable?: boolean }
+  dragClassName?: string
 }
 
 export const AgentCard: React.FC<AgentCardProps> = ({
@@ -28,19 +32,29 @@ export const AgentCard: React.FC<AgentCardProps> = ({
   onDelete,
   onSaveAsShared,
   onShareToOrganization,
-  onConvertToStrands
+  onConvertToStrands,
+  dragProps,
+  dragClassName
 }) => {
   const { t } = useTranslation()
 
   return (
     <div
       className={`group relative flex items-start p-4 border
-        ${isSelected ? 'border-blue-500 dark:border-blue-400' : 'border-gray-200 dark:border-gray-700'}
+        border-gray-200 dark:border-gray-700
         rounded-lg bg-white dark:bg-gray-800 hover:border-blue-500
         dark:hover:border-blue-400 transition-all duration-200 cursor-pointer
-        ${isSelected ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
+        ${dragClassName || ''}`}
       onClick={() => onSelect(agent.id!)}
+      {...dragProps}
     >
+      {dragProps?.draggable && (
+        <MdDragIndicator
+          className="absolute left-1 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-gray-600
+            opacity-0 group-hover:opacity-100 transition-opacity"
+          title={t('myAgents.dragToReorder')}
+        />
+      )}
       <div className="flex-shrink-0 mr-4">
         <div
           className={`w-10 h-10 flex items-center justify-center
@@ -48,25 +62,16 @@ export const AgentCard: React.FC<AgentCardProps> = ({
             rounded-lg border border-transparent dark:border-gray-600 shadow-sm dark:shadow-inner`}
         >
           {agent.icon ? (
-            React.cloneElement(
-              (AGENT_ICONS.find((opt) => opt.value === agent.icon)?.icon as React.ReactElement) ??
-                AGENT_ICONS[0].icon,
-              {
-                className: `w-5 h-5 ${isSelected ? 'dark:text-blue-300' : 'dark:text-gray-100'}`,
-                style: {
-                  color:
-                    agent.iconColor ||
-                    (isSelected ? 'var(--tw-text-blue-600)' : 'var(--tw-text-gray-700)'),
-                  filter: 'brightness(1.2) contrast(1.2)'
-                }
-              }
-            )
-          ) : (
-            <TbRobot
-              className={`w-5 h-5 ${
-                isSelected ? 'text-blue-700 dark:text-blue-200' : 'text-blue-600 dark:text-gray-100'
-              } filter brightness-110 contrast-125`}
+            <AgentIconView
+              icon={agent.icon}
+              className="w-5 h-5 dark:text-gray-100"
+              style={{
+                color: agent.iconColor || 'var(--tw-text-gray-700)',
+                filter: 'brightness(1.2) contrast(1.2)'
+              }}
             />
+          ) : (
+            <TbRobot className="w-5 h-5 text-blue-600 dark:text-gray-100 filter brightness-110 contrast-125" />
           )}
         </div>
       </div>
@@ -77,7 +82,10 @@ export const AgentCard: React.FC<AgentCardProps> = ({
           </h3>
           <div className="flex items-center gap-1">
             {isSelected && (
-              <span className="px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 rounded">
+              <span
+                title={t('myAgents.activeInChat')}
+                className="px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 rounded"
+              >
                 {t('active')}
               </span>
             )}

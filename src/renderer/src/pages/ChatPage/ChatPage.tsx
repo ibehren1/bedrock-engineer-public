@@ -4,11 +4,9 @@ import { MessageList } from './components/MessageList'
 import InputFormContainer, { InputFormContainerRef } from './components/InputFormContainer'
 import { ExampleScenarios } from './components/ExampleScenarios'
 import { useAgentChat } from './hooks/useAgentChat'
-import { AgentSelector } from './components/AgentSelector'
 import useSetting from '@renderer/hooks/useSetting'
 import { IgnoreSettingsModal } from '@renderer/components/IgnoreSettingsModal'
 import { useToolSettingModal } from './modals/useToolSettingModal'
-import { useAgentSettingsModal } from './modals/useAgentSettingsModal'
 import { FiChevronRight, FiBarChart2 } from 'react-icons/fi'
 import { FaListCheck } from 'react-icons/fa6'
 import { Tooltip } from 'flowbite-react'
@@ -127,13 +125,6 @@ export default function ChatPage() {
   const [showIgnoreSettingsModal, setShowIgnoreSettingsModal] = useState(false)
   const handleOpenIgnoreFileModal = () => setShowIgnoreSettingsModal(true)
   const handleCloseIgnoreFileModal = () => setShowIgnoreSettingsModal(false)
-
-  const {
-    show: showAgentSettingModal,
-    handleOpen: openAgentSettingsModal,
-    handleClose: handleCloseAgentSettingsModal,
-    AgentSettingsModal
-  } = useAgentSettingsModal()
 
   const {
     show: showSystemPromptModal,
@@ -433,13 +424,7 @@ export default function ChatPage() {
         {/* チャット列（ヘッダー + メインコンテンツ） - フレックス成長。履歴表示時に右へスライド */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* ヘッダー - 固定 */}
-          <div className="flex justify-between items-center">
-            <AgentSelector
-              agents={agents}
-              selectedAgent={selectedAgentId}
-              onOpenSettings={openAgentSettingsModal}
-            />
-
+          <div className="flex justify-end items-center">
             <div className="flex items-center gap-2">
               {/* Only show TODO icon when there are messages */}
               {messages.length > 0 && (
@@ -497,12 +482,6 @@ export default function ChatPage() {
             modelId={llm?.modelId || ''}
           />
           <TodoModal isOpen={showTodoModal} onClose={handleCloseTodoModal} />
-          <AgentSettingsModal
-            isOpen={showAgentSettingModal}
-            onClose={handleCloseAgentSettingsModal}
-            selectedAgentId={selectedAgentId}
-            onSelectAgent={setSelectedAgentId}
-          />
           <ToolSettingModal isOpen={showToolSettingModal} onClose={handleCloseToolSettingModal} />
           <IgnoreSettingsModal
             isOpen={showIgnoreSettingsModal}

@@ -1,7 +1,6 @@
 import React from 'react'
 import { CogIcon } from '@heroicons/react/24/outline'
-import { getIconByValue } from '@renderer/components/icons/AgentIcons'
-import { AgentIcon as AgentIconType } from '@/types/agent-chat'
+import { AgentIconView } from '@renderer/components/icons/AgentIconView'
 
 interface AgentIconProps {
   agent: { icon?: string; iconColor?: string; name: string } | null
@@ -15,12 +14,9 @@ export const AgentIcon: React.FC<AgentIconProps> = ({ agent, size = 'sm' }) => {
     return <CogIcon className={`${iconSize} flex-shrink-0`} />
   }
 
-  // 既存のAgentIconsコンポーネントを使用
-  const iconElement = getIconByValue(agent.icon as AgentIconType, agent.iconColor)
-
   return (
     <div className={`${iconSize} flex items-center justify-center flex-shrink-0`}>
-      {iconElement}
+      <AgentIconView icon={agent.icon} iconColor={agent.iconColor} />
     </div>
   )
 }

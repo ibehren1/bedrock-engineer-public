@@ -607,15 +607,10 @@ export const AGENT_ICONS: AgentIconOption[] = [
   }
 ]
 
-export const getIconByValue = (value: AgentIcon, color?: string): React.ReactNode => {
-  const option = AGENT_ICONS.find((opt) => opt.value === value)
-  const icon = option?.icon || <TbRobot />
-  if (color) {
-    return React.cloneElement(icon as React.ReactElement, { style: { color } })
-  }
-  return icon
-}
-
+/**
+ * Curated icons only. Icons from the lazily loaded libraries can't be resolved
+ * synchronously — render `AgentIconView` instead of reaching for this list.
+ */
 export const getIconsByCategory = (category: AgentIconOption['category']): AgentIconOption[] => {
   return AGENT_ICONS.filter((icon) => icon.category === category)
 }

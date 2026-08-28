@@ -6,7 +6,6 @@ import { useSpeakChat } from './hooks/useSpeakChat'
 import { VoiceAILottie } from '@renderer/components/VoiceAI'
 import { ChatDisplay } from './components/ChatDisplay'
 import { useSystemPromptModal } from '../ChatPage/modals/useSystemPromptModal'
-import { useAgentSettingsModal } from '../ChatPage/modals/useAgentSettingsModal'
 import { AgentSelector } from '../ChatPage/components/AgentSelector'
 import { ViewToggleButton } from '@renderer/components/ViewToggleButton'
 import { useSettings } from '@renderer/contexts/SettingsContext'
@@ -27,8 +26,6 @@ const API_ENDPOINT = window.store.get('apiEndpoint')
 
 interface PageHeaderProps {
   agents: any[]
-  selectedAgentId: string
-  onOpenAgentSettings: () => void
   onOpenSystemPrompt: () => void
   onOpenVoiceSelector: () => void
   onOpenPermissionHelp: () => void
@@ -36,8 +33,6 @@ interface PageHeaderProps {
 
 const PageHeader: React.FC<PageHeaderProps> = ({
   agents,
-  selectedAgentId,
-  onOpenAgentSettings,
   onOpenSystemPrompt,
   onOpenVoiceSelector,
   onOpenPermissionHelp
@@ -50,11 +45,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-4">
-        <AgentSelector
-          agents={agents}
-          selectedAgent={selectedAgentId}
-          onOpenSettings={onOpenAgentSettings}
-        />
+        <AgentSelector agents={agents} alignment="left" openDirection="down" />
       </div>
       <div className="flex items-center gap-2">
         {isMacOS && (
@@ -507,7 +498,7 @@ export const SpeakPage: React.FC = () => {
     setSelectedVoiceId,
     currentAgent
   } = useSettings()
-  const { agents, setSelectedAgentId } = useSetting()
+  const { agents } = useSetting()
 
   // 現在のエージェントのツール情報を取得
   const agentTools = getAgentTools(selectedAgentId)
@@ -593,13 +584,6 @@ export const SpeakPage: React.FC = () => {
     SystemPromptModal
   } = useSystemPromptModal()
 
-  const {
-    show: showAgentSettingModal,
-    handleOpen: openAgentSettingsModal,
-    handleClose: handleCloseAgentSettingsModal,
-    AgentSettingsModal
-  } = useAgentSettingsModal()
-
   const { PermissionHelpModal, openModal: openPermissionHelpModal } = usePermissionHelpModal()
 
   const handleStartRecording = async () => {
@@ -671,8 +655,6 @@ export const SpeakPage: React.FC = () => {
         {/* Header */}
         <PageHeader
           agents={agents}
-          selectedAgentId={selectedAgentId}
-          onOpenAgentSettings={openAgentSettingsModal}
           onOpenSystemPrompt={handleOpenSystemPromptModal}
           onOpenVoiceSelector={handleOpenVoiceSelector}
           onOpenPermissionHelp={openPermissionHelpModal}
@@ -704,13 +686,6 @@ export const SpeakPage: React.FC = () => {
           isOpen={showSystemPromptModal}
           onClose={handleCloseSystemPromptModal}
           systemPrompt={systemPrompt}
-        />
-
-        <AgentSettingsModal
-          isOpen={showAgentSettingModal}
-          onClose={handleCloseAgentSettingsModal}
-          selectedAgentId={selectedAgentId}
-          onSelectAgent={setSelectedAgentId}
         />
 
         {/* Voice Selector Modal */}

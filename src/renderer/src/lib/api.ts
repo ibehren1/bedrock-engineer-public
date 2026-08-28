@@ -223,7 +223,13 @@ export async function getStructuredOutput<T>(params: {
   })
 
   if (!res.ok) {
-    throw new Error(`Structured output request failed: ${res.statusText}`)
+    // The route reports the underlying Bedrock message in the body; without it
+    // callers only see "Internal Server Error".
+    const detail = await res
+      .json()
+      .then((body) => body?.message)
+      .catch(() => undefined)
+    throw new Error(`Structured output request failed: ${detail || res.statusText}`)
   }
 
   return res.json()

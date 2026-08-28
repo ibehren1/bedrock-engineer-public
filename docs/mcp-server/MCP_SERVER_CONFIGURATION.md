@@ -67,9 +67,52 @@ MCP servers can be configured in two formats:
 - **git**: Git operation tools
 - **postgres**: PostgreSQL database operation tools
 
+## Finding Servers
+
+The "MCP Servers" tab has a **Find MCP servers** panel backed by the
+[official MCP Registry](https://registry.modelcontextprotocol.io):
+
+- **Search** queries the registry directly (`/v0/servers?search=…&version=latest`).
+- **Suggest for this agent** asks the model to derive search terms from the agent's configuration,
+  then runs those searches. The model produces search terms only — every server, version and package
+  identifier shown comes from the registry.
+- **MCP Registry** and **MCP Market** open the two directories in your browser.
+
+What the suggestion reads, in order of usefulness:
+
+| Source | Why it matters |
+| ------ | -------------- |
+| System prompt | Where the specifics live — the systems, products and data sources the agent works with |
+| Scenarios | Concrete tasks, usually naming real tools |
+| Allowed shell commands | A `kubectl` or `gh` pattern names the system directly |
+| Additional instruction | Extra context appended to the generated prompt |
+| Description, category | Coarse signal, used when the prompt is thin |
+| Enabled tools, existing MCP servers | Excluded from suggestions — no point proposing what the agent already has |
+
+Each term must be grounded in a phrase from that configuration, and the UI shows the phrase next to
+the term. Generic words (`automation`, `devops`, `deployment`, `monitoring`, …) are rejected because
+they match nothing useful in a directory. If nothing in the configuration names a system, the panel
+says so instead of guessing — fill in the system prompt or search the registry directly.
+
+Each result shows its registry name, version, how it runs, and any environment variables it requires.
+"Load config" fills the JSON editor with:
+
+- an npm package as `npx -y <identifier>@<version>`,
+- a Python package as `uvx <identifier>`,
+- a hosted server as its remote `url`,
+- `env` keys with empty values for anything the server requires.
+
+Servers published without package details show a note instead of a config; open their source
+repository to see how to run them. Nothing is added or connected until you press "Add Server", so you
+always see the command first.
+
+[MCP Market](https://mcpmarket.com) is linked for browsing by category, but not read by the app: it
+publishes no API, its `robots.txt` disallows `/api/` for all agents, and automated requests receive a
+Vercel bot challenge.
+
 ## Configuration Steps
 
-1. Open the agent edit modal
+1. Open the agent editor from the My Agents page
 2. Select the "MCP Servers" tab
 3. Click "Add New MCP Server" button
 4. Enter configuration in the JSON format above

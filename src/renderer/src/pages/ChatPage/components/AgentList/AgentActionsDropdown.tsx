@@ -3,6 +3,7 @@ import { CustomAgent } from '@/types/agent-chat'
 import { FiMoreVertical } from 'react-icons/fi'
 import { Dropdown } from 'flowbite-react'
 import { useTranslation } from 'react-i18next'
+import { PROTECTED_DEFAULT_AGENT_IDS } from './useAgentFilter'
 
 interface AgentActionsDropdownProps {
   agent: CustomAgent
@@ -28,6 +29,10 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
   const isCustomAgent = agent.isCustom ?? true
   const isEditable = isCustomAgent && !agent.isShared
 
+  // 共有エージェント（ファイル管理）と他ページが参照するデフォルトエージェントは削除できない
+  const isDeletable =
+    !agent.isShared && !!agent.id && !PROTECTED_DEFAULT_AGENT_IDS.includes(agent.id)
+
   // メニュー項目が1つもない場合は表示しない
   const hasAnyAction =
     (isEditable && onEdit) ||
@@ -35,7 +40,7 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
     onConvertToStrands ||
     (!agent.isShared && onSaveAsShared) ||
     (isEditable && onShareToOrganization) ||
-    (isEditable && onDelete)
+    (isDeletable && onDelete)
 
   if (!hasAnyAction) {
     return null
@@ -80,12 +85,12 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
             {t('shareToOrganization')}
           </Dropdown.Item>
         )}
-        {isEditable && onDelete && (
+        {isDeletable && onDelete && (
           <Dropdown.Item
             onClick={() => onDelete(agent.id!)}
             className="text-red-600 dark:text-red-400 w-48"
           >
-            {t('delete')}
+            {isCustomAgent ? t('delete') : t('myAgents.removeDefault')}
           </Dropdown.Item>
         )}
       </Dropdown>

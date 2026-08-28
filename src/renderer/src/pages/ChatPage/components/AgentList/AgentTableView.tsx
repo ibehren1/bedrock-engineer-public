@@ -2,8 +2,9 @@ import React from 'react'
 import { CustomAgent } from '@/types/agent-chat'
 import { FiChevronUp, FiChevronDown } from 'react-icons/fi'
 import { TbRobot } from 'react-icons/tb'
+import { MdDragIndicator } from 'react-icons/md'
 import { useTranslation } from 'react-i18next'
-import { AGENT_ICONS } from '@renderer/components/icons/AgentIcons'
+import { AgentIconView } from '@renderer/components/icons/AgentIconView'
 import { SortKey, SortOrder } from './useAgentFilter'
 import { AgentActionsDropdown } from './AgentActionsDropdown'
 
@@ -20,6 +21,12 @@ interface AgentTableViewProps {
   sortKey: SortKey
   sortOrder: SortOrder
   onSort: (key: SortKey) => void
+  /** HTML5 drag handlers from useAgentDragOrder */
+  dragProps?: (agentId?: string) => React.HTMLAttributes<HTMLTableRowElement> & {
+    draggable?: boolean
+  }
+  dragClassName?: (agentId?: string) => string
+  dragEnabled?: boolean
 }
 
 export const AgentTableView: React.FC<AgentTableViewProps> = ({
@@ -34,7 +41,10 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
   onConvertToStrands,
   sortKey,
   sortOrder,
-  onSort
+  onSort,
+  dragProps,
+  dragClassName,
+  dragEnabled = false
 }) => {
   const { t } = useTranslation()
 
@@ -59,6 +69,11 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
+            {dragEnabled && (
+              <th scope="col" className="pl-2 w-6">
+                {/* Drag handle column */}
+              </th>
+            )}
             <th scope="col" className="px-4 py-3 w-16">
               {/* Icon column - no sort */}
             </th>
@@ -116,13 +131,16 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
               <tr
                 key={agent.id}
                 className={`border-b dark:border-gray-700 cursor-pointer
-                  ${
-                    isSelected
-                      ? 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                      : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
+                  bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700
+                  ${dragClassName?.(agent.id) || ''}`}
                 onClick={() => onSelectAgent(agent.id!)}
+                {...dragProps?.(agent.id)}
               >
+                {dragEnabled && (
+                  <td className="pl-2 w-6 text-gray-300 dark:text-gray-600">
+                    <MdDragIndicator className="w-4 h-4" title={t('myAgents.dragToReorder')} />
+                  </td>
+                )}
                 {/* Icon */}
                 <td className="px-4 py-3">
                   <div
@@ -131,27 +149,16 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
                       rounded-lg border border-transparent dark:border-gray-600 shadow-sm dark:shadow-inner`}
                   >
                     {agent.icon ? (
-                      React.cloneElement(
-                        (AGENT_ICONS.find((opt) => opt.value === agent.icon)
-                          ?.icon as React.ReactElement) ?? AGENT_ICONS[0].icon,
-                        {
-                          className: `w-5 h-5 ${isSelected ? 'dark:text-blue-300' : 'dark:text-gray-100'}`,
-                          style: {
-                            color:
-                              agent.iconColor ||
-                              (isSelected ? 'var(--tw-text-blue-600)' : 'var(--tw-text-gray-700)'),
-                            filter: 'brightness(1.2) contrast(1.2)'
-                          }
-                        }
-                      )
-                    ) : (
-                      <TbRobot
-                        className={`w-5 h-5 ${
-                          isSelected
-                            ? 'text-blue-700 dark:text-blue-200'
-                            : 'text-blue-600 dark:text-gray-100'
-                        } filter brightness-110 contrast-125`}
+                      <AgentIconView
+                        icon={agent.icon}
+                        className="w-5 h-5 dark:text-gray-100"
+                        style={{
+                          color: agent.iconColor || 'var(--tw-text-gray-700)',
+                          filter: 'brightness(1.2) contrast(1.2)'
+                        }}
                       />
+                    ) : (
+                      <TbRobot className="w-5 h-5 text-blue-600 dark:text-gray-100 filter brightness-110 contrast-125" />
                     )}
                   </div>
                 </td>
@@ -192,7 +199,10 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
                     {isSelected && (
-                      <span className="px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 rounded">
+                      <span
+                        title={t('myAgents.activeInChat')}
+                        className="px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 rounded"
+                      >
                         {t('active')}
                       </span>
                     )}

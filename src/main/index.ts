@@ -243,7 +243,7 @@ function createMenu(window: BrowserWindow) {
         {
           label: 'GitHub Repository',
           click: async () => {
-            await shell.openExternal('https://github.com/aws-samples/bedrock-engineer')
+            await shell.openExternal('https://github.com/ibehren1/bedrock-engineer-public')
           }
         }
       ]

@@ -8,6 +8,7 @@ import {
   testAllMcpServerConnections,
   cleanupMcpClients
 } from '../mcp/index'
+import { searchMcpRegistry } from '../mcp/registry-client'
 
 /**
  * MCP関連のIPCハンドラー定義
@@ -104,6 +105,18 @@ export const mcpHandlers = {
     }
   },
 
+  // 公式MCPレジストリの検索（https://registry.modelcontextprotocol.io）
+  'mcp:searchRegistry': async (_, query: string, limit = 10) => {
+    try {
+      const servers = await searchMcpRegistry(query, limit)
+      return { success: true, servers }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      console.error('[Main Process] IPC: mcp:searchRegistry error:', errorMessage)
+      return { success: false, error: errorMessage, servers: [] }
+    }
+  },
+
   // MCPクライアントクリーンアップ
   'mcp:cleanup': async () => {
     try {
@@ -131,6 +144,7 @@ export const cleanupMcpHandlers = () => {
   ipcMain.removeAllListeners('mcp:executeTool')
   ipcMain.removeAllListeners('mcp:testConnection')
   ipcMain.removeAllListeners('mcp:testAllConnections')
+  ipcMain.removeAllListeners('mcp:searchRegistry')
   ipcMain.removeAllListeners('mcp:cleanup')
 
   console.log('[Main Process] MCP IPC handlers cleanup completed')

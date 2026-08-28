@@ -31,8 +31,8 @@ export const ScenarioSchema = z.object({
   content: z.string()
 })
 
-// AgentIcon schema - Union of all possible icon types
-export const AgentIconSchema = z.enum([
+// Curated icon values, hand-picked and grouped by category in the icon picker
+export const CuratedAgentIconSchema = z.enum([
   'robot',
   'brain',
   'chat',
@@ -267,6 +267,18 @@ export const AgentIconSchema = z.enum([
   'discount',
   'online-payment'
 ])
+
+/**
+ * Any icon from one of the bundled Iconify collections, stored as the Iconify id
+ * `<collection>:<name>` (e.g. `tabler:rocket`). Collections are lazily loaded in
+ * the renderer, so the value is validated by shape only.
+ */
+export const LibraryAgentIconSchema = z
+  .string()
+  .regex(/^[a-z][a-z0-9-]*:[a-z0-9][a-z0-9-]*$/, 'Expected an Iconify icon id like "tabler:rocket"')
+
+// AgentIcon schema - a curated icon value or an Iconify icon id
+export const AgentIconSchema = z.union([CuratedAgentIconSchema, LibraryAgentIconSchema])
 
 // AgentCategory schema
 export const AgentCategorySchema = z.enum([

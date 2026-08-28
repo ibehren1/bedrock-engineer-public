@@ -17,6 +17,13 @@ export const EXCLUDED_CHAT_AGENT_IDS = [
   'businessProcessAgent'
 ]
 
+/**
+ * Default agents that other pages resolve by id, so they must never be removed.
+ * `diagramGeneratorAgent` is visible in the agent list but backs the Diagram
+ * Generator page (see DiagramGeneratorPage's diagramAgentId).
+ */
+export const PROTECTED_DEFAULT_AGENT_IDS = [...EXCLUDED_CHAT_AGENT_IDS, 'diagramGeneratorAgent']
+
 export const useAgentFilter = (agents: CustomAgent[]) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])

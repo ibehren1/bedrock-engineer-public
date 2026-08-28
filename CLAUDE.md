@@ -77,6 +77,31 @@ This is an **Electron + React + TypeScript** app built with `electron-vite`. The
 - **MCP integration**: MCP servers are configured per-agent with support for both command (stdio) and URL (SSE/streamable HTTP) connection types.
 - **Express API server**: An internal Express server (`src/main/api/index.ts`) with Socket.IO runs on a random port for streaming communication between main and renderer.
 
+## Changelog (CHANGELOG.md)
+
+`CHANGELOG.md` is the fork's dated update summary, and its **topmost dated section is published
+verbatim as the GitHub release notes** for each build (see the "Build release notes from CHANGELOG"
+step in `.github/workflows/build-and-release.yml`). Treat it as release-facing copy, not an internal
+log.
+
+Rules:
+
+- **Every commit that changes user-visible behavior updates `CHANGELOG.md` in the same commit.**
+  That covers features, UI changes, model additions, pricing, bug fixes, and anything that alters
+  what a user sees or how they use the app. Include the changelog edit in the commit itself, not a
+  follow-up.
+- **Skip it for changes with no user-visible effect**: refactors, test-only changes, comment or
+  formatting passes, and internal tooling that doesn't reach a build. When in doubt, add an entry.
+- **Write for the person installing the build**, in plain prose: what changed and, where it isn't
+  obvious, why. Avoid file paths, symbol names, and commit-type prefixes (`feat:`, `fix:`).
+- **Add to the section for today's date** (`### YYYY-MM-DD`) at the top of the file, creating it if
+  it doesn't exist yet. Newest section first; never reorder or rewrite older sections.
+- **One bullet per change**, appended to the end of today's section so entries stay in the order
+  they happened.
+- **Don't reference the changelog update itself** in an entry — describe the actual change.
+- `README.md` describes the fork feature-by-feature; when a change makes part of it wrong (or adds
+  something worth showing), update the README in the same commit too.
+
 ## Testing
 
 - Unit tests: `*.test.ts` (excluded: `*.integration.test.ts`)

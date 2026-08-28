@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { BasicSectionProps } from './types'
 import { TbRobot } from 'react-icons/tb'
 import { AGENT_ICONS } from '@renderer/components/icons/AgentIcons'
+import { AgentIconView } from '@renderer/components/icons/AgentIconView'
+import { IconPicker } from '@renderer/components/icons/IconPicker'
 
 export const BasicSection: React.FC<BasicSectionProps> = ({
   name,
@@ -13,7 +15,6 @@ export const BasicSection: React.FC<BasicSectionProps> = ({
 }) => {
   const { t } = useTranslation()
   const [showIconPicker, setShowIconPicker] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const iconPickerRef = useRef<HTMLDivElement>(null)
 
   // 自動選択のロジック
@@ -199,13 +200,11 @@ export const BasicSection: React.FC<BasicSectionProps> = ({
               transition-colors w-10 h-10 bg-blue-50 dark:bg-blue-900/20"
               >
                 {icon ? (
-                  React.cloneElement(
-                    AGENT_ICONS.find((opt) => opt.value === icon)?.icon as React.ReactElement,
-                    {
-                      className: `w-5 h-5 ${!iconColor ? 'text-gray-700 dark:text-gray-300' : ''}`,
-                      style: iconColor ? { color: iconColor } : undefined
-                    }
-                  )
+                  <AgentIconView
+                    icon={icon}
+                    iconColor={iconColor}
+                    className={`w-5 h-5 ${!iconColor ? 'text-gray-700 dark:text-gray-300' : ''}`}
+                  />
                 ) : (
                   <TbRobot className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                 )}
@@ -215,7 +214,7 @@ export const BasicSection: React.FC<BasicSectionProps> = ({
                 <div
                   ref={iconPickerRef}
                   className="absolute z-50 left-0 top-full mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border
-                border-gray-200 dark:border-gray-700 p-2 w-[320px]"
+                border-gray-200 dark:border-gray-700 p-2 w-[400px]"
                 >
                   {/* Color Picker */}
                   <div className="p-2 border-b border-gray-200 dark:border-gray-700 pb-6 color-picker-container">
@@ -250,76 +249,14 @@ export const BasicSection: React.FC<BasicSectionProps> = ({
                       </button>
                     </div>
                   </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={t('searchIcons')}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md
-                    bg-gray-50 dark:bg-gray-700 text-sm focus:outline-none focus:ring-2
-                    focus:ring-blue-500 dark:focus:ring-blue-400 mb-2"
+                  <div className="pt-2">
+                    <IconPicker
+                      selectedIcon={icon}
+                      onSelect={(value) => {
+                        onChange('icon', value)
+                        setShowIconPicker(false)
+                      }}
                     />
-                  </div>
-                  <div className="max-h-[420px] overflow-y-auto p-2">
-                    {(
-                      [
-                        'general',
-                        'lifestyle',
-                        'health',
-                        'education',
-                        'travel',
-                        'food',
-                        'shopping',
-                        'development',
-                        'cloud',
-                        'devops',
-                        'security',
-                        'monitoring'
-                      ] as const
-                    ).map((category) => {
-                      const categoryIcons = AGENT_ICONS.filter(
-                        (opt) =>
-                          opt.category === category &&
-                          (searchQuery === '' ||
-                            opt.label.toLowerCase().includes(searchQuery.toLowerCase()))
-                      )
-
-                      if (categoryIcons.length === 0) return null
-
-                      return (
-                        <div key={category} className="mb-4 last:mb-0">
-                          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2 px-1">
-                            {t(`iconCategory.${category}`)}
-                          </h3>
-                          <div className="grid grid-cols-6 gap-2">
-                            {categoryIcons.map((option) => (
-                              <button
-                                key={option.value}
-                                type="button"
-                                onClick={() => {
-                                  onChange('icon', option.value)
-                                  setShowIconPicker(false)
-                                }}
-                                className={`flex items-center justify-center p-2 rounded-lg hover:bg-gray-100
-                              dark:hover:bg-gray-700 ${
-                                icon === option.value
-                                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                                  : 'dark:text-gray-400'
-                              }`}
-                                title={option.label}
-                              >
-                                <div className="w-6 h-6 flex items-center justify-center">
-                                  {React.cloneElement(option.icon as React.ReactElement, {
-                                    className: 'w-8 h-8'
-                                  })}
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )
-                    })}
                   </div>
                 </div>
               )}

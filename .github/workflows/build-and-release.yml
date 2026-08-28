@@ -1,8 +1,8 @@
 name: Build and Release
 
 # Runs on every push to main (including PR merges): build + publish a GitHub
-# release. The release body is extracted from the "## Update summary:" section
-# of README.md through the "- - -" separator.
+# release. The release body is the newest dated section of CHANGELOG.md, plus a
+# link to the full changelog.
 
 on:
   push:
@@ -118,22 +118,39 @@ jobs:
           echo "Downloaded artifacts:"
           find ./artifacts -type f 2>/dev/null | sort || echo "(none — build produced no installers)"
 
-      - name: Extract release notes from README
+      - name: Build release notes from CHANGELOG
         if: steps.check-tag.outputs.skip != 'true'
         run: |
-          # Grab everything from "## Update summary:" through (but not including)
-          # the "- - -" separator. Fails loudly if either boundary is missing.
-          awk '/^## Update summary:/{flag=1} /^- - -[[:space:]]*$/{flag=0} flag' README.md > update-summary.md
+          # The release body is the newest dated section of CHANGELOG.md only:
+          # from the first "### YYYY-MM-DD" heading up to the next one. Fails
+          # loudly if the file or a dated heading is missing.
+          if [ ! -f CHANGELOG.md ]; then
+            echo "Error: CHANGELOG.md not found" >&2
+            exit 1
+          fi
 
-          if ! grep -q '^## Update summary:' update-summary.md; then
-            echo "Error: '## Update summary:' heading not found in README.md" >&2
+          # Bracket ranges rather than {4} intervals, so this works with any awk.
+          awk '
+            /^### [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/ {
+              if (seen) exit
+              seen = 1
+            }
+            seen
+          ' CHANGELOG.md > update-summary.md
+
+          if [ ! -s update-summary.md ]; then
+            echo "Error: no dated '### YYYY-MM-DD' section found in CHANGELOG.md" >&2
             exit 1
           fi
 
           {
             echo "# Bedrock Engineer v${VERSION}"
             echo
+            echo "## Update summary"
+            echo
             cat update-summary.md
+            echo
+            echo "Full changelog: ${{ github.server_url }}/${{ github.repository }}/blob/main/CHANGELOG.md"
           } > RELEASE_NOTES.md
 
           echo "----- Release notes preview -----"

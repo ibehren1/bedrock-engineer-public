@@ -4,7 +4,7 @@ import { FiX } from 'react-icons/fi'
 import { ModelSelector } from '../../ChatPage/components/ModelSelector'
 import { Agent } from '@/types/agent-chat'
 import { TbRobot } from 'react-icons/tb'
-import { AGENT_ICONS } from '@renderer/components/icons/AgentIcons'
+import { AgentIconView } from '@renderer/components/icons/AgentIconView'
 import useSetting from '@renderer/hooks/useSetting'
 
 interface NewSessionModalProps {
@@ -105,16 +105,11 @@ export const NewSessionModal: React.FC<NewSessionModalProps> = ({
               <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                 <div className="flex items-center gap-2 mb-2">
                   {selectedAgent.icon ? (
-                    React.cloneElement(
-                      (AGENT_ICONS.find((opt) => opt.value === selectedAgent.icon)
-                        ?.icon as React.ReactElement) ?? AGENT_ICONS[0].icon,
-                      {
-                        className: 'w-4 h-4',
-                        style: selectedAgent.iconColor
-                          ? { color: selectedAgent.iconColor }
-                          : undefined
-                      }
-                    )
+                    <AgentIconView
+                      icon={selectedAgent.icon}
+                      iconColor={selectedAgent.iconColor}
+                      className="w-4 h-4"
+                    />
                   ) : (
                     <TbRobot className="w-4 h-4" />
                   )}

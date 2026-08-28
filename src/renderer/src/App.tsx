@@ -82,7 +82,7 @@ const Layout: React.FC = () => {
                 })}
             </ul>
             <ul>
-              <div onClick={() => open('https://github.com/aws-samples/bedrock-engineer')}>
+              <div onClick={() => open('https://github.com/ibehren1/bedrock-engineer-public')}>
                 <ListItem href="#">
                   <FiGithub className="text-xl dark:text-white" />
                 </ListItem>

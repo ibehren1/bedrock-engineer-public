@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { TbRobot } from 'react-icons/tb'
 import { CustomAgent } from '@/types/agent-chat'
-import { getIconByValue } from '@renderer/components/icons/AgentIcons'
+import { AgentIconView } from '@renderer/components/icons/AgentIconView'
 
 interface AgentCardProps {
   agent: CustomAgent
@@ -21,7 +21,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, onTagClic
       <div className="flex items-start">
         <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bg-blue-100 dark:bg-blue-900/40">
           {agent.icon ? (
-            getIconByValue(agent.icon, agent.iconColor || '#3B82F6')
+            <AgentIconView icon={agent.icon} iconColor={agent.iconColor || '#3B82F6'} />
           ) : (
             <TbRobot className="w-5 h-5" style={{ color: agent.iconColor || '#3B82F6' }} />
           )}

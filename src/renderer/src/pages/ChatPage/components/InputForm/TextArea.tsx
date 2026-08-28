@@ -2,6 +2,7 @@ import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react'
 import { FiLoader, FiSend, FiX } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
+import { AgentSelector } from '../AgentSelector'
 import { ModelSelector } from '../ModelSelector'
 import { ThinkingModeSelector } from '../ThinkingModeSelector'
 import { InterleaveThinkingToggle } from '../InterleaveThinkingToggle'
@@ -38,7 +39,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
   onHeightChange
 }) => {
   const { t } = useTranslation()
-  const { planMode, setPlanMode } = useSettings()
+  const { planMode, setPlanMode, agents } = useSettings()
   const [dragActive, setDragActive] = useState(false)
   const [attachedImages, setAttachedImages] = useState<AttachedImage[]>([])
   const [isManuallyResized, setIsManuallyResized] = useState(false)
@@ -554,12 +555,19 @@ export const TextArea: React.FC<TextAreaProps> = ({
         {/* Controls at the bottom */}
         <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 rounded-b-lg">
           <div className="flex items-center gap-2.5 z-10 pointer-events-auto">
-            <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {t('inputControls.agent')}
+              </span>
+              <AgentSelector agents={agents} alignment="left" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {t('inputControls.model')}
+              </span>
               <ModelSelector openable={true} />
             </div>
-            <div>
-              <ThinkingModeSelector />
-            </div>
+            <ThinkingModeSelector label={t('inputControls.thinking')} />
             <InterleaveThinkingToggle />
           </div>
 

@@ -214,7 +214,13 @@ api.post(
         stack: error.stack,
         modelId: req.body.modelId
       })
-      return res.status(500).send(error)
+      // Serializing an Error with res.send() loses its message, leaving callers
+      // with a bare "Internal Server Error"; send the useful parts explicitly.
+      return res.status(500).json({
+        name: error.name,
+        message: error.details?.originalError || error.message,
+        code: error.code
+      })
     }
   })
 )

@@ -147,6 +147,12 @@ type StoreScheme = {
   /** サイドバーで非表示にするナビゲーション項目のhref一覧 */
   sidebarHiddenItems?: string[]
 
+  /** ユーザーが削除したデフォルトエージェントのID一覧（再シードを防ぐ） */
+  hiddenDefaultAgentIds?: string[]
+
+  /** ユーザーがドラッグ＆ドロップで並べ替えたエージェントのID順 */
+  agentOrder?: string[]
+
   /** Amazon Bedrock特有の設定 */
   bedrockSettings?: {
     /** リージョンフェイルオーバー機能の有効/無効 */
@@ -343,6 +349,18 @@ const init = () => {
   const sidebarHiddenItems = electronStore.get('sidebarHiddenItems')
   if (sidebarHiddenItems === undefined) {
     electronStore.set('sidebarHiddenItems', [])
+  }
+
+  // Initialize hiddenDefaultAgentIds if not present
+  const hiddenDefaultAgentIds = electronStore.get('hiddenDefaultAgentIds')
+  if (hiddenDefaultAgentIds === undefined) {
+    electronStore.set('hiddenDefaultAgentIds', [])
+  }
+
+  // Initialize agentOrder if not present
+  const agentOrder = electronStore.get('agentOrder')
+  if (agentOrder === undefined) {
+    electronStore.set('agentOrder', [])
   }
 
   // Initialize appTheme if not present (default is 'dim')

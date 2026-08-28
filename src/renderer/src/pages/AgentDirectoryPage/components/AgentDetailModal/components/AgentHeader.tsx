@@ -1,7 +1,7 @@
 import React from 'react'
 import { TbRobot } from 'react-icons/tb'
 import { AgentIcon } from '@/types/agent-chat'
-import { getIconByValue } from '@renderer/components/icons/AgentIcons'
+import { AgentIconView } from '@renderer/components/icons/AgentIconView'
 
 interface AgentHeaderProps {
   name: string
@@ -17,9 +17,11 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({ name, description, ico
     <div className="flex items-start">
       <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4 bg-blue-100 dark:bg-blue-900/40 flex-shrink-0">
         {icon ? (
-          getIconByValue(icon, iconColor || defaultColor) || (
-            <TbRobot className="w-6 h-6" style={{ color: iconColor || defaultColor }} />
-          )
+          <AgentIconView
+            icon={icon}
+            iconColor={iconColor || defaultColor}
+            fallback={<TbRobot className="w-6 h-6" style={{ color: iconColor || defaultColor }} />}
+          />
         ) : (
           <span className="text-2xl" style={{ color: iconColor || defaultColor }}>
             👤

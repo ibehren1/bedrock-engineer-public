@@ -7,9 +7,11 @@ import { FiChevronDown } from 'react-icons/fi'
 
 type ThinkingModeSelectorProps = {
   className?: string
+  /** Rendered next to the control, and hidden with it on models without thinking support */
+  label?: string
 }
 
-export const ThinkingModeSelector: React.FC<ThinkingModeSelectorProps> = ({ className }) => {
+export const ThinkingModeSelector: React.FC<ThinkingModeSelectorProps> = ({ className, label }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { currentLLM, thinkingMode, updateThinkingMode } = useSettings()
@@ -56,7 +58,8 @@ export const ThinkingModeSelector: React.FC<ThinkingModeSelectorProps> = ({ clas
   }
 
   return (
-    <div className={`relative ${className || ''}`} ref={dropdownRef}>
+    <div className={`relative flex items-center gap-1.5 ${className || ''}`} ref={dropdownRef}>
+      {label && <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}

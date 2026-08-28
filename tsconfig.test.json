@@ -2,6 +2,8 @@
   "extends": "./tsconfig.node.json",
   "compilerOptions": {
     "esModuleInterop": true,
+    // Renderer components under test are .tsx and need the JSX transform
+    "jsx": "react-jsx",
     "types": ["jest", "node"],
     "module": "CommonJS",
     "moduleResolution": "node",

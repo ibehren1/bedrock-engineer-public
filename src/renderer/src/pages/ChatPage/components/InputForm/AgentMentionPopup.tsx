@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { TbRobot } from 'react-icons/tb'
 import { useTranslation } from 'react-i18next'
 import { CustomAgent } from '@/types/agent-chat'
-import { AGENT_ICONS } from '@renderer/components/icons/AgentIcons'
+import { AgentIconView } from '@renderer/components/icons/AgentIconView'
 import type { CaretCoordinates } from './caretCoordinates'
 
 type AgentMentionPopupProps = {
@@ -29,15 +29,14 @@ type Placement = {
   maxHeight: number
 }
 
-const renderIcon = (agent: CustomAgent) => {
-  const option = agent.icon ? AGENT_ICONS.find((opt) => opt.value === agent.icon) : undefined
-  if (!option) return <TbRobot className="w-4 h-4" />
-
-  return React.cloneElement(option.icon as React.ReactElement, {
-    className: 'w-4 h-4',
-    style: agent.iconColor ? { color: agent.iconColor } : undefined
-  })
-}
+const renderIcon = (agent: CustomAgent) => (
+  <AgentIconView
+    icon={agent.icon}
+    iconColor={agent.iconColor}
+    className="w-4 h-4"
+    fallback={<TbRobot className="w-4 h-4" />}
+  />
+)
 
 /**
  * Caret-anchored agent picker for `@` mentions.

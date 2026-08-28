@@ -3,18 +3,17 @@ import Markdown from 'react-markdown'
 import { TbRobot } from 'react-icons/tb'
 import { FiAlertTriangle, FiClock, FiTool } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
-import { AGENT_ICONS } from '@renderer/components/icons/AgentIcons'
+import { AgentIconView } from '@renderer/components/icons/AgentIconView'
 import type { InvokeAgentResult as InvokeAgentResultType } from '@/types/tools'
 
-const renderAgentIcon = (icon?: string, iconColor?: string) => {
-  const option = icon ? AGENT_ICONS.find((opt) => opt.value === icon) : undefined
-  if (!option) return <TbRobot className="w-4 h-4" />
-
-  return React.cloneElement(option.icon as React.ReactElement, {
-    className: 'w-4 h-4',
-    style: iconColor ? { color: iconColor } : undefined
-  })
-}
+const renderAgentIcon = (icon?: string, iconColor?: string) => (
+  <AgentIconView
+    icon={icon}
+    iconColor={iconColor}
+    className="w-4 h-4"
+    fallback={<TbRobot className="w-4 h-4" />}
+  />
+)
 
 /**
  * Renders the outcome of a delegated task: which agent ran, what it answered,

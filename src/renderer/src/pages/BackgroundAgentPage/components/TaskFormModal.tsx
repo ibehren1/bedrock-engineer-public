@@ -5,7 +5,6 @@ import { useSettings } from '@renderer/contexts/SettingsContext'
 import { ModelSelector } from '../../ChatPage/components/ModelSelector'
 import { DirectorySelector } from '../../ChatPage/components/InputForm/DirectorySelector'
 import { AgentSelector } from '../../ChatPage/components/AgentSelector'
-import { useAgentSettingsModal } from '../../ChatPage/modals/useAgentSettingsModal'
 import { IgnoreSettingsModal } from '@renderer/components/IgnoreSettingsModal'
 import { ScheduleConfig, ScheduledTask } from '../hooks/useBackgroundAgent'
 
@@ -65,14 +64,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ mode, task, onSubm
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showProjectIgnoreModal, setShowProjectIgnoreModal] = useState(false)
-
-  // Agent Settings Modal
-  const {
-    show: showAgentSettingModal,
-    handleOpen: openAgentSettingsModal,
-    handleClose: handleCloseAgentSettingsModal,
-    AgentSettingsModal
-  } = useAgentSettingsModal()
 
   // プロジェクトディレクトリ選択ハンドラー
   const handleSelectDirectory = async () => {
@@ -294,9 +285,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ mode, task, onSubm
 
                     <AgentSelector
                       agents={agents}
-                      selectedAgent={formData.agentId}
-                      onOpenSettings={openAgentSettingsModal}
+                      value={formData.agentId}
+                      onChange={(agentId) => setFormData((prev) => ({ ...prev, agentId }))}
                       alignment="left"
+                      showEditAgentsLink={false}
+                      openDirection="down"
                     />
 
                     {errors.agentId && (
@@ -484,14 +477,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({ mode, task, onSubm
         isOpen={showProjectIgnoreModal}
         onClose={() => setShowProjectIgnoreModal(false)}
         projectPath={formData.projectDirectory}
-      />
-
-      {/* Agent Settings Modal */}
-      <AgentSettingsModal
-        isOpen={showAgentSettingModal}
-        onClose={handleCloseAgentSettingsModal}
-        selectedAgentId={formData.agentId}
-        onSelectAgent={(agentId) => setFormData((prev) => ({ ...prev, agentId }))}
       />
     </div>
   )

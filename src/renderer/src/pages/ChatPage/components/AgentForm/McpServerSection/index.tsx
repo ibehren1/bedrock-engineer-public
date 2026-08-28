@@ -6,16 +6,24 @@ import { McpServerForm } from './McpServerForm'
 import { useMcpServerState } from './hooks/useMcpServerState'
 import { preventModalClose } from './utils/eventUtils'
 import { generateEditJson } from './utils/mcpServerUtils'
+import { McpMarketPanel } from './McpMarketPanel'
+import { AgentMarketContext } from './mcpMarket'
 
 interface McpServerSectionProps {
   mcpServers: McpServerConfig[]
   onChange: (mcpServers: McpServerConfig[]) => void
+  /** The agent being edited, used to tailor MCP Market links and suggestions */
+  agentContext?: AgentMarketContext
 }
 
 /**
  * MCPサーバー設定セクションのメインコンポーネント
  */
-export const McpServerSection: React.FC<McpServerSectionProps> = ({ mcpServers, onChange }) => {
+export const McpServerSection: React.FC<McpServerSectionProps> = ({
+  mcpServers,
+  onChange,
+  agentContext
+}) => {
   const { t } = useTranslation()
 
   // カスタムフックを使用して状態を管理
@@ -50,6 +58,17 @@ export const McpServerSection: React.FC<McpServerSectionProps> = ({ mcpServers, 
     }
   }
 
+  /**
+   * Load a suggested server into the JSON editor. It is deliberately *not*
+   * added or connected here: suggestions come from a model, so the user reviews
+   * the command before anything runs.
+   */
+  const handleUseSuggestion = (json: string) => {
+    setEditMode(null)
+    setJsonError(null)
+    setJsonInput(json)
+  }
+
   return (
     <div className="space-y-4" onClick={preventModalClose}>
       <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
@@ -66,6 +85,13 @@ export const McpServerSection: React.FC<McpServerSectionProps> = ({ mcpServers, 
           )}
         </p>
       </div>
+
+      {/* MCP Market: links and model-suggested servers for this agent */}
+      <McpMarketPanel
+        agentContext={agentContext || {}}
+        existingServerNames={mcpServers.map((server) => server.name)}
+        onUseSuggestion={handleUseSuggestion}
+      />
 
       {/* サーバーリスト */}
       <McpServerList

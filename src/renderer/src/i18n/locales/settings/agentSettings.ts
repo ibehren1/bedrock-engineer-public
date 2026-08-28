@@ -1,6 +1,6 @@
 export const agentSettings = {
   en: {
-    'agentSettings.infoTitle': 'How to use custom agents and shared agents',
+    'agentSettings.infoTitle': 'How to use your own agents and shared agents',
     'agentSettings.description':
       'Create and customize AI agents to assist with specific tasks. You can edit existing agents or create new ones with customized system prompts, capabilities, and appearance.',
     'agentSettings.sharedAgentsDescription':
@@ -11,7 +11,7 @@ export const agentSettings = {
       'Generate a system prompt optimized for voice-based conversations (Nova Sonic)'
   },
   ja: {
-    'agentSettings.infoTitle': 'カスタムエージェントと共有エージェントの使い方',
+    'agentSettings.infoTitle': 'マイエージェントと共有エージェントの使い方',
     'agentSettings.description':
       'AIエージェントを作成・カスタマイズして、特定のタスクをサポートできます。既存のエージェントを編集したり、カスタマイズされたシステムプロンプト、機能を持つ新しいエージェントを作成したりできます。',
     'agentSettings.sharedAgentsDescription':

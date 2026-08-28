@@ -118,6 +118,18 @@ export const AgentFormContent: React.FC<{
         <div className="pb-4" onClick={formEventUtils.preventPropagation}>
           <McpServerSection
             mcpServers={formData.mcpServers || []}
+            agentContext={{
+              name: formData.name,
+              description: formData.description,
+              system: formData.system,
+              category: agentCategory,
+              toolNames: agentTools
+                .filter((tool) => tool.enabled)
+                .map((tool) => tool.toolSpec?.name || ''),
+              scenarios: formData.scenarios,
+              allowedCommands: (formData.allowedCommands || []).map((command) => command.pattern),
+              additionalInstruction: formData.additionalInstruction
+            }}
             onChange={async (servers) => {
               console.log('MCPサーバー設定変更:', servers.length, 'servers')
               updateField('mcpServers', servers)

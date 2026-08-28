@@ -17,6 +17,12 @@ export const agent = {
     iconColor: 'Icon Color',
     reset: 'Reset',
     searchIcons: 'Search icons...',
+    searchIconsHint: 'Type to search every icon library.',
+    iconsLoading: 'Loading icons...',
+    iconLibraryCurated: 'Curated',
+    iconLibraryAll: 'All libraries',
+    noIconsFound: 'No icons match your search.',
+    iconResultsTruncated: 'Showing {{shown}} of {{total}} matches — refine your search.',
     iconCategory: {
       general: 'General',
       lifestyle: 'Lifestyle & Home',
@@ -80,7 +86,48 @@ export const agent = {
     namePlaceholder: 'e.g., Programming Mentor',
     descriptionPlaceholder: 'e.g., AI mentor teaching programming from basics to advanced',
     noProjectPath: '(Project path is not set)',
-    customAgents: 'Custom Agents',
+    myAgents: {
+      title: 'My Agents',
+      description: 'Create, edit and maintain the agents you use in chat and voice chat.',
+      editAgents: 'Edit agents',
+      removeDefault: 'Remove',
+      restoreDefaults: 'Restore default agents ({{count}})',
+      dragToReorder: 'Drag to rearrange',
+      activeInChat: 'Currently selected in chat and voice chat',
+      defaultNotEditable:
+        'Built-in agents cannot be edited — they are refreshed on every launch. Duplicate this one to customize it.',
+      sharedNotEditable:
+        'Shared agents are edited in their file under .bedrock-engineer/agents/. Duplicate this one to customize it here.',
+      reorderHint: 'Drag agents to rearrange them. The order is used in the agent dropdown too.'
+    },
+    inputControls: {
+      agent: 'Agent',
+      model: 'Model',
+      thinking: 'Thinking'
+    },
+    mcpMarket: {
+      title: 'Find MCP servers',
+      description:
+        'Search the official MCP Registry, or let the model pick the search terms from this agent.',
+      browse: 'MCP Market',
+      registry: 'MCP Registry',
+      searchPlaceholder: 'Search the MCP Registry (e.g. postgres, github, figma)',
+      search: 'Search',
+      suggest: 'Suggest for this agent',
+      suggesting: 'Searching...',
+      searchFailed: 'Registry search failed: {{error}}',
+      resultsCount: '{{count}} server(s) from the MCP Registry. Searched for:',
+      noResults: 'The MCP Registry returned nothing for: {{terms}}',
+      noTerms:
+        "Nothing in this agent's description, scenarios or system prompt named a system to connect to. Add detail, or search the registry directly.",
+      clearSuggestions: 'Clear',
+      categoriesForThisAgent: 'Browse MCP Market by category:',
+      hosted: 'hosted',
+      needsEnv: 'Needs: {{vars}}',
+      noInstallInfo: 'Published without package details — check the source repository to run it.',
+      useSuggestion: 'Load config',
+      source: 'Source'
+    },
     editAgent: 'Edit Agent',
     deleteAgent: 'Delete Agent',
     systemPromptInfo: `Enter the system prompt that defines the agent's behavior.Describe in detail what role it should play and how it should respond.`,
@@ -143,6 +190,12 @@ export const agent = {
     iconColor: 'アイコンの色',
     reset: 'リセット',
     searchIcons: 'アイコンを検索...',
+    searchIconsHint: '入力するとすべてのアイコンライブラリを検索します。',
+    iconsLoading: 'アイコンを読み込み中...',
+    iconLibraryCurated: 'おすすめ',
+    iconLibraryAll: 'すべてのライブラリ',
+    noIconsFound: '一致するアイコンがありません。',
+    iconResultsTruncated: '{{total}} 件中 {{shown}} 件を表示しています。検索条件を絞ってください。',
     iconCategory: {
       general: '一般',
       lifestyle: 'ライフスタイル & ホーム',
@@ -202,7 +255,49 @@ export const agent = {
     namePlaceholder: '例: プログラミングメンター',
     descriptionPlaceholder: '例: プログラミングの基礎から応用までを教えるAIメンター',
     noProjectPath: '（プロジェクトパスが設定されていません）',
-    customAgents: 'カスタムエージェント',
+    myAgents: {
+      title: 'マイエージェント',
+      description: 'チャットや音声チャットで使うエージェントを作成・編集・管理します。',
+      editAgents: 'エージェントを編集',
+      removeDefault: '削除',
+      restoreDefaults: 'デフォルトエージェントを復元 ({{count}})',
+      dragToReorder: 'ドラッグして並べ替え',
+      activeInChat: 'チャットと音声チャットで選択中',
+      defaultNotEditable:
+        '組み込みエージェントは編集できません（起動時に元の内容へ戻ります）。複製してからカスタマイズしてください。',
+      sharedNotEditable:
+        '共有エージェントは .bedrock-engineer/agents/ のファイルで編集します。ここでカスタマイズする場合は複製してください。',
+      reorderHint:
+        'エージェントをドラッグして並べ替えられます。この順序はエージェントのドロップダウンにも反映されます。'
+    },
+    inputControls: {
+      agent: 'エージェント',
+      model: 'モデル',
+      thinking: '思考'
+    },
+    mcpMarket: {
+      title: 'MCPサーバーを探す',
+      description:
+        '公式 MCP レジストリを検索します。検索キーワードはこのエージェントの設定からモデルに考えさせることもできます。',
+      browse: 'MCP Market',
+      registry: 'MCP レジストリ',
+      searchPlaceholder: 'MCP レジストリを検索（例: postgres, github, figma）',
+      search: '検索',
+      suggest: 'このエージェント向けに提案',
+      suggesting: '検索中...',
+      searchFailed: 'レジストリの検索に失敗しました: {{error}}',
+      resultsCount: 'MCP レジストリの検索結果 {{count}} 件。検索キーワード:',
+      noResults: 'MCP レジストリで見つかりませんでした（キーワード: {{terms}}）',
+      noTerms:
+        'このエージェントの説明・シナリオ・システムプロンプトから、接続先となる具体的なシステムを特定できませんでした。内容を追記するか、レジストリを直接検索してください。',
+      clearSuggestions: 'クリア',
+      categoriesForThisAgent: 'MCP Market のカテゴリを見る:',
+      hosted: 'ホスト型',
+      needsEnv: '必要な環境変数: {{vars}}',
+      noInstallInfo: 'パッケージ情報が未登録です。実行方法はソースリポジトリを確認してください。',
+      useSuggestion: '設定を読み込む',
+      source: 'ソース'
+    },
     editAgent: 'エージェントを編集',
     deleteAgent: 'エージェントを削除',
     systemPromptInfo: `エージェントの振る舞いを定義するシステムプロンプトを入力してください。どのような役割を果たし、どのように応答するべきかを詳細に記述します。作業するプロジェクトのディレクトリパスを明確に指示することを推奨します。`,

@@ -15,6 +15,8 @@ import { ToolName } from 'src/types/tools'
 import { CustomAgent } from '@/types/agent-chat'
 import { replacePlaceholders } from '../../../common/utils/placeholderUtils'
 import { DEFAULT_AGENTS } from '@renderer/pages/ChatPage/constants/DEFAULT_AGENTS'
+import { EXCLUDED_CHAT_AGENT_IDS } from '@renderer/pages/ChatPage/components/AgentList/useAgentFilter'
+import { sortAgentsByOrder } from '@renderer/pages/ChatPage/components/AgentList/agentOrder'
 import {
   InferenceParameters,
   LLM,
@@ -190,6 +192,15 @@ export interface SettingsContextType {
   saveCustomAgents: (agents: CustomAgent[]) => void
   sharedAgents: CustomAgent[]
   loadSharedAgents: () => Promise<void>
+
+  // Default agents the user removed (never re-seeded until restored)
+  hiddenDefaultAgentIds: string[]
+  removeDefaultAgent: (agentId: string) => void
+  restoreDefaultAgents: () => void
+
+  // User-defined agent arrangement (drag & drop on the My Agents page)
+  agentOrder: string[]
+  setAgentOrder: (agentIds: string[]) => void
 
   // Directory Agents Settings
   directoryAgents: CustomAgent[]
@@ -444,6 +455,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Custom Agents Settings
   const [customAgents, setCustomAgents] = useState<CustomAgent[]>([])
   const [sharedAgents, setSharedAgents] = useState<CustomAgent[]>([])
+  const [hiddenDefaultAgentIds, setStateHiddenDefaultAgentIds] = useState<string[]>([])
+  const [agentOrder, setStateAgentOrder] = useState<string[]>([])
 
   // Directory Agents Settings
   const [directoryAgents, setDirectoryAgents] = useState<CustomAgent[]>([])
@@ -642,6 +655,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Load Custom Agents
     const savedAgents = window.store.get('customAgents') || []
 
+    // ユーザーが削除したデフォルトエージェントは再シードしない
+    const hiddenDefaults = window.store.get('hiddenDefaultAgentIds') || []
+    setStateHiddenDefaultAgentIds(hiddenDefaults)
+
+    // ユーザーが並べ替えたエージェントの順序を読み込む
+    setStateAgentOrder(window.store.get('agentOrder') || [])
+
     // DEFAULT_AGENTSの各エージェントについて、全ての重要なプロパティを比較し、変更があれば更新
     let hasChanges = false
     // 更新後のエージェントリスト
@@ -649,7 +669,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // 処理済みのエージェントIDを追跡
     const processedIds = new Set<string>()
 
-    DEFAULT_AGENTS.forEach((defaultAgent) => {
+    // 削除済みのデフォルトエージェントは処理済みとして扱い、保存済みのコピーも復活させない
+    hiddenDefaults.forEach((agentId) => {
+      processedIds.add(agentId)
+      if (savedAgents.some((agent) => agent.id === agentId)) {
+        hasChanges = true
+      }
+    })
+
+    const seededDefaults = DEFAULT_AGENTS.filter(
+      (defaultAgent) => !hiddenDefaults.includes(defaultAgent.id)
+    )
+
+    seededDefaults.forEach((defaultAgent) => {
       // そのIDのエージェントがすでにカスタムエージェントに存在するかチェック
       const existingAgent = savedAgents.find((agent) => agent.id === defaultAgent.id)
       processedIds.add(defaultAgent.id)
@@ -1280,6 +1312,49 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     window.store.set('selectedAgentId', agentId)
   }
 
+  /**
+   * Remove one of the DEFAULT_AGENTS. The id is remembered so the startup
+   * seeding does not bring the agent back on the next launch.
+   */
+  const removeDefaultAgent = (agentId: string) => {
+    const updatedHidden = hiddenDefaultAgentIds.includes(agentId)
+      ? hiddenDefaultAgentIds
+      : [...hiddenDefaultAgentIds, agentId]
+    setStateHiddenDefaultAgentIds(updatedHidden)
+    window.store.set('hiddenDefaultAgentIds', updatedHidden)
+
+    const remainingAgents = customAgents.filter((agent) => agent.id !== agentId)
+    saveCustomAgents(remainingAgents)
+
+    // 選択中のエージェントを削除した場合は、残っているエージェントに切り替える
+    if (selectedAgentId === agentId) {
+      const fallback = remainingAgents.find(
+        (agent) => !!agent.id && !EXCLUDED_CHAT_AGENT_IDS.includes(agent.id)
+      )
+      if (fallback?.id) {
+        setSelectedAgentId(fallback.id)
+      }
+    }
+  }
+
+  /** Bring every removed default agent back without requiring a restart. */
+  const restoreDefaultAgents = () => {
+    setStateHiddenDefaultAgentIds([])
+    window.store.set('hiddenDefaultAgentIds', [])
+
+    const existingIds = new Set(customAgents.map((agent) => agent.id))
+    const missingDefaults = DEFAULT_AGENTS.filter((agent) => !existingIds.has(agent.id))
+    if (missingDefaults.length > 0) {
+      saveCustomAgents([...customAgents, ...missingDefaults.map((agent) => ({ ...agent }))])
+    }
+  }
+
+  /** Persist the arrangement produced by dragging agents on the My Agents page. */
+  const setAgentOrder = useCallback((agentIds: string[]) => {
+    setStateAgentOrder(agentIds)
+    window.store.set('agentOrder', agentIds)
+  }, [])
+
   // Make sure there are no duplicate IDs between agents from different sources
   const allAgents = useMemo(() => {
     // Create a mapping of IDs to count occurrences
@@ -1313,8 +1388,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       })
     ]
 
-    return result
-  }, [customAgents, sharedAgents])
+    // ユーザーが並べ替えた順序を適用する（未登録のエージェントは末尾に残る）
+    return sortAgentsByOrder(result, agentOrder)
+  }, [customAgents, sharedAgents, agentOrder])
 
   // エージェント固有のMCPツールを取得する関数
   const getAgentMcpTools = useCallback(
@@ -2034,6 +2110,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     saveCustomAgents,
     sharedAgents,
     loadSharedAgents,
+    hiddenDefaultAgentIds,
+    removeDefaultAgent,
+    restoreDefaultAgents,
+    agentOrder,
+    setAgentOrder,
 
     // Directory Agents Settings
     directoryAgents,

@@ -11,7 +11,10 @@ import {
 import { createRuntimeClient } from '../client'
 import { processImageContent } from '../utils/imageUtils'
 import { getAlternateRegionOnThrottling } from '../utils/awsUtils'
-import { getThinkingSupportedModelIds, getSupportedThinkingTypes } from '../../../../common/models/models'
+import {
+  getThinkingSupportedModelIds,
+  getSupportedThinkingTypes
+} from '../../../../common/models/models'
 import type { CallConverseAPIProps, ServiceContext } from '../types'
 import { createCategoryLogger } from '../../../../common/logger'
 
@@ -80,7 +83,13 @@ export class ConverseService {
     commandParams: ConverseCommandInput | ConverseStreamCommandInput
     processedMessages?: Message[]
   }> {
-    const { modelId, messages, system, toolConfig, guardrailConfig } = props
+    const { modelId, messages, system, guardrailConfig } = props
+    let toolConfig = props.toolConfig
+
+    // Bedrock rejects extended thinking together with a forced tool choice:
+    // "Thinking may not be enabled when tool_choice forces tool use." Structured
+    // output forces a tool, so such requests must run without thinking.
+    const forcesToolUse = !!toolConfig?.toolChoice?.tool
 
     // 画像データを含むメッセージを処理
     const processedMessages = this.processMessages(messages)
@@ -121,6 +130,17 @@ export class ConverseService {
 
     // Claude Fable 5 requires adaptive thinking always on
     const isFable5 = modelId.includes('claude-fable-5')
+
+    // Fable 5 cannot drop thinking, so a forced tool choice is relaxed to "auto"
+    // instead. The model still calls the tool when the prompt asks it to; if it
+    // doesn't, the caller reports a missing structured output.
+    if (isFable5 && forcesToolUse && toolConfig) {
+      toolConfig = { ...toolConfig, toolChoice: { auto: {} } }
+      converseLogger.debug('Relaxed forced tool choice to auto (Fable 5 keeps thinking on)', {
+        modelId
+      })
+    }
+
     if (isFable5) {
       additionalModelRequestFields = {
         thinking: {
@@ -144,6 +164,7 @@ export class ConverseService {
       !isFable5 &&
       !isOpenAiReasoningModel &&
       !props.disableThinking &&
+      !forcesToolUse &&
       thinkingSupportedModelIds.some((id) => modelId.includes(id)) &&
       thinkingMode?.type !== 'disabled' &&
       thinkingMode?.type !== undefined
@@ -153,11 +174,19 @@ export class ConverseService {
       let thinkingType: string = thinkingMode.type
 
       // If user selected 'enabled' but model only supports 'adaptive', use adaptive
-      if (thinkingMode.type === 'enabled' && !supportedTypes.includes('enabled') && supportedTypes.includes('adaptive')) {
+      if (
+        thinkingMode.type === 'enabled' &&
+        !supportedTypes.includes('enabled') &&
+        supportedTypes.includes('adaptive')
+      ) {
         thinkingType = 'adaptive'
       }
       // If user selected 'adaptive' but model only supports 'enabled', use enabled
-      if (thinkingMode.type === 'adaptive' && !supportedTypes.includes('adaptive') && supportedTypes.includes('enabled')) {
+      if (
+        thinkingMode.type === 'adaptive' &&
+        !supportedTypes.includes('adaptive') &&
+        supportedTypes.includes('enabled')
+      ) {
         thinkingType = 'enabled'
       }
 
