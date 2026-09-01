@@ -383,6 +383,17 @@ export function useSpeakChat(
     }
   }, [socket, audioRecorder, audioPlayer])
 
+  // Leaving the page has to stop the 24 kHz audio graph and release the
+  // microphone, not just close the socket. Held in a ref so the cleanup runs
+  // once, on unmount, rather than on every change to `disconnect`.
+  const disconnectRef = useRef(disconnect)
+  disconnectRef.current = disconnect
+  useEffect(() => {
+    return () => {
+      disconnectRef.current()
+    }
+  }, [])
+
   // Start recording
   const startRecording = useCallback(async () => {
     if (socket.status !== 'connected') {

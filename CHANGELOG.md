@@ -7,6 +7,18 @@ dated section here for anything user-visible.
 See the [README](./README.md#whats-different-in-this-fork) for a feature-by-feature
 overview of the fork with screenshots.
 
+### 2026-08-31
+- Call the action on built-in agents "Hide" instead of "Remove", and "Unhide" instead of "Restore default agents". Nothing is deleted — a hidden built-in agent is only taken out of the lists, and unhiding brings back its original configuration (any edits you made to it before hiding are not kept). Agents you created yourself are still deleted outright, and still say "Delete".
+- Unhide agents one at a time. The button that brought every hidden agent back at once is now a dropdown that lists each hidden agent by name and icon, with "Unhide all" still available at the bottom.
+- Allow hiding the Diagram Generator agent, which previously offered no way to remove it. The Diagram Generator page keeps working after you hide it, web search included, because it now falls back to the built-in agent configuration.
+- Cut idle power use so the app is easier on a laptop battery. The largest saving: a hidden window was created at every launch to keep the background agent Task History screen warm, which meant a second full app process ran for the whole session even if you never used background agents. Task History now opens when you ask for it and is discarded when you close it, and scheduled background agent tasks are started directly instead of relying on that hidden window, so they still run after a restart without opening the page.
+- Stop polling for TODO list changes when nothing can change them. The check now runs while a response is being generated, or while the TODO panel is open, instead of every two seconds for any conversation that has messages.
+- Release the microphone when you leave voice chat. Previously the mic stream and audio processing kept running after navigating away mid-recording, so the system microphone indicator stayed on.
+- Remove animations that ran forever with nothing happening: the gradient on the Act/Plan button in the message bar, and the rotating rings on the voice chat icon while it is idle. Loading and "Thinking" animations are unchanged.
+- Check Docker availability once when the Code Interpreter settings are opened rather than every 30 seconds; the "re-check" button covers starting Docker afterwards.
+- Reorganize Settings into five tabs — General, AWS, Models, Chat and Workspace — with a sidebar down the left, instead of one long column of sixteen unrelated sections. Everything that was there is still there, grouped with what it relates to: region now sits next to the credentials that use it and next to region failover, and model choice sits with the inference parameters and the light processing model. Each tab has its own address, so links into settings land on the right tab — the "Open Settings" prompt shown when voice chat isn't available in your region now opens the AWS tab directly.
+- Translate the AWS and Language settings into Japanese. Those labels had no translation at all and showed in English regardless of the selected language.
+
 ### 2026-08-28
 - Add a "My Agents" page with its own sidebar button (renamed from "Custom Agents"). It opens in the main window instead of an overlay, and is where you create, edit, duplicate, share, and remove agents.
 - Replace the agent display button with a real agent dropdown, moved into the message entry area to the left of the model selector. The dropdown includes an "Edit agents" entry that opens the My Agents page.

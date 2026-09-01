@@ -29,8 +29,9 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
   const isCustomAgent = agent.isCustom ?? true
   const isEditable = isCustomAgent && !agent.isShared
 
-  // 共有エージェント（ファイル管理）と他ページが参照するデフォルトエージェントは削除できない
-  const isDeletable =
+  // 共有エージェント（ファイル管理）と一覧に出ないデフォルトエージェントは
+  // 削除・非表示にできない。カスタムエージェントは削除、デフォルトは非表示になる。
+  const isRemovable =
     !agent.isShared && !!agent.id && !PROTECTED_DEFAULT_AGENT_IDS.includes(agent.id)
 
   // メニュー項目が1つもない場合は表示しない
@@ -40,7 +41,7 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
     onConvertToStrands ||
     (!agent.isShared && onSaveAsShared) ||
     (isEditable && onShareToOrganization) ||
-    (isDeletable && onDelete)
+    (isRemovable && onDelete)
 
   if (!hasAnyAction) {
     return null
@@ -85,12 +86,12 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
             {t('shareToOrganization')}
           </Dropdown.Item>
         )}
-        {isDeletable && onDelete && (
+        {isRemovable && onDelete && (
           <Dropdown.Item
             onClick={() => onDelete(agent.id!)}
-            className="text-red-600 dark:text-red-400 w-48"
+            className={isCustomAgent ? 'text-red-600 dark:text-red-400 w-48' : 'w-48'}
           >
-            {isCustomAgent ? t('delete') : t('myAgents.removeDefault')}
+            {isCustomAgent ? t('delete') : t('myAgents.hideDefault')}
           </Dropdown.Item>
         )}
       </Dropdown>

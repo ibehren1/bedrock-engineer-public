@@ -109,7 +109,10 @@ export class TodoSessionManager {
       const data = fs.readFileSync(filePath, 'utf-8')
       return JSON.parse(data) as TodoList
     } catch (error) {
-      console.error(`Error reading todo file ${sessionId}:`, error)
+      // セッションにTODOが無いのは通常の状態なので、存在しないファイルは記録しない
+      if ((error as NodeJS.ErrnoException)?.code !== 'ENOENT') {
+        console.error(`Error reading todo file ${sessionId}:`, error)
+      }
       return null
     }
   }

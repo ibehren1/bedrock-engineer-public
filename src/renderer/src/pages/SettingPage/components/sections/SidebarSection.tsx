@@ -3,7 +3,7 @@ import { SettingSection } from '../SettingSection'
 import useSetting from '@renderer/hooks/useSetting'
 import { routes } from '@renderer/routes'
 
-// Setting is always visible so users can re-enable hidden items.
+// Settings is always visible so users can re-enable hidden items.
 const ALWAYS_VISIBLE_HREFS = ['/setting']
 
 export const SidebarSection = () => {

@@ -624,8 +624,8 @@ export const SpeakPage: React.FC = () => {
   }
 
   const handleOpenSettings = () => {
-    // Navigate to settings page using React Router
-    navigate('/setting')
+    // このプロンプトはリージョンを変更させるためのものなので、AWSタブを直接開く
+    navigate('/setting/aws')
   }
 
   const handleDismissRegionWarning = () => {

@@ -90,7 +90,7 @@ export const routes: AppRoute[] = [
     element: <DiagramGeneratorPage />
   },
   {
-    name: 'Setting',
+    name: 'Settings',
     href: '/setting',
     icon: FiSettings,
     position: 'top',
@@ -111,4 +111,13 @@ export const routes: AppRoute[] = [
   //   position: 'top',
   //   element: <ErrorPage />
   // }
+]
+
+/**
+ * Routes that belong to a page in `routes` rather than to the navigation.
+ * Kept separate because `routes` drives the sidebar and the command palette,
+ * and a parameterized path has no business appearing in either.
+ */
+export const subRoutes: { href: string; element: React.ReactElement }[] = [
+  { href: '/setting/:tab', element: <SettingPage /> }
 ]

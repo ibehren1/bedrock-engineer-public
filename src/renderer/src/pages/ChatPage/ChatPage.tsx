@@ -152,7 +152,7 @@ export default function ChatPage() {
     handleOpen: handleOpenTodoModal,
     flash: todoFlash,
     TodoModal
-  } = useTodoModal(messages, currentSessionId)
+  } = useTodoModal(messages, currentSessionId, loading)
 
   // Flash the TODO header icon in the changed task's status color on each update
   const [todoFlashColor, setTodoFlashColor] = useState<string | null>(null)

@@ -130,7 +130,12 @@ const pickFlashStatus = (prev: TodoList | null, next: TodoList | null): TodoItem
 }
 
 // Custom hook for todo modal with real-time updates
-export const useTodoModal = (messages?: any[], currentSessionId?: string) => {
+export const useTodoModal = (
+  messages?: any[],
+  currentSessionId?: string,
+  /** True while a response is streaming; the poll only runs then (or while open). */
+  isStreaming?: boolean
+) => {
   const [show, setShow] = useState(false)
   const [todoList, setTodoList] = useState<TodoList | null>(null)
   const [loading, setLoading] = useState(false)
@@ -186,14 +191,16 @@ export const useTodoModal = (messages?: any[], currentSessionId?: string) => {
     [currentSessionId]
   )
 
-  // Poll for TODO list changes whenever there are messages, regardless of
-  // whether the modal is open. `todoUpdate` tool calls happen mid-stream
-  // inside an existing assistant message, so messages.length is not a
-  // reliable signal — a short interval reliably catches status changes so
-  // the header icon can flash. Poll faster while streaming.
+  // Poll for TODO list changes while a response is streaming or the panel is
+  // open. `todoUpdate` tool calls happen mid-stream inside an existing assistant
+  // message, so messages.length is not a reliable signal — a short interval
+  // reliably catches status changes so the header icon can flash. An idle chat
+  // needs no poll at all: nothing can change the list, and each tick costs an
+  // IPC round trip plus a file read in the main process.
   const hasMessages = !!messages && messages.length > 0
+  const shouldPoll = hasMessages && (isStreaming || show)
   useEffect(() => {
-    if (!hasMessages) return undefined
+    if (!shouldPoll) return undefined
 
     // Fetch immediately, then on a short interval (silent: no spinner flicker)
     fetchTodoList({ silent: true })
@@ -202,7 +209,17 @@ export const useTodoModal = (messages?: any[], currentSessionId?: string) => {
     }, 2000) // Refresh every 2 seconds
 
     return () => clearInterval(interval)
-  }, [hasMessages, currentSessionId, fetchTodoList])
+  }, [shouldPoll, currentSessionId, fetchTodoList])
+
+  // A todoUpdate in the final chunk lands after the poll stops, so pick it up
+  // once when streaming finishes.
+  const wasStreamingRef = useRef(false)
+  useEffect(() => {
+    if (wasStreamingRef.current && !isStreaming && hasMessages) {
+      fetchTodoList({ silent: true })
+    }
+    wasStreamingRef.current = !!isStreaming
+  }, [isStreaming, hasMessages, fetchTodoList])
 
   const handleOpen = useCallback(
     async (list?: TodoList | null) => {

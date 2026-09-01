@@ -1,5 +1,7 @@
 export * from './iamPolicy'
 export * from './appearance'
+export * from './aws'
+export * from './settingTabs'
 export * from './notification'
 export * from './userAvatar'
 export * from './userName'

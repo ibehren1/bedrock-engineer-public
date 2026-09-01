@@ -8,8 +8,10 @@ type PlanActToggleProps = {
 }
 
 const planModeStyle = 'bg-yellow-300 text-gray-700'
-const actModeStyle =
-  'bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 bg-[length:200%_100%] animate-gradient-x text-white'
+// Act mode is the default, so this pill is on screen for the whole session. It
+// used to animate its gradient position, which repaints continuously and shows
+// up as steady battery drain while the app just sits there.
+const actModeStyle = 'bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 text-white'
 const unselectedStyle =
   'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
 

@@ -10,15 +10,13 @@ module.exports = {
   theme: {
     extend: {
       animation: {
-        'pulse-slide': 'pulseSlide 1.5s ease-in-out infinite',
+        // gradient-x is for "Thinking"/"Listening" indicators only — anything
+        // shown at rest must not animate, since a continuous repaint costs
+        // battery for the whole session.
         'gradient-x': 'gradient-x 5s ease infinite',
         'todo-flash': 'todoFlash 0.5s ease-in-out 2'
       },
       keyframes: {
-        pulseSlide: {
-          '0%, 100%': { transform: 'translateX(-100%)' },
-          '50%': { transform: 'translateX(200%)' }
-        },
         todoFlash: {
           '0%, 100%': { opacity: '1', transform: 'scale(1)' },
           '50%': { opacity: '0.4', transform: 'scale(1.3)' }

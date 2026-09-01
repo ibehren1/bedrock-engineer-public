@@ -32,7 +32,10 @@ export class TaskManager {
       cleanupInterval: config?.cleanupInterval ?? 60000 // 1 minute cleanup interval
     }
 
-    this.startCleanupTimer()
+    // The cleanup timer is armed on the first task instead of here: this manager
+    // is constructed as soon as any tool runs, so starting a forever-interval in
+    // the constructor kept a timer alive for users who never touch the Code
+    // Interpreter.
     this.logger.info('TaskManager initialized', {
       maxConcurrentTasks: this.config.maxConcurrentTasks,
       taskTimeout: this.config.taskTimeout
@@ -59,6 +62,7 @@ export class TaskManager {
     }
 
     this.tasks.set(taskId, task)
+    this.startCleanupTimer()
 
     this.logger.info('Task created', {
       taskId,
@@ -251,12 +255,25 @@ export class TaskManager {
   }
 
   /**
-   * Start periodic cleanup of old tasks
+   * Start periodic cleanup of old tasks. Idempotent, so it can be called on
+   * every createTask.
    */
   private startCleanupTimer(): void {
+    if (this.cleanupTimer) {
+      return
+    }
+
     this.cleanupTimer = setInterval(() => {
       this.cleanupOldTasks()
     }, this.config.cleanupInterval)
+  }
+
+  /** Stop the cleanup timer once there is nothing left to clean up. */
+  private stopCleanupTimerIfIdle(): void {
+    if (this.cleanupTimer && this.tasks.size === 0) {
+      clearInterval(this.cleanupTimer)
+      this.cleanupTimer = undefined
+    }
   }
 
   /**
@@ -297,6 +314,8 @@ export class TaskManager {
         runningTime: now.getTime() - (task.startedAt?.getTime() || 0)
       })
     })
+
+    this.stopCleanupTimerIfIdle()
   }
 
   /**

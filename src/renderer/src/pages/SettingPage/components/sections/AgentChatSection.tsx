@@ -1,42 +1,33 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSettings } from '@renderer/contexts/SettingsContext'
 import { SettingSection } from '../SettingSection'
 import { SettingInput } from '../SettingInput'
 
-interface AgentChatSectionProps {
-  tavilySearchApiKey: string
-  onUpdateTavilySearchApiKey: (value: string) => void
-  contextLength: number
-  onUpdateContextLength: (value: number) => void
-  enablePromptCache: boolean
-  onUpdateEnablePromptCache: (enabled: boolean) => void
-  requestTimeout: number
-  onUpdateRequestTimeout: (timeout: number) => void
-}
-
-export const AgentChatSection: React.FC<AgentChatSectionProps> = ({
-  tavilySearchApiKey,
-  onUpdateTavilySearchApiKey,
-  contextLength,
-  onUpdateContextLength,
-  enablePromptCache,
-  onUpdateEnablePromptCache,
-  requestTimeout,
-  onUpdateRequestTimeout
-}) => {
+export const AgentChatSection: React.FC = () => {
   const { t } = useTranslation()
+  const {
+    tavilySearchApiKey,
+    setTavilySearchApiKey,
+    contextLength,
+    updateContextLength,
+    enablePromptCache,
+    setEnablePromptCache,
+    requestTimeout,
+    setRequestTimeout
+  } = useSettings()
 
   const handleContextLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10)
     if (!isNaN(value) && value > 0) {
-      onUpdateContextLength(value)
+      updateContextLength(value)
     }
   }
 
   const handleRequestTimeoutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10)
     if (!isNaN(value) && value > 0) {
-      onUpdateRequestTimeout(value)
+      setRequestTimeout(value)
     }
   }
 
@@ -48,7 +39,7 @@ export const AgentChatSection: React.FC<AgentChatSectionProps> = ({
           type="password"
           placeholder={t('tavilySearchApiKeyPlaceholder', 'tvly-xxxxxxxxxxxxxxx')}
           value={tavilySearchApiKey}
-          onChange={(e) => onUpdateTavilySearchApiKey(e.target.value)}
+          onChange={(e) => setTavilySearchApiKey(e.target.value)}
         />
         <div className="flex gap-1 text-xs text-gray-800 dark:text-gray-200">
           <span>{t('Learn more about Tavily Search, go to')}</span>
@@ -97,7 +88,7 @@ export const AgentChatSection: React.FC<AgentChatSectionProps> = ({
               id="enable-prompt-cache"
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
               checked={enablePromptCache}
-              onChange={(e) => onUpdateEnablePromptCache(e.target.checked)}
+              onChange={(e) => setEnablePromptCache(e.target.checked)}
             />
             <label
               htmlFor="enable-prompt-cache"

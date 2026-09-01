@@ -1,23 +1,17 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { FcFolder } from 'react-icons/fc'
+import { useSettings } from '@renderer/contexts/SettingsContext'
 import { SettingSection } from '../SettingSection'
 
-interface ProjectSectionProps {
-  projectPath: string
-  onSelectDirectory: () => Promise<void>
-}
-
-export const ProjectSection: React.FC<ProjectSectionProps> = ({
-  projectPath,
-  onSelectDirectory
-}) => {
+export const ProjectSection: React.FC = () => {
   const { t } = useTranslation()
+  const { projectPath, selectDirectory } = useSettings()
 
   return (
     <SettingSection title={t('Project Setting')}>
       <label
-        onClick={onSelectDirectory}
+        onClick={selectDirectory}
         className="block text-md font-medium text-gray-900 dark:text-white
           cursor-pointer hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
       >

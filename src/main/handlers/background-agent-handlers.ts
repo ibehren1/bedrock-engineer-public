@@ -51,6 +51,28 @@ function getBackgroundAgentScheduler(): BackgroundAgentScheduler {
 }
 
 /**
+ * 保存済みのスケジュールタスクを起動時に復元する。
+ * タスクが1件もないユーザーではスケジューラを作らないので、cron タイマーも
+ * 一切armされない。
+ */
+export function initializeBackgroundAgentScheduler(): void {
+  try {
+    const persistedTasks = store.get('backgroundAgentScheduledTasks')
+    if (!Array.isArray(persistedTasks) || persistedTasks.length === 0) {
+      logger.debug('No scheduled tasks saved, skipping scheduler startup')
+      return
+    }
+
+    // コンストラクタが永続化済みタスクを復元し、有効なものだけcronに登録する
+    getBackgroundAgentScheduler()
+  } catch (error: any) {
+    logger.error('Failed to initialize BackgroundAgentScheduler at startup', {
+      error: error.message
+    })
+  }
+}
+
+/**
  * BackgroundAgentSchedulerをシャットダウン（強化版）
  */
 export function shutdownBackgroundAgentScheduler(): void {

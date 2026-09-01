@@ -18,11 +18,13 @@ export const EXCLUDED_CHAT_AGENT_IDS = [
 ]
 
 /**
- * Default agents that other pages resolve by id, so they must never be removed.
- * `diagramGeneratorAgent` is visible in the agent list but backs the Diagram
- * Generator page (see DiagramGeneratorPage's diagramAgentId).
+ * Default agents that can't be hidden. These are the agents no list shows in the
+ * first place, so there is nothing to hide. `diagramGeneratorAgent` is not among
+ * them: it is visible in the agent list and can be hidden, because
+ * `getAgentTools` falls back to DEFAULT_AGENTS for the pages that resolve a
+ * built-in agent by id (see DiagramGeneratorPage's diagramAgentId).
  */
-export const PROTECTED_DEFAULT_AGENT_IDS = [...EXCLUDED_CHAT_AGENT_IDS, 'diagramGeneratorAgent']
+export const PROTECTED_DEFAULT_AGENT_IDS = [...EXCLUDED_CHAT_AGENT_IDS]
 
 export const useAgentFilter = (agents: CustomAgent[]) => {
   const [searchQuery, setSearchQuery] = useState('')

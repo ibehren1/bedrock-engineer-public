@@ -33,9 +33,16 @@ export const useChat = (props: UseChatProps) => {
       let lastDataTime = Date.now()
       const WAIT_THRESHOLD = 10000 // 10 seconds without data = waiting state
 
+      // Only push state when the value changed, so this 1 Hz tick doesn't
+      // re-render for the whole request with nothing to report
+      let lastIsWaiting: boolean | null = null
       const checkWaitingState = setInterval(() => {
         const timeSinceLastData = Date.now() - lastDataTime
-        setWaitingForResponse(timeSinceLastData > WAIT_THRESHOLD)
+        const isWaiting = timeSinceLastData > WAIT_THRESHOLD
+        if (isWaiting !== lastIsWaiting) {
+          lastIsWaiting = isWaiting
+          setWaitingForResponse(isWaiting)
+        }
       }, 1000)
 
       const generator = streamChatCompletion({

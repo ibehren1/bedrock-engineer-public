@@ -20,10 +20,10 @@ own sidebar button. It replaces the "Custom Agents" overlay that upstream opens 
 
 - Create, edit, duplicate, export and remove agents from one place. Clicking an agent opens its
   editor rather than switching the active agent.
-- **Remove default agents you don't use.** Upstream re-seeds its built-in agents into the store on
-  every launch, so deleting one never stuck. Removals now persist, and **Restore default agents**
-  brings them back. Agents that other pages depend on (Website Generator, Diagram Generator) can't
-  be removed.
+- **Hide the built-in agents you don't use.** Upstream re-seeds its built-in agents into the store
+  on every launch, so deleting one never stuck. **Hide** now persists across restarts, and the
+  **Unhide** dropdown lists every hidden agent so you can bring them back one at a time or all at
+  once. Agents you created yourself are deleted outright instead of hidden.
 - **Rearrange agents by drag and drop**, in either card or table view. The arrangement is saved and
   is reused by the agent dropdown and `@` mentions. Dragging is disabled while a table column sort
   is active.
@@ -111,10 +111,14 @@ and automated requests get a Vercel bot challenge, so the app doesn't read it.
 
 ![settings-sidebar](./assets/settings-sidebar.png)
 
+- **Settings are grouped into five tabs** — General, AWS, Models, Chat and Workspace — with a
+  sidebar down the left, rather than one long column. Each tab has its own address
+  (`#/setting/aws`), so links into settings open the relevant tab.
 - Dim (default) and Dark themes alongside Light, with accent colors derived from the app icon.
 - **Sidebar Settings** hides any navigation icon you don't use.
 - Pick an emoji avatar and a display name for yourself in the chat.
 - App name comes from `productName` in `package.json`, with a reworked app icon.
+- Japanese translations for the AWS and Language settings, which previously showed only in English.
 
 ### Build and release
 
@@ -268,7 +272,7 @@ Choose an agent from the Agent dropdown in the message entry area, to the left o
 
 ### Customize Agents
 
-Open **My Agents** from the sidebar (or "Edit agents" in the agent dropdown) to create and maintain your agents. Enter the agent's name, description, and system prompt. The system prompt is a crucial element that determines the agent's behavior. By clearly defining the agent's purpose, regulations, role, and when to use available tools, you can obtain more appropriate responses. Default agents you don't want can be removed from this page and restored later with "Restore default agents".
+Open **My Agents** from the sidebar (or "Edit agents" in the agent dropdown) to create and maintain your agents. Enter the agent's name, description, and system prompt. The system prompt is a crucial element that determines the agent's behavior. By clearly defining the agent's purpose, regulations, role, and when to use available tools, you can obtain more appropriate responses. Built-in agents you don't want can be hidden from this page and brought back later from the "Unhide" dropdown.
 
 ![agent-editor](./assets/agent-editor.png)
 

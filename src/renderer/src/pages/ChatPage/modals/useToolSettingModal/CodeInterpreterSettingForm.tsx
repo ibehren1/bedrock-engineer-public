@@ -39,12 +39,11 @@ export const CodeInterpreterSettingForm: React.FC = () => {
     { value: 300, label: '300秒 (5分)' }
   ]
 
-  // Check Docker status on component mount and periodically
+  // Check Docker status once when the form opens. This used to re-check every 30
+  // seconds, and each check spawns a `docker --version` child process; the
+  // "再チェック" button below covers the case where Docker starts later.
   useEffect(() => {
     checkDockerStatus()
-    // Set up periodic check every 30 seconds
-    const interval = setInterval(checkDockerStatus, 30000)
-    return () => clearInterval(interval)
   }, [])
 
   const checkDockerStatus = async () => {

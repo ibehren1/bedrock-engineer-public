@@ -6,11 +6,11 @@ import useSetting from '@renderer/hooks/useSetting'
 import { PROTECTED_DEFAULT_AGENT_IDS } from '@renderer/pages/ChatPage/components/AgentList'
 
 /**
- * Create / update / duplicate / delete and export operations for the agents
- * shown on the My Agents page.
+ * Create / update / duplicate / delete (hide, for built-ins) and export
+ * operations for the agents shown on the My Agents page.
  */
 export const useAgentCrud = () => {
-  const { customAgents, saveCustomAgents, loadSharedAgents, removeDefaultAgent } = useSetting()
+  const { customAgents, saveCustomAgents, loadSharedAgents, hideDefaultAgent } = useSetting()
   const { t } = useTranslation()
 
   const saveAgent = useCallback(
@@ -50,19 +50,19 @@ export const useAgentCrud = () => {
 
   const deleteAgent = useCallback(
     (id: string) => {
-      // デフォルトエージェントは再シードされないように削除済みとして記録する
+      // デフォルトエージェントは削除ではなく非表示にし、再シードされないように記録する
       const agent = customAgents.find((a) => a.id === id)
       const isDefaultAgent = agent ? agent.isCustom === false : false
 
       if (isDefaultAgent) {
         if (PROTECTED_DEFAULT_AGENT_IDS.includes(id)) return
-        removeDefaultAgent(id)
+        hideDefaultAgent(id)
         return
       }
 
       saveCustomAgents(customAgents.filter((a) => a.id !== id))
     },
-    [customAgents, removeDefaultAgent, saveCustomAgents]
+    [customAgents, hideDefaultAgent, saveCustomAgents]
   )
 
   const duplicateAgent = useCallback(

@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 
 export type RecordingStatus = 'idle' | 'recording' | 'processing' | 'error'
 
@@ -155,6 +155,36 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}): UseAudi
     }
   }, [status, targetSampleRate, isFirefox, arrayBufferToBase64, onAudioData])
 
+  // Release the microphone and the audio graph. Works off refs so it is safe to
+  // call from an unmount cleanup, where the `status` closure may be stale.
+  const teardown = useCallback(() => {
+    isRecordingRef.current = false
+
+    // Stop audio processing
+    if (processorRef.current) {
+      processorRef.current.disconnect()
+      processorRef.current.onaudioprocess = null
+      processorRef.current = null
+    }
+
+    if (sourceNodeRef.current) {
+      sourceNodeRef.current.disconnect()
+      sourceNodeRef.current = null
+    }
+
+    // Close audio context
+    if (audioContextRef.current) {
+      audioContextRef.current.close()
+      audioContextRef.current = null
+    }
+
+    // Stop media stream so the OS microphone indicator goes out
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach((track) => track.stop())
+      audioStreamRef.current = null
+    }
+  }, [])
+
   // Stop recording
   const stopRecording = useCallback(() => {
     if (status !== 'recording') {
@@ -162,38 +192,26 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}): UseAudi
     }
 
     setStatus('processing')
-    isRecordingRef.current = false
 
     try {
-      // Stop audio processing
-      if (processorRef.current) {
-        processorRef.current.disconnect()
-        processorRef.current = null
-      }
-
-      if (sourceNodeRef.current) {
-        sourceNodeRef.current.disconnect()
-        sourceNodeRef.current = null
-      }
-
-      // Close audio context
-      if (audioContextRef.current) {
-        audioContextRef.current.close()
-        audioContextRef.current = null
-      }
-
-      // Stop media stream
-      if (audioStreamRef.current) {
-        audioStreamRef.current.getTracks().forEach((track) => track.stop())
-        audioStreamRef.current = null
-      }
-
+      teardown()
       setStatus('idle')
     } catch (error) {
       console.error('Error stopping recording:', error)
       setStatus('error')
     }
-  }, [status])
+  }, [status, teardown])
+
+  // Navigating away from the page must not leave the microphone live
+  useEffect(() => {
+    return () => {
+      try {
+        teardown()
+      } catch (error) {
+        console.error('Error releasing microphone on unmount:', error)
+      }
+    }
+  }, [teardown])
 
   return {
     status,

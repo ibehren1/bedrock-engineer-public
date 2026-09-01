@@ -366,14 +366,27 @@ export const useAgentChat = (
     const TIMEOUT_MS = requestTimeout * 60 * 1000 // Convert minutes to milliseconds
     const HEARTBEAT_INTERVAL = 30000 // 30 seconds heartbeat check
 
+    // Only push state when a value actually changed: this ticks every second for
+    // the whole request, and an unconditional setState re-rendered the entire
+    // chat tree once a second even when nothing was different.
+    let lastIsWaiting: boolean | null = null
+    let lastCountdown: number | null = null
+
     const checkWaitingState = setInterval(() => {
       const timeSinceLastData = Date.now() - lastDataTime
       const isWaiting = timeSinceLastData > WAIT_THRESHOLD
-      setWaitingForResponse(isWaiting)
+      if (isWaiting !== lastIsWaiting) {
+        lastIsWaiting = isWaiting
+        setWaitingForResponse(isWaiting)
+      }
 
       if (isWaiting) {
         const remainingTime = Math.max(0, TIMEOUT_MS - timeSinceLastData)
-        setTimeoutCountdown(Math.floor(remainingTime / 1000))
+        const countdown = Math.floor(remainingTime / 1000)
+        if (countdown !== lastCountdown) {
+          lastCountdown = countdown
+          setTimeoutCountdown(countdown)
+        }
 
         // Abort when timeout is reached
         if (remainingTime === 0 && abortController.current && !timedOut) {

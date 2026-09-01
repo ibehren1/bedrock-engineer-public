@@ -1,14 +1,12 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { FcFolder } from 'react-icons/fc'
+import { useSettings } from '@renderer/contexts/SettingsContext'
 import { SettingSection } from '../SettingSection'
 
-interface ProjectSectionProps {
-  userDataPath: string
-}
-
-export const ConfigDirSection: React.FC<ProjectSectionProps> = ({ userDataPath }) => {
+export const ConfigDirSection: React.FC = () => {
   const { t } = useTranslation()
+  const { userDataPath } = useSettings()
 
   return (
     <SettingSection title={t('Config Directory')}>

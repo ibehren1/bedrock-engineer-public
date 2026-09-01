@@ -3,7 +3,8 @@ import { FiGithub } from 'react-icons/fi'
 import { Tooltip } from 'flowbite-react'
 import { createHashRouter, Link, Outlet, RouterProvider, useLocation } from 'react-router-dom'
 import CmdK from './command-palette'
-import { routes } from './routes'
+import { routes, subRoutes } from './routes'
+import { isRouteActive } from './lib/routeMatching'
 import HomePage from './pages/HomePage/HomePage'
 import { Toaster } from 'react-hot-toast'
 import ErrorPage from './pages/ErrorPage/ErrorPage'
@@ -72,7 +73,7 @@ const Layout: React.FC = () => {
                   return (
                     <ListItem
                       key={page.name}
-                      selected={location.pathname === page.href}
+                      selected={isRouteActive(location.pathname, page.href)}
                       href={page.href}
                       toolTipContent={page.name + ' ⌘ ' + shortcut}
                     >
@@ -110,6 +111,10 @@ const router = createHashRouter([
         path: route.href === '/' ? '/' : route.href,
         element: route.element,
         index: route.href === '/'
+      })),
+      ...subRoutes.map((route) => ({
+        path: route.href,
+        element: route.element
       })),
       {
         path: '*',

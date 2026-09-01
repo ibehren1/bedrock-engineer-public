@@ -15,7 +15,13 @@ import { useAgentCrud } from './useAgentCrud'
  */
 export const MyAgentsPage: React.FC = () => {
   const { t } = useTranslation()
-  const { agents, selectedAgentId, hiddenDefaultAgentIds, restoreDefaultAgents } = useSetting()
+  const {
+    agents,
+    selectedAgentId,
+    hiddenDefaultAgents,
+    unhideDefaultAgent,
+    unhideAllDefaultAgents
+  } = useSetting()
   const { saveAgent, deleteAgent, duplicateAgent, saveAsShared, convertToStrands } = useAgentCrud()
 
   const [editingAgent, setEditingAgent] = useState<CustomAgent | null>(null)
@@ -106,8 +112,9 @@ export const MyAgentsPage: React.FC = () => {
               onSaveAsShared={saveAsShared}
               onShareToOrganization={openShareToOrganizationModal}
               onConvertToStrands={convertToStrands}
-              hiddenDefaultCount={hiddenDefaultAgentIds.length}
-              onRestoreDefaults={restoreDefaultAgents}
+              hiddenAgents={hiddenDefaultAgents}
+              onUnhideAgent={unhideDefaultAgent}
+              onUnhideAll={unhideAllDefaultAgents}
               allowReorder
             />
 

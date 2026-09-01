@@ -92,7 +92,10 @@
   min-width: 100px;
 }
 
-.reactMarkDown * {
+/* Fade in the block itself, not every descendant: streaming re-creates those
+   nodes, so a per-descendant animation restarted across the whole transcript on
+   every chunk. */
+.reactMarkDown {
   animation: fade-in 1s;
   animation-fill-mode: forwards;
 }

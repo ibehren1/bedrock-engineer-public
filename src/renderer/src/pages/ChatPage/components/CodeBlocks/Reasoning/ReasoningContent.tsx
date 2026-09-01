@@ -228,6 +228,7 @@ export const ReasoningContent: React.FC<ReasoningContentProps> = ({
   useEffect(() => {
     let secondsTimer: ReturnType<typeof setInterval> | null = null
     let initialDelayTimer: ReturnType<typeof setTimeout> | null = null
+    let transitionTimer: ReturnType<typeof setTimeout> | null = null
 
     if (isLoading) {
       // ローディング開始時に思考開始時間を記録
@@ -248,7 +249,8 @@ export const ReasoningContent: React.FC<ReasoningContentProps> = ({
 
             // トランジションアニメーションのために
             setCounterTransition(true)
-            setTimeout(() => {
+            if (transitionTimer) clearTimeout(transitionTimer)
+            transitionTimer = setTimeout(() => {
               setElapsedSeconds(seconds)
               setCounterTransition(false)
             }, 150) // 150msのトランジション時間
@@ -266,6 +268,7 @@ export const ReasoningContent: React.FC<ReasoningContentProps> = ({
     return () => {
       if (initialDelayTimer) clearTimeout(initialDelayTimer)
       if (secondsTimer) clearInterval(secondsTimer)
+      if (transitionTimer) clearTimeout(transitionTimer)
     }
   }, [isLoading])
 

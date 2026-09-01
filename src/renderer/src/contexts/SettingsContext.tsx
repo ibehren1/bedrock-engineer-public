@@ -193,10 +193,12 @@ export interface SettingsContextType {
   sharedAgents: CustomAgent[]
   loadSharedAgents: () => Promise<void>
 
-  // Default agents the user removed (never re-seeded until restored)
+  // Default agents the user hid (never re-seeded until unhidden)
   hiddenDefaultAgentIds: string[]
-  removeDefaultAgent: (agentId: string) => void
-  restoreDefaultAgents: () => void
+  hiddenDefaultAgents: CustomAgent[]
+  hideDefaultAgent: (agentId: string) => void
+  unhideDefaultAgent: (agentId: string) => void
+  unhideAllDefaultAgents: () => void
 
   // User-defined agent arrangement (drag & drop on the My Agents page)
   agentOrder: string[]
@@ -655,7 +657,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Load Custom Agents
     const savedAgents = window.store.get('customAgents') || []
 
-    // ユーザーが削除したデフォルトエージェントは再シードしない
+    // ユーザーが非表示にしたデフォルトエージェントは再シードしない
     const hiddenDefaults = window.store.get('hiddenDefaultAgentIds') || []
     setStateHiddenDefaultAgentIds(hiddenDefaults)
 
@@ -669,7 +671,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // 処理済みのエージェントIDを追跡
     const processedIds = new Set<string>()
 
-    // 削除済みのデフォルトエージェントは処理済みとして扱い、保存済みのコピーも復活させない
+    // 非表示のデフォルトエージェントは処理済みとして扱い、保存済みのコピーも復活させない
     hiddenDefaults.forEach((agentId) => {
       processedIds.add(agentId)
       if (savedAgents.some((agent) => agent.id === agentId)) {
@@ -1313,10 +1315,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }
 
   /**
-   * Remove one of the DEFAULT_AGENTS. The id is remembered so the startup
+   * Hide one of the DEFAULT_AGENTS. The id is remembered so the startup
    * seeding does not bring the agent back on the next launch.
    */
-  const removeDefaultAgent = (agentId: string) => {
+  const hideDefaultAgent = (agentId: string) => {
     const updatedHidden = hiddenDefaultAgentIds.includes(agentId)
       ? hiddenDefaultAgentIds
       : [...hiddenDefaultAgentIds, agentId]
@@ -1326,7 +1328,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const remainingAgents = customAgents.filter((agent) => agent.id !== agentId)
     saveCustomAgents(remainingAgents)
 
-    // 選択中のエージェントを削除した場合は、残っているエージェントに切り替える
+    // 選択中のエージェントを非表示にした場合は、残っているエージェントに切り替える
     if (selectedAgentId === agentId) {
       const fallback = remainingAgents.find(
         (agent) => !!agent.id && !EXCLUDED_CHAT_AGENT_IDS.includes(agent.id)
@@ -1337,16 +1339,33 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }
 
-  /** Bring every removed default agent back without requiring a restart. */
-  const restoreDefaultAgents = () => {
-    setStateHiddenDefaultAgentIds([])
-    window.store.set('hiddenDefaultAgentIds', [])
-
+  /** Put the given default agents back into the list they were hidden from. */
+  const seedDefaultAgents = (agentIds: string[]) => {
     const existingIds = new Set(customAgents.map((agent) => agent.id))
-    const missingDefaults = DEFAULT_AGENTS.filter((agent) => !existingIds.has(agent.id))
+    const missingDefaults = DEFAULT_AGENTS.filter(
+      (agent) => agentIds.includes(agent.id) && !existingIds.has(agent.id)
+    )
     if (missingDefaults.length > 0) {
       saveCustomAgents([...customAgents, ...missingDefaults.map((agent) => ({ ...agent }))])
     }
+  }
+
+  /** Bring a single hidden default agent back without requiring a restart. */
+  const unhideDefaultAgent = (agentId: string) => {
+    const updatedHidden = hiddenDefaultAgentIds.filter((id) => id !== agentId)
+    setStateHiddenDefaultAgentIds(updatedHidden)
+    window.store.set('hiddenDefaultAgentIds', updatedHidden)
+
+    seedDefaultAgents([agentId])
+  }
+
+  /** Bring every hidden default agent back without requiring a restart. */
+  const unhideAllDefaultAgents = () => {
+    const hiddenIds = hiddenDefaultAgentIds
+    setStateHiddenDefaultAgentIds([])
+    window.store.set('hiddenDefaultAgentIds', [])
+
+    seedDefaultAgents(hiddenIds)
   }
 
   /** Persist the arrangement produced by dragging agents on the My Agents page. */
@@ -1391,6 +1410,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // ユーザーが並べ替えた順序を適用する（未登録のエージェントは末尾に残る）
     return sortAgentsByOrder(result, agentOrder)
   }, [customAgents, sharedAgents, agentOrder])
+
+  // 非表示にしたデフォルトエージェント（名前とアイコンを再表示メニューで使う）
+  const hiddenDefaultAgents = useMemo(() => {
+    const hidden = hiddenDefaultAgentIds
+      .map((agentId) => DEFAULT_AGENTS.find((agent) => agent.id === agentId))
+      .filter((agent): agent is CustomAgent => !!agent)
+
+    return sortAgentsByOrder(hidden, agentOrder)
+  }, [hiddenDefaultAgentIds, agentOrder])
 
   // エージェント固有のMCPツールを取得する関数
   const getAgentMcpTools = useCallback(
@@ -1531,7 +1559,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const getAgentTools = useCallback(
     (agentId: string): ToolState[] => {
       // 現在選択されているエージェントを見つける
-      const agent = allAgents.find((a) => a.id === agentId)
+      // Pages that address a built-in agent by id (Diagram Generator, Website
+      // Generator) have to keep their tools after the user hides that agent, so
+      // fall back to the built-in definition. The sibling getters below need no
+      // fallback: these built-ins declare empty allowedCommands /
+      // knowledgeBases / bedrockAgents / flows, which is what those getters
+      // already return for a missing agent.
+      const agent =
+        allAgents.find((a) => a.id === agentId) ?? DEFAULT_AGENTS.find((a) => a.id === agentId)
 
       // プレースホルダー値を準備
       const placeholderValues = {
@@ -2111,8 +2146,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     sharedAgents,
     loadSharedAgents,
     hiddenDefaultAgentIds,
-    removeDefaultAgent,
-    restoreDefaultAgents,
+    hiddenDefaultAgents,
+    hideDefaultAgent,
+    unhideDefaultAgent,
+    unhideAllDefaultAgents,
     agentOrder,
     setAgentOrder,
 

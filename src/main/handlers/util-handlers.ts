@@ -68,6 +68,17 @@ export const utilHandlers = {
       let output = ''
       let errorOutput = ''
 
+      // Timeout after 5 seconds. Cleared as soon as the probe answers so the
+      // kill timer doesn't stay armed for an already-finished process.
+      const timeoutTimer = setTimeout(() => {
+        dockerProcess.kill()
+        resolve({
+          available: false,
+          error: 'Docker check timed out',
+          lastChecked: new Date()
+        })
+      }, 5000)
+
       dockerProcess.stdout?.on('data', (data) => {
         output += data.toString()
       })
@@ -77,6 +88,8 @@ export const utilHandlers = {
       })
 
       dockerProcess.on('close', (code) => {
+        clearTimeout(timeoutTimer)
+
         if (code === 0 && output.includes('Docker version')) {
           // Extract version information
           const versionMatch = output.match(/Docker version (\d+\.\d+\.\d+)/)
@@ -97,22 +110,14 @@ export const utilHandlers = {
       })
 
       dockerProcess.on('error', (error) => {
+        clearTimeout(timeoutTimer)
+
         resolve({
           available: false,
           error: error.message,
           lastChecked: new Date()
         })
       })
-
-      // Timeout after 5 seconds
-      setTimeout(() => {
-        dockerProcess.kill()
-        resolve({
-          available: false,
-          error: 'Docker check timed out',
-          lastChecked: new Date()
-        })
-      }, 5000)
     })
   }
 } as const

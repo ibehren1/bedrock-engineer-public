@@ -1,11 +1,11 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { FcIdea } from 'react-icons/fc'
-import { SettingSection } from './SettingSection'
-import { SettingSelect } from './SettingSelect'
 import { useSettings } from '@renderer/contexts/SettingsContext'
+import { SettingSection } from '../SettingSection'
+import { SettingSelect } from '../SettingSelect'
 
-export const LightModelSettings: React.FC = () => {
+export const LightModelSection: React.FC = () => {
   const { t } = useTranslation()
   const { availableModels, lightProcessingModel, updateLightProcessingModel } = useSettings()
 

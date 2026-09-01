@@ -78,10 +78,9 @@ export const AIIcon: React.FC<AIIconProps> = ({
           }
         }
 
-        .animate-idle #outer-ring { animation: rotate-slow 20s linear infinite; }
-        .animate-idle #middle-ring { animation: rotate-reverse 15s linear infinite; }
-        .animate-idle #inner-ring { animation: rotate-slow 10s linear infinite; }
-        .animate-idle #core-circle { animation: core-pulse 4s ease-in-out infinite; }
+        /* The idle state deliberately animates nothing: voice chat can sit open
+           for a long time, and four infinite animations there kept waking the
+           GPU with nothing happening. */
 
         .animate-processing #outer-ring { animation: rotate-slow 3s linear infinite; }
         .animate-processing #middle-ring { animation: rotate-reverse 2s linear infinite; }
@@ -98,9 +97,6 @@ export const AIIcon: React.FC<AIIconProps> = ({
         .animate-recording #glow { animation: pulse-glow 1s ease-in-out infinite; }
 
         @media (prefers-reduced-motion: reduce) {
-          .animate-idle #outer-ring,
-          .animate-idle #middle-ring,
-          .animate-idle #inner-ring,
           .animate-processing #outer-ring,
           .animate-processing #middle-ring,
           .animate-processing #inner-ring,
@@ -108,7 +104,6 @@ export const AIIcon: React.FC<AIIconProps> = ({
           .animate-recording #middle-ring,
           .animate-recording #inner-ring { animation: none; }
 
-          .animate-idle #core-circle,
           .animate-processing #core-circle,
           .animate-recording #core-circle { animation: core-pulse 4s ease-in-out infinite; }
         }

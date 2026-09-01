@@ -1,140 +1,52 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import useSetting from '@renderer/hooks/useSetting'
-import {
-  ProjectSection,
-  LanguageSection,
-  AppearanceSection,
-  AgentChatSection,
-  UserAvatarSection,
-  AWSSection,
-  AdvancedSection,
-  NotificationSection,
-  SidebarSection,
-  GuardrailSettings
-} from './components/sections'
-import { LightModelSettings } from './components/LightModelSettings'
-import { ConfigDirSection } from './components/sections/ConfigDirSection'
+import { useNavigate, useParams } from 'react-router-dom'
+import { SettingsSidebar } from './components/SettingsSidebar'
+import { AwsTab, ChatTab, GeneralTab, ModelsTab, WorkspaceTab } from './components/tabs'
+import { resolveSettingTab, SettingTabId } from './settingTabs'
+
+const TAB_PANELS: Record<SettingTabId, React.FC> = {
+  general: GeneralTab,
+  aws: AwsTab,
+  models: ModelsTab,
+  chat: ChatTab,
+  workspace: WorkspaceTab
+}
 
 export const SettingPage: React.FC = () => {
-  const { t, i18n } = useTranslation()
-  const {
-    userDataPath,
-    projectPath,
-    selectDirectory,
-    currentLLM,
-    updateLLM,
-    availableModels,
-    sendMsgKey,
-    updateSendMsgKey,
-    contextLength,
-    updateContextLength,
-    enablePromptCache,
-    setEnablePromptCache,
-    requestTimeout,
-    setRequestTimeout,
-    tavilySearchApiKey,
-    setTavilySearchApiKey,
-    awsRegion,
-    setAwsRegion,
-    awsAccessKeyId,
-    setAwsAccessKeyId,
-    awsSecretAccessKey,
-    setAwsSecretAccessKey,
-    awsSessionToken,
-    setAwsSessionToken,
-    useAwsProfile,
-    setUseAwsProfile,
-    awsProfile,
-    setAwsProfile,
-    proxySettings,
-    setProxySettings,
-    inferenceParams,
-    updateInferenceParams,
-    bedrockSettings,
-    updateBedrockSettings,
-    guardrailSettings,
-    updateGuardrailSettings
-  } = useSetting()
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { tab } = useParams<{ tab?: string }>()
 
-  const handleChangeLLM = (modelId: string) => {
-    const selectedModel = availableModels.find((model) => model.modelId === modelId)
-    if (selectedModel) {
-      updateLLM(selectedModel)
-    } else {
-      console.error(t('Invalid model'))
-    }
-  }
+  // 不明なタブ（プレーンな /setting も含む）は最初のタブにフォールバックする
+  const activeTab = resolveSettingTab(tab)
+  const ActivePanel = TAB_PANELS[activeTab]
 
-  const handleChangeLanguage = (newLanguage: string) => {
-    i18n.changeLanguage(newLanguage)
-    window.store.set('language', newLanguage as any)
+  const handleTabChange = (nextTab: SettingTabId) => {
+    // replace: タブの切り替えで履歴を積み上げない
+    navigate(`/setting/${nextTab}`, { replace: true })
   }
 
   return (
-    <div
-      className="flex flex-col gap-8 min-w-[320px] max-w-[1024px] mx-auto h-full overflow-y-auto
-      dark:text-white md:px-16 px-8 py-6"
-    >
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('Setting')}</h1>
+    <div className="flex flex-col h-full dark:text-white">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-6 pb-4">
+        {t('Settings')}
+      </h1>
 
-      <ConfigDirSection userDataPath={userDataPath} />
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <div
+          className="lg:w-64 w-16 border-r border-gray-200 dark:border-gray-700/50 flex-shrink-0
+            overflow-y-auto transition-all duration-300"
+        >
+          <SettingsSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+        </div>
 
-      <ProjectSection projectPath={projectPath} onSelectDirectory={selectDirectory} />
-
-      <LanguageSection currentLanguage={i18n.language} onChangeLanguage={handleChangeLanguage} />
-
-      <AppearanceSection />
-
-      <AgentChatSection
-        tavilySearchApiKey={tavilySearchApiKey}
-        onUpdateTavilySearchApiKey={setTavilySearchApiKey}
-        contextLength={contextLength}
-        onUpdateContextLength={updateContextLength}
-        enablePromptCache={enablePromptCache}
-        onUpdateEnablePromptCache={setEnablePromptCache}
-        requestTimeout={requestTimeout}
-        onUpdateRequestTimeout={setRequestTimeout}
-      />
-
-      <AWSSection
-        awsRegion={awsRegion}
-        awsAccessKeyId={awsAccessKeyId}
-        awsSecretAccessKey={awsSecretAccessKey}
-        awsSessionToken={awsSessionToken}
-        onUpdateRegion={setAwsRegion}
-        onUpdateAccessKeyId={setAwsAccessKeyId}
-        onUpdateSecretAccessKey={setAwsSecretAccessKey}
-        onUpdateSessionToken={setAwsSessionToken}
-        useAwsProfile={useAwsProfile}
-        onUpdateUseAwsProfile={setUseAwsProfile}
-        awsProfile={awsProfile}
-        onUpdateAwsProfile={setAwsProfile}
-        proxySettings={proxySettings}
-        onUpdateProxySettings={setProxySettings}
-        currentLLM={currentLLM}
-        availableModels={availableModels}
-        inferenceParams={inferenceParams}
-        bedrockSettings={bedrockSettings}
-        onUpdateLLM={handleChangeLLM}
-        onUpdateInferenceParams={updateInferenceParams}
-        onUpdateBedrockSettings={updateBedrockSettings}
-      />
-
-      <GuardrailSettings
-        guardrailSettings={guardrailSettings}
-        onUpdateGuardrailSettings={updateGuardrailSettings}
-      />
-
-      <LightModelSettings />
-
-      <AdvancedSection sendMsgKey={sendMsgKey} onUpdateSendMsgKey={updateSendMsgKey} />
-
-      <NotificationSection />
-
-      <UserAvatarSection />
-
-      <SidebarSection />
+        <div className="flex-1 overflow-y-auto md:px-16 px-8 py-6">
+          <div className="min-w-[320px] max-w-[1024px]">
+            <ActivePanel />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

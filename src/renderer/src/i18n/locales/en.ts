@@ -5,6 +5,8 @@ import { websiteGenerator } from './websiteGenerator'
 import {
   iamPolicy,
   appearanceSettings,
+  awsSettings,
+  settingTabsLabels,
   notificationSettings,
   userAvatarSettings,
   userNameSettings,
@@ -70,7 +72,7 @@ const Translation = {
 }
 
 const SettingPage = {
-  Setting: 'Setting',
+  Settings: 'Settings',
   'Proxy Settings': 'Proxy Settings',
   'Enable Proxy': 'Enable Proxy',
   'Proxy Host': 'Proxy Host',
@@ -973,6 +975,8 @@ const en = {
   ...CodeBlock,
   ...iamPolicy.en,
   ...appearanceSettings.en,
+  ...awsSettings.en,
+  ...settingTabsLabels.en,
   ...notificationSettings.en,
   ...userAvatarSettings.en,
   ...userNameSettings.en,

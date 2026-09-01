@@ -7,6 +7,7 @@ import { AgentTableView } from './AgentTableView'
 import { AgentViewToggle } from './AgentViewToggle'
 import { EmptyState } from './EmptyState'
 import { TagFilter } from './TagFilter'
+import { UnhideAgentsDropdown } from './UnhideAgentsDropdown'
 import { useAgentFilter } from './useAgentFilter'
 import { useAgentDragOrder } from './useAgentDragOrder'
 import { useSettings } from '@renderer/contexts/SettingsContext'
@@ -22,9 +23,10 @@ interface AgentListProps {
   onSaveAsShared?: (agent: CustomAgent) => void
   onShareToOrganization?: (agent: CustomAgent) => void
   onConvertToStrands?: (agentId: string) => void
-  /** Number of default agents the user removed; enables the restore button */
-  hiddenDefaultCount?: number
-  onRestoreDefaults?: () => void
+  /** Default agents the user hid; drives the unhide dropdown */
+  hiddenAgents?: CustomAgent[]
+  onUnhideAgent?: (agentId: string) => void
+  onUnhideAll?: () => void
   /** Allow rearranging agents by drag & drop (My Agents page) */
   allowReorder?: boolean
 }
@@ -40,8 +42,9 @@ export const AgentList: React.FC<AgentListProps> = ({
   onSaveAsShared,
   onShareToOrganization,
   onConvertToStrands,
-  hiddenDefaultCount = 0,
-  onRestoreDefaults,
+  hiddenAgents,
+  onUnhideAgent,
+  onUnhideAll,
   allowReorder = false
 }) => {
   const { t } = useTranslation()
@@ -87,16 +90,12 @@ export const AgentList: React.FC<AgentListProps> = ({
           />
         </div>
         <div className="flex items-center gap-2">
-          {hiddenDefaultCount > 0 && onRestoreDefaults && (
-            <button
-              onClick={onRestoreDefaults}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white
-                dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm
-                hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2
-                focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 whitespace-nowrap"
-            >
-              {t('myAgents.restoreDefaults', { count: hiddenDefaultCount })}
-            </button>
+          {hiddenAgents && onUnhideAgent && onUnhideAll && (
+            <UnhideAgentsDropdown
+              hiddenAgents={hiddenAgents}
+              onUnhideAgent={onUnhideAgent}
+              onUnhideAll={onUnhideAll}
+            />
           )}
           <AgentViewToggle viewMode={viewMode} onToggle={setViewMode} />
           <button

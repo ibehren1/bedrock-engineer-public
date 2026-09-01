@@ -5,6 +5,8 @@ import { websiteGenerator } from './websiteGenerator'
 import {
   iamPolicy,
   appearanceSettings,
+  awsSettings,
+  settingTabsLabels,
   notificationSettings,
   userAvatarSettings,
   userNameSettings,
@@ -70,7 +72,7 @@ const Translation = {
 }
 
 const SettingPage = {
-  Setting: '設定',
+  Settings: '設定',
   'Proxy Settings': 'プロキシ設定',
   'Enable Proxy': 'プロキシを有効にする',
   'Proxy Host': 'プロキシホスト',
@@ -993,6 +995,8 @@ const ja = {
   ...CodeBlock,
   ...iamPolicy.ja,
   ...appearanceSettings.ja,
+  ...awsSettings.ja,
+  ...settingTabsLabels.ja,
   ...notificationSettings.ja,
   ...userAvatarSettings.ja,
   ...userNameSettings.ja,

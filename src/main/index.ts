@@ -19,11 +19,7 @@ import { bedrockHandlers } from './handlers/bedrock-handlers'
 import { fileHandlers } from './handlers/file-handlers'
 import { pdfHandlers } from './handlers/pdf-handlers'
 import { docxHandlers } from './handlers/docx-handlers'
-import {
-  windowHandlers,
-  preloadTaskHistoryWindow,
-  forceCloseTaskHistoryWindow
-} from './handlers/window-handlers'
+import { windowHandlers, forceCloseTaskHistoryWindow } from './handlers/window-handlers'
 import { agentHandlers } from './handlers/agent-handlers'
 import { utilHandlers } from './handlers/util-handlers'
 import { screenHandlers } from './handlers/screen-handlers'
@@ -31,6 +27,7 @@ import { cameraHandlers } from './handlers/camera-handlers'
 import { proxyHandlers } from './handlers/proxy-handlers'
 import {
   backgroundAgentHandlers,
+  initializeBackgroundAgentScheduler,
   shutdownBackgroundAgentScheduler
 } from './handlers/background-agent-handlers'
 import { pubsubHandlers } from './handlers/pubsub-handlers'
@@ -481,14 +478,10 @@ app.whenReady().then(async () => {
     })
   createWindow()
 
-  // Preload task history window in the background for faster access
-  setTimeout(() => {
-    preloadTaskHistoryWindow().catch((err) => {
-      log.error('Failed to preload task history window at startup', {
-        error: err instanceof Error ? err.message : String(err)
-      })
-    })
-  }, 3000) // 3秒後にプリロード（メインウィンドウの初期化完了後）
+  // Arm the cron jobs for saved background agent tasks. This used to happen as a
+  // side effect of a hidden renderer window, which cost a whole extra process for
+  // the whole session; scheduling belongs in the main process instead.
+  initializeBackgroundAgentScheduler()
 
   // Log where Electron Store saves config.json
   log.debug('Electron Store configuration directory', {
