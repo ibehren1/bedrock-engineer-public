@@ -3,6 +3,7 @@ import { InputForm } from '../InputForm'
 import { AttachedImage } from '../InputForm/TextArea'
 import { SendMsgKey } from '@/types/agent-chat'
 import type { ChatSandboxStatus } from '../../hooks/useChatSandbox'
+import type { ChatAttachment } from '../../hooks/useChatAttachments'
 
 // InputFormContainer の参照タイプを定義
 export type InputFormContainerRef = {
@@ -36,6 +37,17 @@ type InputFormContainerProps = {
     onRemove: (deleteData: boolean) => void
     onOpenFolder: () => void
   }
+  attachments?: {
+    files: ChatAttachment[]
+    directory: string
+    totalSize: number
+    isBusy: boolean
+    onAdd: () => void
+    onRemove: (name: string) => void
+    onOpenFolder: () => void
+    onRefresh: () => void
+    onAddFiles: (files: File[]) => Promise<void>
+  }
 }
 
 /**
@@ -63,7 +75,8 @@ const InputFormContainer = React.forwardRef<InputFormContainerRef, InputFormCont
       hasMessages,
       onHeightChange,
       isHistoryOpen,
-      sandbox
+      sandbox,
+      attachments
     },
     ref
   ) => {
@@ -112,6 +125,7 @@ const InputFormContainer = React.forwardRef<InputFormContainerRef, InputFormCont
         onHeightChange={onHeightChange}
         isHistoryOpen={isHistoryOpen}
         sandbox={sandbox}
+        attachments={attachments}
       />
     )
   }

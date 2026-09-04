@@ -72,6 +72,43 @@ function validatePdfFile(filePath: string): void {
   }
 }
 
+/**
+ * Extract text from a PDF file with optional line range filtering.
+ *
+ * Exported so main-process callers (the attachments context builder) can extract without
+ * a round trip through IPC.
+ */
+export const extractPdfText = async (filePath: string, lineRange?: LineRange): Promise<string> => {
+  log.info('Extracting text from PDF', { filePath, hasLineRange: !!lineRange })
+
+  try {
+    validatePdfFile(filePath)
+
+    const dataBuffer = await fs.readFile(filePath)
+    const pdfData = await pdfParse(dataBuffer)
+    const cleanedText = cleanupText(pdfData.text)
+
+    // Apply line range filtering if specified
+    const result = filterByLineRange(cleanedText, lineRange)
+
+    log.info('PDF text extraction successful', {
+      filePath,
+      pages: pdfData.numpages,
+      originalLength: cleanedText.length,
+      filteredLength: result.length
+    })
+
+    return result
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    log.error('PDF text extraction failed', {
+      filePath,
+      error: errorMessage
+    })
+    throw new Error(`Failed to extract text from PDF ${filePath}: ${errorMessage}`)
+  }
+}
+
 export const pdfHandlers = {
   /**
    * Extract text from PDF file with optional line range filtering
@@ -79,36 +116,7 @@ export const pdfHandlers = {
   'pdf-extract-text': async (
     _event: IpcMainInvokeEvent,
     { filePath, lineRange }: { filePath: string; lineRange?: LineRange }
-  ): Promise<string> => {
-    log.info('Extracting text from PDF', { filePath, hasLineRange: !!lineRange })
-
-    try {
-      validatePdfFile(filePath)
-
-      const dataBuffer = await fs.readFile(filePath)
-      const pdfData = await pdfParse(dataBuffer)
-      const cleanedText = cleanupText(pdfData.text)
-
-      // Apply line range filtering if specified
-      const result = filterByLineRange(cleanedText, lineRange)
-
-      log.info('PDF text extraction successful', {
-        filePath,
-        pages: pdfData.numpages,
-        originalLength: cleanedText.length,
-        filteredLength: result.length
-      })
-
-      return result
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      log.error('PDF text extraction failed', {
-        filePath,
-        error: errorMessage
-      })
-      throw new Error(`Failed to extract text from PDF ${filePath}: ${errorMessage}`)
-    }
-  },
+  ): Promise<string> => extractPdfText(filePath, lineRange),
 
   /**
    * Extract text with metadata from PDF file

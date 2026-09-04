@@ -332,6 +332,40 @@ export const api = {
       return ipcRenderer.invoke('docker-sandbox-open-folder', { sessionId })
     }
   },
+  chatAttachments: {
+    list: async (sessionId: string) => {
+      return ipcRenderer.invoke('chat-attachments-list', { sessionId })
+    },
+    add: async (sessionId: string, files: { name: string; bytes: Uint8Array }[]) => {
+      return ipcRenderer.invoke('chat-attachments-add', { sessionId, files })
+    },
+    addFromPicker: async (sessionId: string) => {
+      return ipcRenderer.invoke('chat-attachments-add-from-picker', { sessionId })
+    },
+    remove: async (sessionId: string, name: string) => {
+      return ipcRenderer.invoke('chat-attachments-remove', { sessionId, name })
+    },
+    removeAll: async (sessionId: string) => {
+      return ipcRenderer.invoke('chat-attachments-remove-all', { sessionId })
+    },
+    removeEveryFolder: async () => {
+      return ipcRenderer.invoke('chat-attachments-remove-every-folder')
+    },
+    rename: async (sessionId: string) => {
+      return ipcRenderer.invoke('chat-attachments-rename', { sessionId })
+    },
+    buildContext: async (sessionId: string) => {
+      return ipcRenderer.invoke('chat-attachments-build-context', { sessionId })
+    },
+    openFolder: async (sessionId: string) => {
+      return ipcRenderer.invoke('chat-attachments-open-folder', { sessionId })
+    }
+  },
+  help: {
+    prepareUserGuide: async (sessionId: string) => {
+      return ipcRenderer.invoke('help-prepare-user-guide', { sessionId })
+    }
+  },
   screen: {
     listAvailableWindows: async () => {
       return ipcRenderer.invoke('screen:list-available-windows')

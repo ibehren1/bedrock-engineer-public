@@ -80,14 +80,14 @@ The "MCP Servers" tab has a **Find MCP servers** panel backed by the
 
 What the suggestion reads, in order of usefulness:
 
-| Source | Why it matters |
-| ------ | -------------- |
-| System prompt | Where the specifics live — the systems, products and data sources the agent works with |
-| Scenarios | Concrete tasks, usually naming real tools |
-| Allowed shell commands | A `kubectl` or `gh` pattern names the system directly |
-| Additional instruction | Extra context appended to the generated prompt |
-| Description, category | Coarse signal, used when the prompt is thin |
-| Enabled tools, existing MCP servers | Excluded from suggestions — no point proposing what the agent already has |
+| Source                              | Why it matters                                                                         |
+| ----------------------------------- | -------------------------------------------------------------------------------------- |
+| System prompt                       | Where the specifics live — the systems, products and data sources the agent works with |
+| Scenarios                           | Concrete tasks, usually naming real tools                                              |
+| Allowed shell commands              | A `kubectl` or `gh` pattern names the system directly                                  |
+| Additional instruction              | Extra context appended to the generated prompt                                         |
+| Description, category               | Coarse signal, used when the prompt is thin                                            |
+| Enabled tools, existing MCP servers | Excluded from suggestions — no point proposing what the agent already has              |
 
 Each term must be grounded in a phrase from that configuration, and the UI shows the phrase next to
 the term. Generic words (`automation`, `devops`, `deployment`, `monitoring`, …) are rejected because
@@ -122,11 +122,13 @@ Vercel bot challenge.
 ## Troubleshooting
 
 **If connection errors occur:**
+
 - Verify the command path is correct
 - Check that required dependencies are installed
 - Confirm environment variables are properly set
 
 **If configuration errors occur:**
+
 - Verify the JSON format is correct
 - Ensure the `mcpServers` object is included
 - Check for duplicate server names

@@ -10,6 +10,7 @@ import { PlanActToggle } from './PlanActToggle'
 import { useSettings } from '@renderer/contexts/SettingsContext'
 import { AgentMentionPopup } from './AgentMentionPopup'
 import { useAgentMention } from './useAgentMention'
+import { useHelpSession } from '../../lib/helpSession'
 
 export type AttachedImage = {
   file: File
@@ -26,6 +27,12 @@ type TextAreaProps = {
   setIsComposing: (value: boolean) => void
   sendMsgKey?: 'Enter' | 'Cmd+Enter'
   onHeightChange?: (height: number) => void
+  /**
+   * Chat page only: hand dropped and pasted files to the chat's attachments folder instead of
+   * carrying them in memory. When absent (the website / diagram / step-functions generators)
+   * the in-memory `attachedImages` path below is used unchanged.
+   */
+  onAddFiles?: (files: File[]) => Promise<void>
 }
 
 export const TextArea: React.FC<TextAreaProps> = ({
@@ -36,10 +43,12 @@ export const TextArea: React.FC<TextAreaProps> = ({
   isComposing,
   setIsComposing,
   sendMsgKey = 'Enter',
-  onHeightChange
+  onHeightChange,
+  onAddFiles
 }) => {
   const { t } = useTranslation()
   const { planMode, setPlanMode, agents } = useSettings()
+  const helpSession = useHelpSession()
   const [dragActive, setDragActive] = useState(false)
   const [attachedImages, setAttachedImages] = useState<AttachedImage[]>([])
   const [isManuallyResized, setIsManuallyResized] = useState(false)
@@ -201,6 +210,16 @@ export const TextArea: React.FC<TextAreaProps> = ({
       // Prevent default paste behavior when handling as images
       e.preventDefault()
 
+      // Chat page: the pasted image becomes a file in the chat's attachments folder, and the
+      // size / format / count checks run in the main process.
+      if (onAddFiles) {
+        const files = imageItems
+          .map((item) => item.getAsFile())
+          .filter((file): file is File => file !== null)
+        if (files.length > 0) await onAddFiles(files)
+        return
+      }
+
       if (attachedImages.length + imageItems.length > 20) {
         toast.error(t('textarea.imageValidation.tooManyImages'))
         return
@@ -219,7 +238,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
         validateAndProcessImage(file)
       }
     },
-    [attachedImages.length, validateAndProcessImage, t]
+    [attachedImages.length, validateAndProcessImage, t, onAddFiles]
   )
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -293,75 +312,6 @@ export const TextArea: React.FC<TextAreaProps> = ({
     [value, onChange]
   )
 
-  // ドロップされたドキュメントを .bedrock-engineer/attachments に保存し、
-  // 既存の readFiles ツールでテキストを抽出してメッセージへ挿入する。
-  // 複数ファイルを順に処理する間 value は更新されないため、結果を一旦蓄積し、
-  // 最後に一度だけカーソル位置へ挿入する（相互上書きを防ぐ）。
-  const processDocumentFiles = useCallback(
-    async (files: File[]) => {
-      const chunks: string[] = []
-
-      for (const droppedFile of files) {
-        // 対応していない拡張子は保存せず、従来どおりファイル名だけを挿入する
-        if (!window.file.isAllowedDocument(droppedFile.name)) {
-          chunks.push(droppedFile.name)
-          continue
-        }
-
-        const loadingToast = toast.loading(
-          t('textarea.document.extracting', { name: droppedFile.name })
-        )
-        try {
-          // ファイルの中身をプロジェクト内へ保存する
-          const bytes = new Uint8Array(await droppedFile.arrayBuffer())
-          const saveResult = await window.file.saveDroppedDocument(droppedFile.name, bytes)
-
-          if (!saveResult.success || !saveResult.filePath) {
-            throw new Error(saveResult.error || 'Failed to save document')
-          }
-
-          // 既存の readFiles ツールを実行してテキストを抽出する
-          const toolResult = await window.api.bedrock.executeTool({
-            type: 'readFiles',
-            paths: [saveResult.filePath]
-          })
-
-          // readFiles は文字列を返すが、ToolResult 形式で返る場合にも備える
-          const extracted =
-            typeof toolResult === 'string'
-              ? toolResult
-              : (toolResult as { result?: string })?.result ?? ''
-
-          toast.dismiss(loadingToast)
-
-          chunks.push(
-            t('textarea.document.injectedBlock', {
-              name: droppedFile.name,
-              path: saveResult.filePath,
-              content: extracted
-            })
-          )
-          toast.success(t('textarea.document.extracted', { name: droppedFile.name }))
-        } catch (error) {
-          toast.dismiss(loadingToast)
-          // 失敗した場合は従来どおりファイル名だけを挿入する
-          chunks.push(droppedFile.name)
-          toast.error(
-            t('textarea.document.extractFailed', {
-              name: droppedFile.name,
-              error: error instanceof Error ? error.message : String(error)
-            })
-          )
-        }
-      }
-
-      if (chunks.length > 0) {
-        insertTextAtCursor(chunks.join('\n'))
-      }
-    },
-    [insertTextAtCursor, t]
-  )
-
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -379,6 +329,13 @@ export const TextArea: React.FC<TextAreaProps> = ({
       setDragActive(false)
 
       const allFiles = Array.from(e.dataTransfer.files)
+
+      // Chat page: every dropped file becomes a file in the chat's attachments folder,
+      // whatever its type. Validation lives in the main process.
+      if (onAddFiles) {
+        if (allFiles.length > 0) void onAddFiles(allFiles)
+        return
+      }
 
       // 画像ファイルと非画像ファイルを分ける
       const imageFiles = allFiles.filter((file) => {
@@ -410,12 +367,13 @@ export const TextArea: React.FC<TextAreaProps> = ({
 
       validImageFiles.forEach(validateAndProcessImage)
 
-      // 非画像ファイルはドキュメントとして扱い、テキストを抽出して挿入する
+      // The generators have no chat to attach a document to, so a dropped file contributes
+      // only its name, the way it did when extraction failed.
       if (nonImageFiles.length > 0) {
-        void processDocumentFiles(nonImageFiles)
+        insertTextAtCursor(nonImageFiles.map((file) => file.name).join('\n'))
       }
     },
-    [attachedImages.length, validateAndProcessImage, t, processDocumentFiles]
+    [attachedImages.length, validateAndProcessImage, t, insertTextAtCursor, onAddFiles]
   )
 
   const removeImage = (index: number) => {
@@ -424,7 +382,9 @@ export const TextArea: React.FC<TextAreaProps> = ({
 
   return (
     <div className="relative w-full">
-      {attachedImages.length > 0 && (
+      {/* Only the generators still hold images in memory; the chat page lists them in its
+          attachments menu instead. */}
+      {!onAddFiles && attachedImages.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2">
           {attachedImages.map((image, index) => (
             <div key={index} className="relative group">
@@ -554,22 +514,41 @@ export const TextArea: React.FC<TextAreaProps> = ({
 
         {/* Controls at the bottom */}
         <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 rounded-b-lg">
-          <div className="flex items-center gap-2.5 z-10 pointer-events-auto">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {t('inputControls.agent')}
-              </span>
-              <AgentSelector agents={agents} alignment="left" />
+          {/* The Help chat pins its own agent and model, so it shows them as plain text rather
+              than pickers that would appear to change a chat they cannot change. */}
+          {helpSession.isHelpSession ? (
+            <div className="flex items-center gap-2.5 z-10 pointer-events-auto">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {t('inputControls.agent')}
+                </span>
+                <span className="text-xs font-medium dark:text-white">{helpSession.agentName}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {t('inputControls.model')}
+                </span>
+                <span className="text-xs font-medium dark:text-white">{helpSession.modelId}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {t('inputControls.model')}
-              </span>
-              <ModelSelector openable={true} />
+          ) : (
+            <div className="flex items-center gap-2.5 z-10 pointer-events-auto">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {t('inputControls.agent')}
+                </span>
+                <AgentSelector agents={agents} alignment="left" />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {t('inputControls.model')}
+                </span>
+                <ModelSelector openable={true} />
+              </div>
+              <ThinkingModeSelector label={t('inputControls.thinking')} />
+              <InterleaveThinkingToggle />
             </div>
-            <ThinkingModeSelector label={t('inputControls.thinking')} />
-            <InterleaveThinkingToggle />
-          </div>
+          )}
 
           <div className="flex items-center gap-2">
             <div>

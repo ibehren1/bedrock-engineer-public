@@ -83,13 +83,21 @@ export const ChatHistoryProvider: React.FC<{ children: React.ReactNode }> = ({ c
       } catch {
         // 名前が読みやすくなるだけの処理なので、失敗してもリネーム自体は妨げない。
       }
+
+      // 添付ファイルのフォルダもタイトルに追従させる（ファイルはそのまま残る）。
+      try {
+        await window.api.chatAttachments.rename(sessionId)
+      } catch {
+        // こちらも見た目だけの処理なので、失敗を伝播させない。
+      }
     },
     [loadSessions]
   )
 
-  // チャット削除に伴う Docker サンドボックスの後始末。
-  // コンテナは常に削除し、データフォルダは呼び出し側の指定に従う。
-  const teardownSandboxes = useCallback(
+  // チャット削除に伴う後始末。Docker コンテナは常に削除し、そのデータフォルダは
+  // 呼び出し側の指定に従う。添付ファイルのフォルダはユーザーが持っているファイルの
+  // コピーなので、チェックボックスは設けず常に削除する。
+  const teardownChatResources = useCallback(
     async (sessionIds: string[], deleteSandboxData: boolean): Promise<void> => {
       await Promise.all(
         sessionIds.map(async (sessionId) => {
@@ -99,6 +107,11 @@ export const ChatHistoryProvider: React.FC<{ children: React.ReactNode }> = ({ c
           } catch {
             // A chat without a sandbox is the common case, and a Docker daemon that is
             // down must not block deleting the chat itself.
+          }
+          try {
+            await window.api.chatAttachments.removeAll(sessionId)
+          } catch {
+            // 添付が無いチャットが大半なので、失敗しても削除自体は続行する。
           }
         })
       )
@@ -119,11 +132,11 @@ export const ChatHistoryProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // セッションを削除
   const deleteSession = useCallback(
     async (sessionId: string, deleteSandboxData = false): Promise<void> => {
-      await teardownSandboxes([sessionId], deleteSandboxData)
+      await teardownChatResources([sessionId], deleteSandboxData)
       window.chatHistory.deleteSession(sessionId)
       loadSessions() // セッション一覧を更新
     },
-    [loadSessions, teardownSandboxes]
+    [loadSessions, teardownChatResources]
   )
 
   // 選択した複数のセッションを削除
@@ -132,13 +145,13 @@ export const ChatHistoryProvider: React.FC<{ children: React.ReactNode }> = ({ c
       if (!sessionIds || sessionIds.length === 0) {
         return
       }
-      await teardownSandboxes(sessionIds, deleteSandboxData)
+      await teardownChatResources(sessionIds, deleteSandboxData)
       window.chatHistory.deleteSessions(sessionIds)
       loadSessions() // セッション一覧を更新
       // 現在のセッションが削除対象に含まれる場合はクリア
       setCurrentSessionId((prev) => (prev && sessionIds.includes(prev) ? undefined : prev))
     },
-    [loadSessions, teardownSandboxes]
+    [loadSessions, teardownChatResources]
   )
 
   // 全セッションを削除
@@ -152,13 +165,20 @@ export const ChatHistoryProvider: React.FC<{ children: React.ReactNode }> = ({ c
       } catch {
         sandboxSessionIds = []
       }
-      await teardownSandboxes(sandboxSessionIds, deleteSandboxData)
+      await teardownChatResources(sandboxSessionIds, deleteSandboxData)
+
+      // 添付フォルダはサイドバーに出ないチャットの分も残るので、ディスク上を丸ごと片付ける。
+      try {
+        await window.api.chatAttachments.removeEveryFolder()
+      } catch {
+        // プロジェクトフォルダ未設定などで失敗しても、チャットの削除は続行する。
+      }
 
       window.chatHistory.deleteAllSessions()
       loadSessions() // セッション一覧を更新
       setCurrentSessionId(undefined)
     },
-    [loadSessions, teardownSandboxes]
+    [loadSessions, teardownChatResources]
   )
 
   // アクティブセッションを設定

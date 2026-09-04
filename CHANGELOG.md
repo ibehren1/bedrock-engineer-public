@@ -7,7 +7,18 @@ dated section here for anything user-visible.
 See the [README](./README.md#whats-different-in-this-fork) for a feature-by-feature
 overview of the fork with screenshots.
 
+### 2026-09-04
+
+- On Windows, a Docker sandbox that mounts a folder from your project no longer writes that path with backslashes into its compose file. Docker Compose expects forward slashes there, so the mount could fail to resolve; sandbox paths are now always written in the form Compose understands.
+- Attachments now work like sandboxes: they are files on disk in your project directory instead of text pasted into the message box. Dropping, pasting or picking a file writes it into `attachments/<chat-title>-<id>/` right away, and images are files too, so the thumbnail strip above the input is gone. A paperclip button sits next to the export buttons — always available, with a badge for how many files this chat has — and its menu lists each file with its size, deletes one on the spot, adds more through a file picker, and opens the folder in Finder, Explorer or your Linux file manager. The folder is named after the chat and is renamed automatically when the chat title changes, including when a title is generated for you.
+- What the agent sees is rebuilt from the folder on every message. Edit an attached file in an editor, or remove it from the paperclip menu, and the next thing you send reflects that — no re-attaching and no rewriting of the conversation. Text, PDF and Word contents are extracted inline and images are sent as images; anything else, spreadsheets included, is listed by name and path so the agent can open it with its file tools. Very long files are trimmed with a note telling the agent to read the rest itself. Because the contents are assembled per message rather than stored, they no longer bloat the saved conversation or the Markdown, Word and PDF exports.
+- Deleting a chat now deletes its attachments folder along with it, and deleting all chats clears the whole `attachments/` folder — including chats that never got as far as sending a message. The old shared `.bedrock-engineer/attachments` folder is no longer used and can be deleted by hand; files already in it are left alone.
+- Add a full **User Guide** covering every page, every tool and every setting in plain language, written for someone comfortable with a computer but not deeply technical. It explains what each of the twenty-eight tools does and when to reach for it, walks through building an agent and writing a system prompt, covers attachments, Docker sandboxes, MCP servers, scheduled background tasks and the generators, and explains how to choose a model and keep costs down. It ends with a "how do I…" index of about fifty common questions, a glossary, and a troubleshooting section for the errors people actually hit. The agents in the app can read the guide themselves, so you can ask the chat how a feature works instead of going and looking it up.
+- New **Help** button in the bottom-left corner, just above the GitHub link. It opens a chat called "Bedrock Engineer Help" with the user guide already attached, so you can ask how something works in plain language and get an answer taken from the guide rather than guessed at. The guide now ships inside the app, so it always matches the build you are running — no internet connection needed. The help chat runs on whichever model you picked as the **Light Processing Model** in Settings, which keeps it cheap; if you haven't picked one it uses your main conversation model. It has no tools at all, so it can only answer from the guide, and it will say so plainly when the guide does not cover what you asked. Clicking Help again returns to the same conversation instead of starting over, and the chat appears in your history like any other. If you have not set a project directory yet the guide cannot be saved as an attachment, so it is handed to the help agent directly instead and a note tells you why no attachment is shown.
+- The User Guide now covers setting up AWS from nothing. A rewritten "Setting up access to Amazon Bedrock" section walks through enabling model access in the Bedrock console (including why access is per region and why cross-region models need it granted in several), attaching the IAM policy the app asks for, creating access keys in the console or with the API, installing the AWS CLI on macOS, Windows and Linux, and filling in the `~/.aws/credentials` and `~/.aws/config` files by hand or with `aws configure` — with named profiles, session tokens and IAM Identity Center covered, and a short set of commands for checking your setup works before blaming the app. Each failure those commands can produce is matched to the step that fixes it, the troubleshooting section gained entries for invalid and expired credentials, and the README points at the new section from the top, from Getting Started, from the install steps and from the documentation list.
+
 ### 2026-09-03
+
 - Add xAI's Grok 4.6 to the model list. It is built for coding, agentic work and long-running tasks, with a 500K token context window, and its reasoning is always on — the thinking control sets how hard it thinks rather than whether it thinks at all. Bedrock offers it through two routing options, Global and US, both of which appear in the model dropdown; there is no single-region option. Grok also caches repeated prompt content automatically, so no cache settings are involved. Grok 4.3 is not offered, because Bedrock does not serve it on the API this app uses.
 - The "Deeper" thinking setting now asks for the highest reasoning effort the model offers, one step up from before. This affects Grok 4.6 and the GPT-5.6 models; Claude models are unchanged.
 - Switching to another chat no longer cancels the one you were in. An agent keeps working — including running its tools — while you read or write in a different chat, and the answer is there waiting when you come back. Chats still working are marked "Still responding" in the history list, and the stop button only ever stops the chat you are looking at. This also holds when you leave the Chat page entirely, so you can check settings mid-answer; reloading the window still cancels everything.
@@ -19,6 +30,7 @@ overview of the fork with screenshots.
 - Give wide model logos room to be seen. Most model logos are square glyphs, but xAI's is a wordmark about two and a half times wider than it is tall, and fitting that into a square slot shrank it to a smudge. Wide logos now get the full width available in the chat avatar, the model dropdown and the model button, and they keep their proportions in the Word and PDF exports instead of being squeezed into a square. The icon column in the model dropdown is now a fixed width, so every row's name lines up regardless of which logo it has.
 
 ### 2026-09-02
+
 - Keep Mermaid diagrams as `mermaid` code blocks in the Markdown export instead of turning them into
   PNG images. GitHub, VS Code and Obsidian render them from the source, and the diagram stays
   editable and readable as text. DrawIO diagrams and images pasted into the conversation are still
@@ -29,9 +41,11 @@ overview of the fork with screenshots.
 - Swap the icon offered for "Azure" when choosing an agent icon, because the icon set removed the Microsoft Azure mark. Agents already set to it keep working and pick up the new glyph.
 
 ### 2026-09-01
+
 - Add Claude Fable 5.1 to the model list. It is Anthropic's most capable model for demanding reasoning and long-horizon agentic work, with a 1M token context window, up to 128K output tokens, and thinking always on. Bedrock currently offers it on the global endpoint and, for single-region routing, in US East (N. Virginia) only.
 
 ### 2026-08-31
+
 - Call the action on built-in agents "Hide" instead of "Remove", and "Unhide" instead of "Restore default agents". Nothing is deleted — a hidden built-in agent is only taken out of the lists, and unhiding brings back its original configuration (any edits you made to it before hiding are not kept). Agents you created yourself are still deleted outright, and still say "Delete".
 - Unhide agents one at a time. The button that brought every hidden agent back at once is now a dropdown that lists each hidden agent by name and icon, with "Unhide all" still available at the bottom.
 - Allow hiding the Diagram Generator agent, which previously offered no way to remove it. The Diagram Generator page keeps working after you hide it, web search included, because it now falls back to the built-in agent configuration.
@@ -44,6 +58,7 @@ overview of the fork with screenshots.
 - Translate the AWS and Language settings into Japanese. Those labels had no translation at all and showed in English regardless of the selected language.
 
 ### 2026-08-28
+
 - Add a "My Agents" page with its own sidebar button (renamed from "Custom Agents"). It opens in the main window instead of an overlay, and is where you create, edit, duplicate, share, and remove agents.
 - Replace the agent display button with a real agent dropdown, moved into the message entry area to the left of the model selector. The dropdown includes an "Edit agents" entry that opens the My Agents page.
 - Label the message entry controls: Agent, Model, and Thinking.
@@ -61,9 +76,11 @@ overview of the fork with screenshots.
 - Choose an agent icon from about 38,000 icons instead of the previous 250. The icon picker keeps the curated, categorised list as its default view and adds ten icon collections you can browse or search by name: Tabler, Lucide, Phosphor, Material, Heroicons, Bootstrap, Font Awesome (plus brands), Simple Icons and Game Icons. Pick "All libraries" to search across every collection at once. Icon data loads only when you open a collection, so startup is unaffected, and existing agent icons keep working.
 
 ### 2026-08-27
-- Add ability for user to specify that the agent use another agent profile (via @<profile name>) to accomplish a task.  Results come back to the current agent.  i.e. use @email to find email from Kevin and compose a reply.  This allows the current agent to use the results of another agent's task (tools) without needing to switch back and forth.
+
+- Add ability for user to specify that the agent use another agent profile (via @<profile name>) to accomplish a task. Results come back to the current agent. i.e. use @email to find email from Kevin and compose a reply. This allows the current agent to use the results of another agent's task (tools) without needing to switch back and forth.
 
 ### 2026-08-24
+
 - Add an "Export chat to PDF" button. Same content as the Markdown export in a single self-contained PDF (Letter, 1" margins), typeset like the Word export.
 - Write each avatar image once instead of once per turn (`user-avatar.png`, `assistant-avatar-<model ID>.png`).
 - Group consecutive turns from the same party under a single heading.
@@ -73,6 +90,7 @@ overview of the fork with screenshots.
 - Diagrams (Mermaid/DrawIO) render at half size; Word also centers them.
 
 ### 2026-08-20
+
 - Add username along side the avatar.
 - Add a floating toolbar to copy just the highlighted text of a chat message as markdown or rich text.
 - Make the stop-generation button red while inference is running.
@@ -82,38 +100,47 @@ overview of the fork with screenshots.
 - Publish the GitHub release even when the build job fails or produces no installers (notes-only release; any binaries that did build are still attached).
 
 ### 2026-08-19
+
 - Serve OpenAI GPT-5.6 (Sol/Terra/Luna) models through the standard Bedrock Converse API and remove the OpenAI Responses API translation layer.
 - Remove the GPT-5.5 and GPT-5.4 models, which are not available through Converse.
 - Update the release workflow to keep build artifacts only for the most current release.
 
 ### 2026-08-14
+
 - Update assistant icon in chat interface to match the model's icon.
 - Hovering over the model icon in the chat interface now displays the specific model's name that produced the output.
 - Add options to copy message to clipboard in either markdown or rich text format.
 
 ### 2026-08-13
+
 - Update Claude Sonnet 5 pricing to $2/$10 per million input/output tokens.
 - Update to address open security vulnerabilities.
 
 ### 2026-08-04
-- Update OpenAI model pricing. 
+
+- Update OpenAI model pricing.
 - Address new Dependabot security alerts.
 
 ### 2026-07-30
+
 - Fix timezone issues for scheduled tasks.
 - Create select/delete function for chat history.
 - Address Dependabot security alerts.
 
 ### 2026-07-28
+
 - Add support for OpenAI API / GPT-5.6 models..
 
 ### 2026-07-27
+
 - Visual updates to add Dim and Dark themes.
 
 ### 2026-07-24
+
 - Added support for Opus 5 model.
 
 ### 2026-07-23
+
 - Remove gloss/glare from app icon.
 - Add option in settings to allowlist models.
   - This to shrink the list of models shown in the model selection dropdown in the chat interface.
@@ -124,37 +151,45 @@ overview of the fork with screenshots.
 - Added support for Kimi 2.5 model.
 
 ### 2026-07-22
+
 - Add setting to hide various route shortcuts from the sidebar.
 - Update to name the app from productName in package.json.
 - Update icon for the app.
 - Update the agent chat assistant icon to the Bedrock logo.
 
 ### 2026-07-21
+
 - Add drag-and-drop support for file attachments.
 - Update versioning scheme to use date-based versioning from the last git commit.
 
 ### 2026-07-13
+
 - Add conversation cost to the top right of the display.
 - Update the ToDo list icon to flash as items change status.
 
 ### 2026-07-08
+
 - Fix non-working Nova Sonic voice chat.
 - Force chat naming at second user prompt.
 - Update clear chat icon to a new-conversation icon.
 
 ### 2026-06-30
+
 - Add Sonnet 5 model support.
 
 ### 2026-06-29
+
 - Replace the unconditional auto-scroll-to-bottom with a hook that follows streaming output through the tool-use phase, then stops once the first line of the main response reaches the top of the message area. Respects manual scroll-up (pauses until the user returns to the bottom).
 - Fix issue with title generation for chats.
 - Add function to export chat history as a markdown file.
 - Update to Electron 42.x.x.
 
 ### 2026-06-10
+
 - Add support for Anthropic Fable 5 model.
 
 ### 2026-06-01
+
 - Added Makefile targets for easy local building, installing, signing, and cleaning the project.
   - `make build-mac`: Build the project for macOS.
   - `make install`: Install the project.

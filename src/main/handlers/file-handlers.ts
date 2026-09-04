@@ -1,4 +1,4 @@
-import { app, BrowserWindow, IpcMainInvokeEvent, shell } from 'electron'
+import { app, BrowserWindow, IpcMainInvokeEvent } from 'electron'
 import { handleFileOpen } from '../../preload/file'
 import fs from 'fs'
 import path from 'path'
@@ -90,36 +90,6 @@ export const fileHandlers = {
     }
 
     return path
-  },
-
-  // Open the project's attachments directory in the OS file manager
-  // (Finder on macOS, Explorer on Windows). Creates it first if it doesn't
-  // exist so the folder always opens successfully.
-  'open-attachments-directory': async (_event: IpcMainInvokeEvent) => {
-    try {
-      const projectPath = store.get('projectPath') as string
-      if (!projectPath) {
-        return { success: false, error: 'Project path not set' }
-      }
-
-      const attachmentsDir = path.join(projectPath, '.bedrock-engineer', 'attachments')
-      await fs.promises.mkdir(attachmentsDir, { recursive: true })
-
-      const errorMessage = await shell.openPath(attachmentsDir)
-      if (errorMessage) {
-        return { success: false, error: errorMessage }
-      }
-
-      return { success: true, path: attachmentsDir }
-    } catch (error) {
-      log.error('Failed to open attachments directory', {
-        error: error instanceof Error ? error.message : String(error)
-      })
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : String(error)
-      }
-    }
   },
 
   'get-local-image': async (_event: IpcMainInvokeEvent, filePath: string) => {

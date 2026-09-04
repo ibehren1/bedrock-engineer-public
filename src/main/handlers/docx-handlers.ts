@@ -80,6 +80,48 @@ function calculateTextStatistics(text: string): { wordCount: number; characterCo
   return { wordCount, characterCount }
 }
 
+/**
+ * Extract text from a DOCX file with optional line range filtering.
+ *
+ * Exported so main-process callers (the attachments context builder) can extract without a
+ * round trip through IPC.
+ */
+export const extractDocxText = async (filePath: string, lineRange?: LineRange): Promise<string> => {
+  log.info('Extracting text from DOCX', { filePath, hasLineRange: !!lineRange })
+
+  try {
+    validateDocxFile(filePath)
+
+    const result = await mammoth.extractRawText({ path: filePath })
+
+    if (result.messages.length > 0) {
+      log.warn('DOCX extraction warnings', {
+        filePath,
+        warnings: result.messages.map((m) => m.message)
+      })
+    }
+
+    const cleanedText = cleanupText(result.value)
+    const filteredResult = filterByLineRange(cleanedText, lineRange)
+
+    log.info('DOCX text extraction successful', {
+      filePath,
+      originalLength: cleanedText.length,
+      filteredLength: filteredResult.length,
+      warningCount: result.messages.length
+    })
+
+    return filteredResult
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    log.error('DOCX text extraction failed', {
+      filePath,
+      error: errorMessage
+    })
+    throw new Error(`Failed to extract text from DOCX ${filePath}: ${errorMessage}`)
+  }
+}
+
 export const docxHandlers = {
   /**
    * Extract text from DOCX file with optional line range filtering
@@ -87,41 +129,7 @@ export const docxHandlers = {
   'docx-extract-text': async (
     _event: IpcMainInvokeEvent,
     { filePath, lineRange }: { filePath: string; lineRange?: LineRange }
-  ): Promise<string> => {
-    log.info('Extracting text from DOCX', { filePath, hasLineRange: !!lineRange })
-
-    try {
-      validateDocxFile(filePath)
-
-      const result = await mammoth.extractRawText({ path: filePath })
-
-      if (result.messages.length > 0) {
-        log.warn('DOCX extraction warnings', {
-          filePath,
-          warnings: result.messages.map((m) => m.message)
-        })
-      }
-
-      const cleanedText = cleanupText(result.value)
-      const filteredResult = filterByLineRange(cleanedText, lineRange)
-
-      log.info('DOCX text extraction successful', {
-        filePath,
-        originalLength: cleanedText.length,
-        filteredLength: filteredResult.length,
-        warningCount: result.messages.length
-      })
-
-      return filteredResult
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      log.error('DOCX text extraction failed', {
-        filePath,
-        error: errorMessage
-      })
-      throw new Error(`Failed to extract text from DOCX ${filePath}: ${errorMessage}`)
-    }
-  },
+  ): Promise<string> => extractDocxText(filePath, lineRange),
 
   /**
    * Extract text with metadata from DOCX file

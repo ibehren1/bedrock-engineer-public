@@ -5,6 +5,7 @@ import { AttachmentsButton } from './AttachmentsButton'
 import { DirectorySelector } from './DirectorySelector'
 import { SandboxButton } from './SandboxButton'
 import type { ChatSandboxStatus } from '../../hooks/useChatSandbox'
+import type { ChatAttachment } from '../../hooks/useChatAttachments'
 import { SendMsgKey } from '@/types/agent-chat'
 import { FiStopCircle } from 'react-icons/fi'
 import { TbMarkdown, TbMessagePlus, TbFileTypeDocx, TbFileTypePdf } from 'react-icons/tb'
@@ -40,6 +41,17 @@ type InputFormProps = {
     onRemove: (deleteData: boolean) => void
     onOpenFolder: () => void
   }
+  attachments?: {
+    files: ChatAttachment[]
+    directory: string
+    totalSize: number
+    isBusy: boolean
+    onAdd: () => void
+    onRemove: (name: string) => void
+    onOpenFolder: () => void
+    onRefresh: () => void
+    onAddFiles: (files: File[]) => Promise<void>
+  }
 }
 
 export const InputForm: React.FC<InputFormProps> = ({
@@ -63,7 +75,8 @@ export const InputForm: React.FC<InputFormProps> = ({
   hasMessages,
   onHeightChange,
   isHistoryOpen = false,
-  sandbox
+  sandbox,
+  attachments
 }) => {
   const [isComposing, setIsComposing] = useState(false)
   const { t } = useTranslation()
@@ -83,7 +96,6 @@ export const InputForm: React.FC<InputFormProps> = ({
           <div className="flex flex-col justify-end gap-2 mb-1">
             <div className="flex gap-4 items-center">
               <ToolSettings onOpenToolSettings={onOpenToolSettings} />
-              <AttachmentsButton />
             </div>
             <DirectorySelector
               projectPath={projectPath}
@@ -93,80 +105,100 @@ export const InputForm: React.FC<InputFormProps> = ({
           </div>
 
           {/* right */}
-          {hasMessages && (
-            <div className="flex items-end mb-1 gap-2">
-              {loading && onStopGeneration && (
-                <Tooltip content={t('Stop generation')} placement="top" animation="duration-500">
-                  <button
-                    onClick={onStopGeneration}
-                    className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
+          <div className="flex items-end mb-1 gap-2">
+            {/* Outside the hasMessages gate below: files have to be attachable before the
+                first message is sent. */}
+            {attachments && (
+              <AttachmentsButton
+                files={attachments.files}
+                directory={attachments.directory}
+                totalSize={attachments.totalSize}
+                isBusy={attachments.isBusy}
+                onAdd={attachments.onAdd}
+                onRemove={attachments.onRemove}
+                onOpenFolder={attachments.onOpenFolder}
+                onOpen={attachments.onRefresh}
+              />
+            )}
+            {hasMessages && (
+              <>
+                {loading && onStopGeneration && (
+                  <Tooltip content={t('Stop generation')} placement="top" animation="duration-500">
+                    <button
+                      onClick={onStopGeneration}
+                      className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
+                    >
+                      <FiStopCircle />
+                    </button>
+                  </Tooltip>
+                )}
+                {/* Only present once this chat actually has a sandbox to control */}
+                {sandbox?.status.exists && (
+                  <SandboxButton
+                    status={sandbox.status}
+                    isBusy={sandbox.isBusy}
+                    onStop={sandbox.onStop}
+                    onStart={sandbox.onStart}
+                    onRemove={sandbox.onRemove}
+                    onOpenFolder={sandbox.onOpenFolder}
+                  />
+                )}
+                {onExportChat && (
+                  <Tooltip
+                    content={t('Export chat to Markdown')}
+                    placement="top"
+                    animation="duration-500"
                   >
-                    <FiStopCircle />
+                    <button
+                      onClick={onExportChat}
+                      disabled={isExporting}
+                      className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <TbMarkdown />
+                    </button>
+                  </Tooltip>
+                )}
+                {onExportWord && (
+                  <Tooltip
+                    content={t('Export chat to Word')}
+                    placement="top"
+                    animation="duration-500"
+                  >
+                    <button
+                      onClick={onExportWord}
+                      disabled={isExportingWord}
+                      className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <TbFileTypeDocx />
+                    </button>
+                  </Tooltip>
+                )}
+                {onExportPdf && (
+                  <Tooltip
+                    content={t('Export chat to PDF')}
+                    placement="top"
+                    animation="duration-500"
+                  >
+                    <button
+                      onClick={onExportPdf}
+                      disabled={isExportingPdf}
+                      className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <TbFileTypePdf />
+                    </button>
+                  </Tooltip>
+                )}
+                <Tooltip content={t('New chat')} placement="top" animation="duration-500">
+                  <button
+                    onClick={onClearChat}
+                    className="p-2 text-green-500 hover:text-green-600 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors duration-200"
+                  >
+                    <TbMessagePlus />
                   </button>
                 </Tooltip>
-              )}
-              {/* Only present once this chat actually has a sandbox to control */}
-              {sandbox?.status.exists && (
-                <SandboxButton
-                  status={sandbox.status}
-                  isBusy={sandbox.isBusy}
-                  onStop={sandbox.onStop}
-                  onStart={sandbox.onStart}
-                  onRemove={sandbox.onRemove}
-                  onOpenFolder={sandbox.onOpenFolder}
-                />
-              )}
-              {onExportChat && (
-                <Tooltip
-                  content={t('Export chat to Markdown')}
-                  placement="top"
-                  animation="duration-500"
-                >
-                  <button
-                    onClick={onExportChat}
-                    disabled={isExporting}
-                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <TbMarkdown />
-                  </button>
-                </Tooltip>
-              )}
-              {onExportWord && (
-                <Tooltip
-                  content={t('Export chat to Word')}
-                  placement="top"
-                  animation="duration-500"
-                >
-                  <button
-                    onClick={onExportWord}
-                    disabled={isExportingWord}
-                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <TbFileTypeDocx />
-                  </button>
-                </Tooltip>
-              )}
-              {onExportPdf && (
-                <Tooltip content={t('Export chat to PDF')} placement="top" animation="duration-500">
-                  <button
-                    onClick={onExportPdf}
-                    disabled={isExportingPdf}
-                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <TbFileTypePdf />
-                  </button>
-                </Tooltip>
-              )}
-              <Tooltip content={t('New chat')} placement="top" animation="duration-500">
-                <button
-                  onClick={onClearChat}
-                  className="p-2 text-green-500 hover:text-green-600 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors duration-200"
-                >
-                  <TbMessagePlus />
-                </button>
-              </Tooltip>
-            </div>
-          )}
+              </>
+            )}
+          </div>
         </div>
 
         <TextArea
@@ -178,6 +210,7 @@ export const InputForm: React.FC<InputFormProps> = ({
           setIsComposing={setIsComposing}
           sendMsgKey={sendMsgKey}
           onHeightChange={onHeightChange}
+          onAddFiles={attachments?.onAddFiles}
         />
       </div>
     </div>

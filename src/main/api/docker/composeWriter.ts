@@ -3,6 +3,7 @@ import net from 'net'
 import path from 'path'
 import yaml from 'js-yaml'
 import { createCategoryLogger } from '../../../common/logger'
+import { isInside } from '../../lib/pathSafety'
 import {
   CreateSandboxOptions,
   DEFAULT_SANDBOX_IMAGE,
@@ -100,6 +101,12 @@ const serializeVolume = (hostRelativeOrAbsolute: string, containerPath: string):
   `${hostRelativeOrAbsolute}:${containerPath}`
 
 /**
+ * Compose volume sources are always forward-slash separated, even on Windows, so paths
+ * derived from `path.relative` have to be converted before they go into the document.
+ */
+const toComposePath = (hostPath: string): string => hostPath.split(path.sep).join('/')
+
+/**
  * Build the compose document for a default, generated sandbox.
  */
 const buildGeneratedCompose = (
@@ -193,10 +200,6 @@ const buildFromAgentYaml = (
 
   const resolvedProject = path.resolve(projectPath)
   const resolvedSandbox = path.resolve(sandboxDir)
-  const isInside = (target: string, parent: string): boolean => {
-    const relative = path.relative(parent, target)
-    return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative))
-  }
 
   for (const [serviceName, rawService] of Object.entries(services)) {
     if (!rawService || typeof rawService !== 'object') {
@@ -265,7 +268,7 @@ const buildFromAgentYaml = (
           `Service "${serviceName}" bind-mounts "${source}", which is outside the project directory. Sandbox mounts are limited to the project directory and the sandbox's own folder.`
         )
       }
-      const relative = path.relative(resolvedSandbox, absolute)
+      const relative = toComposePath(path.relative(resolvedSandbox, absolute))
       rewritten.push(serializeVolume(relative.startsWith('.') ? relative : `./${relative}`, target))
       sawDataMount = true
     }

@@ -1,4 +1,5 @@
 import { CustomAgent } from '@/types/agent-chat'
+import { HELP_AGENT_ID, HELP_AGENT_SYSTEM_PROMPT } from './helpAgent'
 
 export const DEFAULT_AGENTS: CustomAgent[] = [
   {
@@ -700,6 +701,30 @@ However, you may want to minimize the amount of information in the output if you
     iconColor: 'oklch(0.67 0.2 30)', // Svelte orange
     category: 'website',
     tools: ['tavilySearch', 'retrieve', 'think'],
+    allowedCommands: [],
+    bedrockAgents: [],
+    knowledgeBases: [],
+    isCustom: false
+  },
+  {
+    // Backs the Help button in the sidebar. Deliberately tool-less: it answers from the user
+    // guide attached to the chat and nothing else.
+    id: HELP_AGENT_ID,
+    name: 'Bedrock Engineer Help',
+    description: 'helpAgent.description',
+    system: HELP_AGENT_SYSTEM_PROMPT,
+    scenarios: [
+      { title: 'Getting started', content: '' },
+      { title: 'Configuring AWS credentials', content: '' },
+      { title: 'Creating a custom agent', content: '' },
+      { title: 'Connecting an MCP server', content: '' },
+      { title: 'Using background agents', content: '' },
+      { title: 'Keyboard shortcuts', content: '' }
+    ],
+    icon: 'question',
+    iconColor: 'oklch(0.62 0.19 45)',
+    category: 'general',
+    tools: [],
     allowedCommands: [],
     bedrockAgents: [],
     knowledgeBases: [],

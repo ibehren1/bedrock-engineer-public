@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { FaDocker } from 'react-icons/fa'
 import { FiFolder, FiPlay, FiSquare, FiTrash2 } from 'react-icons/fi'
 import type { ChatSandboxStatus } from '../../hooks/useChatSandbox'
+import { folderName } from '../../lib/folderName'
 
 type SandboxButtonProps = {
   status: ChatSandboxStatus
@@ -12,13 +13,6 @@ type SandboxButtonProps = {
   onRemove: (deleteData: boolean) => void
   onOpenFolder: () => void
 }
-
-/** Last path segment, which is the readable `<chat-slug>-<shortid>` folder name. */
-const folderName = (directory: string): string =>
-  directory
-    .replace(/[/\\]+$/, '')
-    .split(/[/\\]/)
-    .pop() ?? directory
 
 /**
  * Docker whale button for the chat toolbar, shown only when the current chat has a

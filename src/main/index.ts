@@ -35,6 +35,8 @@ import { todoHandlers } from './handlers/todo-handlers'
 import { subAgentHandlers } from './handlers/sub-agent-handlers'
 import { mcpHandlers, cleanupMcpHandlers } from './handlers/mcp-handlers'
 import { dockerSandboxHandlers } from './handlers/docker-sandbox-handlers'
+import { chatAttachmentsHandlers } from './handlers/chat-attachments-handlers'
+import { helpHandlers } from './handlers/help-handlers'
 import { stopAllSandboxes } from './api/docker'
 import { cleanupMcpClients } from './mcp/index'
 
@@ -462,6 +464,8 @@ app.whenReady().then(async () => {
   registerIpcHandlers(mcpHandlers, { loggerCategory: 'mcp:ipc' })
   registerIpcHandlers(proxyHandlers, { loggerCategory: 'proxy:ipc' })
   registerIpcHandlers(dockerSandboxHandlers, { loggerCategory: 'docker-sandbox:ipc' })
+  registerIpcHandlers(chatAttachmentsHandlers, { loggerCategory: 'chat-attachments:ipc' })
+  registerIpcHandlers(helpHandlers, { loggerCategory: 'help:ipc' })
 
   // ログハンドラーの登録
   registerLogHandler()

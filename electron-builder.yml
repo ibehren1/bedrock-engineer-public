@@ -19,6 +19,9 @@ extraResources:
     to: 'worklets'
   - from: 'src/renderer/camera-preview.html'
     to: 'renderer/camera-preview.html'
+  # The Help chat attaches this guide, so the build has to carry the copy that matches it.
+  - from: 'docs/USER_GUIDE.md'
+    to: 'docs/USER_GUIDE.md'
 win:
   # executableName intentionally omitted: defaults to productName from package.json.
 nsis:

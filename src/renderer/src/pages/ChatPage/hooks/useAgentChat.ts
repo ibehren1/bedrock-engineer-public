@@ -38,6 +38,7 @@ import { AttachedImage } from '../components/InputForm/TextArea'
 import { ChatMessage } from '@/types/chat/history'
 import { isMcpTool } from '@/types/tools'
 import { clearHostApproval, requestHostApproval } from '../lib/hostCommandApproval'
+import { injectAttachmentBlocks } from '../lib/attachmentContext'
 import { notificationService } from '@renderer/services/NotificationService'
 import { limitContextLength } from '@renderer/lib/contextLength'
 import { IdentifiableMessage } from '@/types/chat/message'
@@ -58,6 +59,11 @@ import {
 type TurnContext = {
   tools: ToolState[]
   allowedAgentIds: string[]
+  /**
+   * このチャットの添付ファイルから組み立てたブロック。送信時に一度だけ作り、
+   * ターン内の全リクエスト（ツール実行の再帰を含む）で使い回す。
+   */
+  attachments: ContentBlock[]
 }
 
 // メッセージの送信時に、Trace を全て載せると InputToken が逼迫するので取り除く
@@ -382,7 +388,8 @@ export const useAgentChat = (
     props: StreamChatCompletionProps,
     currentMessages: Message[],
     turnKey: string,
-    turnSessionId?: string
+    turnSessionId: string | undefined,
+    turnCtx: TurnContext
   ) => {
     // Track last data received time for timeout detection
     let lastDataTime = Date.now()
@@ -467,6 +474,11 @@ export const useAgentChat = (
         limitedMessages = removeReasoningContent(limitedMessages)
       }
 
+      // 添付ファイルはターン開始時に一度読み込み、リクエストごとに再適用する。
+      // 純粋な変換なので、UI が描画し履歴に保存される配列にはブロックが入らない。
+      // トリミングの後・キャッシュポイント付与の前に行うのが要点。
+      limitedMessages = injectAttachmentBlocks(limitedMessages, turnCtx.attachments)
+
       // Prompt Cache適用（enablePromptCacheが有効な場合）
       if (enablePromptCache) {
         const cacheManager = new PromptCacheManager(modelId)
@@ -518,7 +530,7 @@ export const useAgentChat = (
             if (!messageStart) {
               console.warn('messageStop without messageStart')
               console.log(getRunState(turnKey).messages)
-              await streamChat(props, currentMessages, turnKey, turnSessionId)
+              await streamChat(props, currentMessages, turnKey, turnSessionId, turnCtx)
               return
             }
             // 新しいメッセージIDを生成
@@ -1118,7 +1130,8 @@ export const useAgentChat = (
       },
       currentMessages,
       turnKey,
-      turnSessionId
+      turnSessionId,
+      turnCtx
     )
 
     if (stopReason === 'tool_use' || stopReason === 'max_tokens') {
@@ -1174,7 +1187,8 @@ export const useAgentChat = (
     const mentionedAgents = parseAgentMentions(userInput, agents, agentId)
     const turnCtx: TurnContext = {
       tools: applyDelegationAllowlist(enabledTools, mentionedAgents),
-      allowedAgentIds: mentionedAgents.map((agent) => agent.id!)
+      allowedAgentIds: mentionedAgents.map((agent) => agent.id!),
+      attachments: []
     }
 
     if (mentionedAgents.length > 0 && !hasInvokeAgentTool(enabledTools)) {
@@ -1192,6 +1206,30 @@ export const useAgentChat = (
     // このターンの状態とメッセージはこのキーに書き込まれ続ける。
     const turnKey = runKey
     const turnSessionId = currentSessionId
+
+    // 添付フォルダは送信ごとに読み直す。前回の送信以降の編集や削除がそのまま反映され、
+    // かつツール実行の再帰ごとに PDF を再抽出することはない。
+    if (turnSessionId) {
+      try {
+        const context = await window.api.chatAttachments.buildContext(turnSessionId)
+        turnCtx.attachments = (context.blocks ?? []) as ContentBlock[]
+
+        if (context.truncatedFiles?.length) {
+          toast(t('attachments.toast.truncated', { files: context.truncatedFiles.join(', ') }))
+        }
+        for (const skipped of context.skippedFiles ?? []) {
+          toast.error(
+            t('attachments.toast.skipped', { name: skipped.name, reason: skipped.reason })
+          )
+        }
+      } catch (error) {
+        toast.error(
+          t('attachments.toast.contextFailed', {
+            error: error instanceof Error ? error.message : String(error)
+          })
+        )
+      }
+    }
 
     let result
     try {
@@ -1256,7 +1294,8 @@ export const useAgentChat = (
         },
         currentMessages,
         turnKey,
-        turnSessionId
+        turnSessionId,
+        turnCtx
       )
 
       const lastMessage = currentMessages[currentMessages.length - 1]

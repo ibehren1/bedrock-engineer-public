@@ -21,6 +21,7 @@ import {
 import { thinkingMode } from './thinkingMode'
 import { agentDirectory } from './agentDirectory'
 import { planActMode } from './planActMode'
+import { help } from './help'
 
 const HomePage = {
   'set your aws credential':
@@ -1014,6 +1015,7 @@ const ja = {
   ...agentDirectory.ja,
   ...AgentFormTabs,
   ...planActMode.ja,
+  ...help.ja,
   ...TodoModal,
   backgroundAgent: BackgroundAgent,
   ignoreSettings: IgnoreSettings,

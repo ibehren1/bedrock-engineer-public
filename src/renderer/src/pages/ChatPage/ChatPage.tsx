@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import AILogo from '../../assets/images/icons/bedrock-color.png'
 import { MessageList } from './components/MessageList'
 import InputFormContainer, { InputFormContainerRef } from './components/InputFormContainer'
@@ -18,8 +18,9 @@ import { useTokenAnalyticsModal, calculateAnalytics } from './modals/useTokenAna
 import { useTodoModal } from './modals/useTodoModal'
 import { HostCommandApprovalModal } from './modals/HostCommandApprovalModal'
 import { useChatSandbox } from './hooks/useChatSandbox'
+import { useChatAttachments } from './hooks/useChatAttachments'
 import { useChatHistory } from '@renderer/contexts/ChatHistoryContext'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useStreamingAutoScroll } from '@renderer/hooks/useStreamingAutoScroll'
 import { useLightProcessingModel } from '@renderer/lib/modelSelection'
 import { generateSessionTitle } from './utils/titleGenerator'
@@ -31,10 +32,13 @@ import { DrawioRasterizer, DrawioRasterizerRef } from './utils/DrawioRasterizer'
 import { allModels } from '@common/models/models'
 import { IdentifiableMessage } from '@/types/chat/message'
 import toast from 'react-hot-toast'
+import { HELP_AGENT_ID, HELP_AGENT_SYSTEM_PROMPT, HELP_CHAT_TITLE } from './constants/helpAgent'
+import { HelpSessionProvider } from './lib/helpSession'
 
 export default function ChatPage() {
   const { t } = useTranslation()
   const location = useLocation()
+  const navigate = useNavigate()
   const {
     currentLLM: llm,
     projectPath,
@@ -50,8 +54,31 @@ export default function ChatPage() {
     userName
   } = useSetting()
 
-  const currentScenarios = currentAgent?.scenarios || []
   const inputFormRef = useRef<InputFormContainerRef>(null)
+
+  const { deleteMessage, getSession, updateSessionTitle, createSession, sessions } =
+    useChatHistory()
+  const { getLightModelId } = useLightProcessingModel()
+
+  // Help チャット。セッション自身の agentId から判定するので、履歴から開き直しても、
+  // アプリを再起動しても Help のままになる。
+  const [isHelpSession, setIsHelpSession] = useState(false)
+  // 添付できなかった場合だけ使うユーザーガイド本文（システムプロンプトに載せる）。
+  const [helpGuideText, setHelpGuideText] = useState<string>()
+
+  const helpAgent = agents.find((agent) => agent.id === HELP_AGENT_ID)
+
+  // Help チャットではエージェント・モデル・システムプロンプトを差し替える。
+  // setSelectedAgentId は永続化されるため呼ばない（通常のチャットが Help に固定されてしまう）。
+  const activeAgentId = isHelpSession ? HELP_AGENT_ID : selectedAgentId
+  const activeModelId = isHelpSession ? getLightModelId() : llm?.modelId
+  const activeSystemPrompt = isHelpSession
+    ? helpGuideText
+      ? `${HELP_AGENT_SYSTEM_PROMPT}\n<user_guide>\n${helpGuideText}\n</user_guide>\n`
+      : HELP_AGENT_SYSTEM_PROMPT
+    : systemPrompt
+
+  const currentScenarios = (isHelpSession ? helpAgent?.scenarios : currentAgent?.scenarios) || []
 
   const {
     messages,
@@ -66,7 +93,7 @@ export default function ChatPage() {
     clearChat,
     setMessages,
     stopGeneration
-  } = useAgentChat(llm?.modelId, systemPrompt, selectedAgentId)
+  } = useAgentChat(activeModelId, activeSystemPrompt, activeAgentId)
 
   // 送信ハンドラをuseCallbackでメモ化
   const onSubmit = useCallback(
@@ -76,8 +103,11 @@ export default function ChatPage() {
     [handleSubmit]
   )
 
-  const { deleteMessage, getSession, updateSessionTitle } = useChatHistory()
-  const { getLightModelId } = useLightProcessingModel()
+  // 表示中のセッションが Help かどうかを追随させる。
+  useEffect(() => {
+    const agentId = currentSessionId ? getSession(currentSessionId)?.agentId : undefined
+    setIsHelpSession(agentId === HELP_AGENT_ID)
+  }, [currentSessionId, getSession])
 
   // DrawIO diagrams render in an iframe, so a live component is needed to rasterize them.
   const drawioRasterizerRef = useRef<DrawioRasterizerRef>(null)
@@ -142,10 +172,11 @@ export default function ChatPage() {
     TokenAnalyticsModal
   } = useTokenAnalyticsModal()
 
-  // 会話全体の実行コストを計算（ヘッダー表示用）
+  // 会話全体の実行コストを計算（ヘッダー表示用）。Help チャットは軽量モデルで動くので、
+  // グローバルの選択モデルではなく実際に使われているモデルで計算する。
   const runningCost = useMemo(
-    () => calculateAnalytics(messages, llm?.modelId || '').costAnalysis.totalCost,
-    [messages, llm?.modelId]
+    () => calculateAnalytics(messages, activeModelId || '').costAnalysis.totalCost,
+    [messages, activeModelId]
   )
 
   const {
@@ -188,6 +219,9 @@ export default function ChatPage() {
     remove: removeSandbox,
     openFolder: openSandboxFolder
   } = useChatSandbox(currentSessionId)
+
+  // このチャットに添付されたファイル（プロジェクト内の attachments/<チャット> フォルダ）
+  const attachments = useChatAttachments(currentSessionId)
 
   const handleStopSandbox = useCallback(async () => {
     try {
@@ -434,8 +468,80 @@ export default function ChatPage() {
     }
   }, [location.search, agents, setSelectedAgentId])
 
+  // Opening the Help chat from the sidebar (`/chat?help=1`).
+  //
+  // Reuse comes first so repeated clicks continue the same conversation instead of leaving a
+  // trail of half-empty Help chats, each with its own copy of the guide on disk.
+  const helpOpenInFlight = useRef(false)
+  useEffect(() => {
+    if (!new URLSearchParams(location.search).has('help')) return
+    if (helpOpenInFlight.current) return
+    helpOpenInFlight.current = true
+
+    const openHelpChat = async () => {
+      try {
+        let sessionId = currentSessionId
+        const alreadyOnHelp = !!sessionId && getSession(sessionId)?.agentId === HELP_AGENT_ID
+
+        if (!alreadyOnHelp) {
+          // Session metadata hides chats with no messages, so an untouched Help chat can be
+          // missing here. The `alreadyOnHelp` check above covers the case that matters.
+          const previous = sessions
+            .filter((session) => session.agentId === HELP_AGENT_ID)
+            .sort((a, b) => b.updatedAt - a.updatedAt)[0]
+
+          if (previous) {
+            sessionId = previous.id
+          } else {
+            sessionId = await createSession(
+              HELP_AGENT_ID,
+              getLightModelId(),
+              HELP_AGENT_SYSTEM_PROMPT
+            )
+            // Titled before the guide is attached so the attachments folder is named from the
+            // real title on creation. A title that isn't "Chat …" is also never auto-renamed.
+            await updateSessionTitle(sessionId, HELP_CHAT_TITLE)
+          }
+        }
+
+        if (!sessionId) return
+
+        const result = await window.api.help.prepareUserGuide(sessionId)
+        if (result.attached) {
+          setHelpGuideText(undefined)
+        } else {
+          setHelpGuideText(result.text)
+          toast(t('help.guideInPromptNotice'))
+        }
+
+        setIsHelpSession(true)
+        if (sessionId !== currentSessionId) setCurrentSessionId(sessionId)
+        if (result.attached) await attachments.refresh()
+      } catch (error) {
+        toast.error(
+          t('help.guideFailed', {
+            error: error instanceof Error ? error.message : String(error)
+          })
+        )
+      } finally {
+        // Cleared only after the param is gone, so the effect cannot re-enter on the same click.
+        navigate('/chat', { replace: true })
+        helpOpenInFlight.current = false
+      }
+    }
+
+    void openHelpChat()
+  }, [location.search])
+
   return (
-    <React.Fragment>
+    <HelpSessionProvider
+      value={{
+        isHelpSession,
+        // The seeded agent may not be in the store yet on the first launch after an update.
+        agentName: helpAgent?.name ?? HELP_CHAT_TITLE,
+        modelId: activeModelId
+      }}
+    >
       {/* Hidden DrawIO embed used to rasterize diagrams during markdown export */}
       <DrawioRasterizer ref={drawioRasterizerRef} />
       <div className="flex p-3 h-screen">
@@ -528,13 +634,13 @@ export default function ChatPage() {
           <SystemPromptModal
             isOpen={showSystemPromptModal}
             onClose={handleCloseSystemPromptModal}
-            systemPrompt={systemPrompt}
+            systemPrompt={activeSystemPrompt}
           />
           <TokenAnalyticsModal
             isOpen={showTokenAnalyticsModal}
             onClose={handleCloseTokenAnalyticsModal}
             messages={messages}
-            modelId={llm?.modelId || ''}
+            modelId={activeModelId || ''}
           />
           <TodoModal isOpen={showTodoModal} onClose={handleCloseTodoModal} />
           <ToolSettingModal isOpen={showToolSettingModal} onClose={handleCloseToolSettingModal} />
@@ -569,10 +675,14 @@ export default function ChatPage() {
                         />
                       </div>
                     </div>
-                    <h1 className="text-lg font-bold dark:text-white">Agent Chat</h1>
+                    <h1 className="text-lg font-bold dark:text-white">
+                      {isHelpSession ? t('help.chatTitle') : 'Agent Chat'}
+                    </h1>
                   </div>
-                  <div className="text-gray-400">{t(currentAgent?.description ?? '')}</div>
-                  {currentAgent && (
+                  <div className="text-gray-400">
+                    {t((isHelpSession ? helpAgent?.description : currentAgent?.description) ?? '')}
+                  </div>
+                  {(isHelpSession ? helpAgent : currentAgent) && (
                     <ExampleScenarios
                       scenarios={currentScenarios}
                       onSelectScenario={handleSelectScenario}
@@ -616,6 +726,17 @@ export default function ChatPage() {
                 hasMessages={messages.length > 0}
                 onHeightChange={setTextareaHeight}
                 isHistoryOpen={isHistoryOpen}
+                attachments={{
+                  files: attachments.files,
+                  directory: attachments.directory,
+                  totalSize: attachments.totalSize,
+                  isBusy: attachments.isBusy,
+                  onAdd: attachments.addFromPicker,
+                  onRemove: attachments.remove,
+                  onOpenFolder: attachments.openFolder,
+                  onRefresh: attachments.refresh,
+                  onAddFiles: attachments.addFiles
+                }}
                 sandbox={{
                   status: sandboxStatus,
                   isBusy: isSandboxBusy,
@@ -629,6 +750,6 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
-    </React.Fragment>
+    </HelpSessionProvider>
   )
 }

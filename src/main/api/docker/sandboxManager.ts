@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { createCategoryLogger } from '../../../common/logger'
 import { store } from '../../../preload/store'
+import { readChatTitle } from '../../lib/chatSessionTitle'
 import { assertSandboxUsable, checkDockerAvailability } from './dockerAvailability'
 import {
   containerNameFor as buildContainerName,
@@ -64,31 +65,6 @@ const getProjectPath = (): string => {
 
 export const getSandboxRoot = (projectPath = getProjectPath()): string =>
   path.join(projectPath, SANDBOX_ROOT_DIRNAME)
-
-/**
- * Read a chat's current title straight from the session file the chat history writes.
- *
- * Sandboxes are created lazily during a tool call, with no renderer involved, so the
- * title has to be resolvable from the main process.
- */
-const readChatTitle = (sessionId: string): string | undefined => {
-  try {
-    const userDataPath = store.get('userDataPath') as string | undefined
-    if (!userDataPath) return undefined
-
-    const file = path.join(userDataPath, 'chat-sessions', `${sessionId}.json`)
-    if (!fs.existsSync(file)) return undefined
-
-    const parsed = JSON.parse(fs.readFileSync(file, 'utf-8')) as { title?: string }
-    return typeof parsed.title === 'string' ? parsed.title : undefined
-  } catch (error) {
-    logger.debug('Could not read chat title for sandbox naming', {
-      sessionId,
-      error: error instanceof Error ? error.message : String(error)
-    })
-    return undefined
-  }
-}
 
 /**
  * Locate an existing sandbox folder by scanning for the metadata file that claims this

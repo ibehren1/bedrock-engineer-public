@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { CustomAgent } from '@/types/agent-chat'
+import { HELP_AGENT_ID } from '../../constants/helpAgent'
 
 export type SortKey = 'name' | 'description' | 'tags' | 'status' | null
 export type SortOrder = 'asc' | 'desc'
@@ -7,6 +8,8 @@ export type SortOrder = 'asc' | 'desc'
 /**
  * Special agents that back other pages and should never be offered as a chat
  * agent — neither in the agent list nor as an @mention delegation target.
+ * `helpAgent` is here for the same reason: the sidebar's Help button is the only
+ * way into it, and it is useless without the user guide that button attaches.
  */
 export const EXCLUDED_CHAT_AGENT_IDS = [
   'reactGeneratorAgent',
@@ -14,7 +17,8 @@ export const EXCLUDED_CHAT_AGENT_IDS = [
   'svelteGeneratorAgent',
   // 'diagramGeneratorAgent',
   'softwareArchitectureAgent',
-  'businessProcessAgent'
+  'businessProcessAgent',
+  HELP_AGENT_ID
 ]
 
 /**

@@ -27,19 +27,12 @@ export const chatPage = {
       "Image recognition uses Claude's vision capabilities to analyze and describe images. The selected model will be used when you run the recognizeImage tool.":
         "Image recognition uses Claude's vision capabilities to analyze and describe images. The selected model will be used when you run the recognizeImage tool.",
       textarea: {
-        placeholder: 'Type message or add images ({{modifier}}+V / drop)',
+        placeholder: 'Type message or attach files ({{modifier}}+V / drop)',
         imageValidation: {
           tooLarge: 'Image is too large (max: 3.75MB)',
           dimensionTooLarge: 'Image dimensions are too large (max: 8000px)',
           tooManyImages: 'Maximum 20 images allowed',
           unsupportedFormat: 'Unsupported image format: {{format}}'
-        },
-        document: {
-          extracting: 'Saving and reading {{name}}...',
-          extracted: 'Added contents of {{name}}',
-          extractFailed: 'Could not read {{name}}: {{error}}',
-          injectedBlock:
-            '\n\n--- Document: {{name}} (saved to {{path}}) ---\n{{content}}\n--- End of {{name}} ---\n'
         },
         aria: {
           removeImage: 'Remove image',
@@ -80,8 +73,27 @@ export const chatPage = {
       'Chat exported to': 'Chat exported to',
       'Failed to export chat': 'Failed to export chat',
       attachments: {
-        label: 'Attachments',
-        tooltip: 'Open the attachments folder',
+        menu: {
+          title: 'Attachments',
+          empty: 'No files attached to this chat yet.',
+          summary: '{{count}} file · {{size}}',
+          summary_plural: '{{count}} files · {{size}}',
+          addFiles: 'Add files…',
+          openFolder: 'Open attachments folder',
+          remove: 'Remove {{name}}'
+        },
+        toast: {
+          added: 'Attached {{name}}',
+          addedMany: 'Attached {{count}} files',
+          removed: 'Removed {{name}}',
+          addFailed: 'Could not attach {{name}}: {{error}}',
+          removeFailed: 'Could not remove {{name}}: {{error}}',
+          noSession: 'Starting the chat — try attaching again in a moment.',
+          truncated:
+            'Some attachments were too long to send in full: {{files}}. The agent can read the rest with its file tools.',
+          skipped: 'Attachment not sent — {{name}}: {{reason}}',
+          contextFailed: "Could not read this chat's attachments: {{error}}"
+        },
         openFailed: 'Could not open attachments folder: {{error}}'
       },
       dockerSandbox: {
@@ -170,19 +182,12 @@ export const chatPage = {
       "Image recognition uses Claude's vision capabilities to analyze and describe images. The selected model will be used when you run the recognizeImage tool.":
         '画像認識はClaudeのビジョン機能を使用して画像を分析・説明します。選択したモデルはrecognizeImageツールを実行する際に使用されます。',
       textarea: {
-        placeholder: 'メッセージを入力、または画像を追加 ({{modifier}}+V / ドロップ)',
+        placeholder: 'メッセージを入力、またはファイルを添付 ({{modifier}}+V / ドロップ)',
         imageValidation: {
           tooLarge: '画像が大きすぎます (上限: 3.75MB)',
           dimensionTooLarge: '画像サイズが大きすぎます (上限: 8000px)',
           tooManyImages: '画像は最大20枚までです',
           unsupportedFormat: '未対応の画像形式です: {{format}}'
-        },
-        document: {
-          extracting: '{{name}} を保存して読み込み中...',
-          extracted: '{{name}} の内容を追加しました',
-          extractFailed: '{{name}} を読み込めませんでした: {{error}}',
-          injectedBlock:
-            '\n\n--- ドキュメント: {{name}} (保存先: {{path}}) ---\n{{content}}\n--- {{name}} ここまで ---\n'
         },
         aria: {
           removeImage: '画像を削除',
@@ -222,8 +227,27 @@ export const chatPage = {
       'Chat exported to': 'チャットのエクスポート先',
       'Failed to export chat': 'チャットのエクスポートに失敗しました',
       attachments: {
-        label: '添付ファイル',
-        tooltip: '添付ファイルフォルダを開く',
+        menu: {
+          title: '添付ファイル',
+          empty: 'このチャットにはまだファイルが添付されていません。',
+          summary: '{{count}} 件 · {{size}}',
+          summary_plural: '{{count}} 件 · {{size}}',
+          addFiles: 'ファイルを追加…',
+          openFolder: '添付ファイルフォルダを開く',
+          remove: '{{name}} を削除'
+        },
+        toast: {
+          added: '{{name}} を添付しました',
+          addedMany: '{{count}} 件のファイルを添付しました',
+          removed: '{{name}} を削除しました',
+          addFailed: '{{name}} を添付できませんでした: {{error}}',
+          removeFailed: '{{name}} を削除できませんでした: {{error}}',
+          noSession: 'チャットの準備中です。少し待ってからもう一度添付してください。',
+          truncated:
+            '一部の添付ファイルは長すぎるため全文を送信できませんでした: {{files}}。残りはエージェントがファイルツールで読めます。',
+          skipped: '添付ファイルを送信できませんでした — {{name}}: {{reason}}',
+          contextFailed: 'このチャットの添付ファイルを読み込めませんでした: {{error}}'
+        },
         openFailed: '添付ファイルフォルダを開けませんでした: {{error}}'
       },
       dockerSandbox: {

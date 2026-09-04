@@ -519,6 +519,50 @@ export interface IPCChannelDefinitions {
     params: { sessionId: string }
     result: { success: boolean; path?: string; error?: string }
   }
+
+  // チャット添付ファイル関連（チャットごとのフォルダ）
+  'chat-attachments-list': {
+    params: { sessionId: string }
+    result: any // AttachmentListing
+  }
+  'chat-attachments-add': {
+    params: { sessionId: string; files: { name: string; bytes: Uint8Array }[] }
+    result: any // AttachmentAddResult
+  }
+  'chat-attachments-add-from-picker': {
+    params: { sessionId: string }
+    result: any // AttachmentAddResult & { canceled: boolean }
+  }
+  'chat-attachments-remove': {
+    params: { sessionId: string; name: string }
+    result: any // AttachmentRemoveResult
+  }
+  'chat-attachments-remove-all': {
+    params: { sessionId: string }
+    result: { removed: boolean }
+  }
+  'chat-attachments-remove-every-folder': {
+    params: void
+    result: { removed: number }
+  }
+  'chat-attachments-rename': {
+    params: { sessionId: string }
+    result: { renamed: boolean; directory?: string }
+  }
+  'chat-attachments-build-context': {
+    params: { sessionId: string }
+    result: any // AttachmentContextResult
+  }
+  'chat-attachments-open-folder': {
+    params: { sessionId: string }
+    result: { success: boolean; path?: string; error?: string }
+  }
+
+  // ヘルプ関連（ユーザーガイドの添付）
+  'help-prepare-user-guide': {
+    params: { sessionId: string }
+    result: any // PrepareUserGuideResult
+  }
   'get-todo-list': {
     params?: { sessionId?: string }
     result: any | null // TodoList | null

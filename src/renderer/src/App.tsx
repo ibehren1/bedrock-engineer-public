@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { FiGithub } from 'react-icons/fi'
+import { FiGithub, FiHelpCircle } from 'react-icons/fi'
 import { Tooltip } from 'flowbite-react'
 import { createHashRouter, Link, Outlet, RouterProvider, useLocation } from 'react-router-dom'
 import CmdK from './command-palette'
@@ -39,6 +39,7 @@ const ListItem: React.FC<{
 
 const Layout: React.FC = () => {
   const location = useLocation()
+  const { t } = useTranslation()
   const { sidebarHiddenItems } = useSetting()
   // Keep <html data-theme> in sync with the appearance setting (and OS changes
   // when 'system' is selected).
@@ -83,6 +84,11 @@ const Layout: React.FC = () => {
                 })}
             </ul>
             <ul>
+              {/* Opens a chat with the bundled user guide attached. Not a route: keeping it out
+                  of `routes` leaves the ⌘1..⌘N numbering and the sidebar settings list alone. */}
+              <ListItem href="/chat?help=1" toolTipContent={t('help.sidebarTooltip')}>
+                <FiHelpCircle className="text-xl dark:text-white" />
+              </ListItem>
               <div onClick={() => open('https://github.com/ibehren1/bedrock-engineer-public')}>
                 <ListItem href="#">
                   <FiGithub className="text-xl dark:text-white" />

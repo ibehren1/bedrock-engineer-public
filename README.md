@@ -11,6 +11,34 @@ Everything below the [upstream documentation](#-bedrock-engineer) still applies.
 what this fork adds or changes. The dated changelog lives in [CHANGELOG.md](./CHANGELOG.md), whose
 newest dated section is published as the release notes for each build.
 
+**New to the app, or looking for how something works?** The [User Guide](./docs/USER_GUIDE.md) is a
+complete, plain-language walkthrough of every screen, every tool and every setting, with a
+question index and a troubleshooting section. Agents in the app can read it too, so you can just ask
+the chat how a feature works.
+
+**Setting up AWS for the first time?** See
+[Setting up access to Amazon Bedrock](./docs/USER_GUIDE.md#4-setting-up-access-to-amazon-bedrock) in
+the User Guide. It walks through enabling model access in the Bedrock console, attaching the IAM
+policy, creating access keys in the console or with the API, installing the AWS CLI, filling in
+`~/.aws/credentials` and `~/.aws/config`, and testing that it all works.
+
+### Help, without leaving the app
+
+A **Help** button sits in the bottom-left corner, just above the GitHub link. It opens a chat called
+"Bedrock Engineer Help" with the user guide already attached, so you can ask how something works and
+get an answer taken from the guide instead of guessed at. The guide is bundled into the build, so it
+always matches the version you are running and works offline.
+
+The help chat runs on whichever model you chose as the **Light Processing Model** in Settings — the
+guide is long, and a small model keeps it cheap — falling back to your main conversation model if
+that setting is empty. It deliberately has no tools, so it cannot read your files or inspect your
+settings; it answers from the guide and says so when the guide does not cover your question. Clicking
+Help again continues the same conversation rather than starting a new one.
+
+If you have not set a project directory yet, the guide cannot be saved as a chat attachment. Help
+still works — the guide is given to the agent directly, and a note explains why no attachment is
+listed.
+
 ### My Agents
 
 Agents are created and maintained on a **My Agents** page that opens in the main window, with its
@@ -90,7 +118,7 @@ and automated requests get a Vercel bot challenge, so the app doesn't read it.
 - **Export the conversation** as Markdown, Word (`.docx`) or PDF from the buttons above the input
   box. All three exclude tool use/results, label turns as `Assistant – <model ID>` / `User – <name>`,
   and embed the avatars. Word and PDF render Mermaid and DrawIO diagrams as images; the Markdown
-  export keeps Mermaid diagrams as ```` ```mermaid ```` code blocks so they stay editable and are
+  export keeps Mermaid diagrams as ` ```mermaid ` code blocks so they stay editable and are
   rendered by GitHub, VS Code and Obsidian, and writes DrawIO diagrams and other images to an
   `images/` folder next to the `.md` file.
 - Select text in a message to get a **floating toolbar** that copies just the selection as Markdown
@@ -103,14 +131,48 @@ and automated requests get a Vercel bot challenge, so the app doesn't read it.
 - The **chat history panel starts open** when you go to Chat.
 - Streaming output auto-scrolls through the tool-use phase and then stops, and respects a manual
   scroll up.
-- Attachments can be dropped onto the window, and chat history supports multi-select delete.
+- **Attachments are files in your project, per chat.** Drop, paste or pick a file and it is written
+  to `attachments/<chat-title>-<id>/` immediately — images included, so nothing is held in the
+  message box. A paperclip button next to the export buttons badges the file count and opens a menu
+  to list, delete, add and reveal them. Their contents are rebuilt from the folder on every message,
+  so editing or removing a file changes what the agent sees next without re-attaching; long files are
+  trimmed with a pointer to read the rest, and formats nothing can extract are passed along as paths.
+  Deleting the chat deletes its attachments folder.
+- Chat history supports multi-select delete.
+
+### A Docker sandbox per chat
+
+Turning on the **Docker Sandbox** tool gives each chat its own long-lived container based on
+`ubuntu:26.04`, and makes it the default place the agent runs commands. The agent can `apt-get
+install` whatever it needs and make a mess without any of it reaching your machine — and because it
+cannot reach your machine, the command allowlist doesn't have to hold it back inside the container.
+
+- Your project directory is mounted read-write at `/workspace`, so files move in and out freely, and
+  the agent can publish ports if you want to open what it built in a browser. Long-running processes
+  can be started in the background and their output read back later.
+- Running a command on **your own machine** instead has to be asked for explicitly, and you get a
+  dialog with the exact command before anything runs — allow it once, or for the rest of that chat.
+- The Docker whale next to the export buttons appears whenever the current chat has a container, and
+  can stop, start or remove it, show the sandbox's folder name, and open that folder in Finder,
+  Explorer or your Linux file manager.
+- Containers survive switching chats, are stopped when you quit, and come back with their installed
+  packages intact. Compose and data files live in `docker-sandboxes/<chat-title>-<id>/` in your
+  project directory as ordinary mapped folders, and the folder is renamed to follow the chat's title.
+- Deleting a chat removes its container; the delete dialog offers to delete the sandbox's data folder
+  too, unchecked by default, so anything the agent wrote is kept unless you say otherwise.
+
+Requires Docker (Docker Compose is used when available, and is needed for multi-service stacks). If
+Docker is missing, the agent tells you how to install it for your platform. Voice chat does not
+support sandboxes and keeps running host commands under the allowlist.
 
 ### Models
 
 - Added Claude Fable 5.1, Fable 5, Opus 5, Sonnet 5 and Opus 4.8, Kimi 2.5, xAI Grok 4.6, and the
   OpenAI GPT-5.6 (Sol/Terra/Luna) models, all served through the standard Bedrock Converse API.
 - Adaptive thinking for newer Claude models, with the thinking type translated per model so
-  switching model generations doesn't 400.
+  switching model generations doesn't 400. On models that expose reasoning-effort levels rather than
+  a thinking budget — Grok 4.6 and the GPT-5.6 models — **Deeper** asks for the highest effort the
+  model offers.
 - Model pricing kept current, and per-model input/output pricing shown in the model dropdown.
 - **Model allowlist** in settings, so the dropdown can be trimmed to the handful of models a given
   user should see.
@@ -137,8 +199,8 @@ and automated requests get a Vercel bot challenge, so the app doesn't read it.
   when a build produces no installers.
 - `CLAUDE.md` documents the codebase layout for AI coding agents.
 
-- - -
- 
+---
+
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/aws-samples/bedrock-engineer) [![Workshop Studio](https://img.shields.io/badge/Workshop_Studio-8A2BE2)](https://catalog.us-east-1.prod.workshops.aws/workshops/57e0af6e-41a5-42cc-98e0-1f1a3fd0c6c4/ja-JP)
 
 Language: [English](./README.md) / [Japanese](./README-ja.md)
@@ -160,6 +222,12 @@ https://github.com/user-attachments/assets/f6ed028d-f3c3-4e2c-afff-de2dd9444759
 
 Bedrock Engineer is a native app, you can download the app or build the source code to use it.
 
+Before it can do anything, it needs access to Amazon Bedrock in your own AWS account. If Bedrock is
+new to you, follow
+[Setting up access to Amazon Bedrock](./docs/USER_GUIDE.md#4-setting-up-access-to-amazon-bedrock) —
+enabling models in the Bedrock console, the IAM policy, creating access keys, installing the AWS CLI,
+and writing the `~/.aws/credentials` and `~/.aws/config` files.
+
 ### Download
 
 Builds of **this fork** are published on its releases page (installers are attached per release):
@@ -180,7 +248,9 @@ It is optimized for MacOS, but can also be built and used on Windows and Linux O
 1. Download the latest release (PKG file)
 2. Double-click the PKG file to start installation
 3. If you see a security warning, follow the steps below
-4. Launch the app and configure your AWS credentials
+4. Launch the app and configure your AWS credentials — see
+   [Setting up access to Amazon Bedrock](./docs/USER_GUIDE.md#4-setting-up-access-to-amazon-bedrock)
+   for model access, IAM permissions, access keys, the AWS CLI and the credentials files
 
 ### macOS Security Warning
 
@@ -325,13 +395,19 @@ The supported tools are:
 
 #### 💻 System Command & Code Execution
 
-| Tool Name         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `executeCommand`  | Manages command execution and process input handling. Features two operational modes: 1) initiating new processes with command and working directory specification, 2) sending standard input to existing processes using process ID. For security reasons, only allowed commands can be executed, using the configured shell. Unregistered commands cannot be executed. The agent's capabilities can be extended by registering commands that connect to databases, execute APIs, or invoke other AI agents.                    |
-| `codeInterpreter` | Executes Python code in a secure Docker environment with pre-installed data science libraries. Provides isolated code execution with no internet access for security. Supports two environments: "basic" (numpy, pandas, matplotlib, requests) and "datascience" (full ML stack including scikit-learn, scipy, seaborn, etc.). Input files can be mounted read-only at /data/ directory for analysis. Generated files are automatically detected and reported. Perfect for data analysis, visualization, and ML experimentation. |
+| Tool Name         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `executeCommand`  | Manages command execution and process input handling. Features two operational modes: 1) initiating new processes with command and working directory specification, 2) sending standard input to existing processes using process ID. For security reasons, only allowed commands can be executed, using the configured shell. Unregistered commands cannot be executed. The agent's capabilities can be extended by registering commands that connect to databases, execute APIs, or invoke other AI agents.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `codeInterpreter` | Executes Python code in a secure Docker environment with pre-installed data science libraries. Provides isolated code execution with no internet access for security. Supports two environments: "basic" (numpy, pandas, matplotlib, requests) and "datascience" (full ML stack including scikit-learn, scipy, seaborn, etc.). Input files can be mounted read-only at /data/ directory for analysis. Generated files are automatically detected and reported. Perfect for data analysis, visualization, and ML experimentation.                                                                                                                                                                                                                                                                                                                                                                                     |
 | `dockerSandbox`   | Gives each chat its own long-lived Docker container based on `ubuntu:26.04`, and makes it the default place `executeCommand` runs. The agent can install any packages it needs without touching your machine, and because the container cannot reach the host, no command allowlist applies inside it. The project directory is mounted read-write at `/workspace`, data written to `/data` persists on the host, and the agent can publish ports so you can open what it builds in a browser. Reaching your own machine instead requires `target: "host"`, which asks for your approval every time. Each sandbox lives in `docker-sandboxes/<chat-title>-<id>/` inside your project directory and is renamed to follow the chat's title, and the Docker whale in the chat toolbar can open that folder in your file manager. Requires Docker; Docker Compose is used when available (multi-service stacks need it). |
-| `screenCapture`   | Captures the current screen and saves as PNG image file. Optionally analyzes the captured image with AI using vision models (Claude/Nova) to extract text content, identify UI elements, and provide detailed visual descriptions for debugging and documentation purposes. Platform-specific permissions required (macOS: Screen Recording permission in System Preferences required).                                                                                                                                          |
-| `cameraCapture`   | Captures images from PC camera using HTML5 getUserMedia API and saves as an image file. Supports different quality settings (low, medium, high) and formats (JPG, PNG). Optionally analyzes the captured image with AI to extract text content, identify objects, and provide detailed visual descriptions for analysis and documentation purposes. Camera access permission is required in your browser settings.                                                                                                               |
+| `screenCapture`   | Captures the current screen and saves as PNG image file. Optionally analyzes the captured image with AI using vision models (Claude/Nova) to extract text content, identify UI elements, and provide detailed visual descriptions for debugging and documentation purposes. Platform-specific permissions required (macOS: Screen Recording permission in System Preferences required).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `cameraCapture`   | Captures images from PC camera using HTML5 getUserMedia API and saves as an image file. Supports different quality settings (low, medium, high) and formats (JPG, PNG). Optionally analyzes the captured image with AI to extract text content, identify objects, and provide detailed visual descriptions for analysis and documentation purposes. Camera access permission is required in your browser settings.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+
+#### 🤝 Agent Delegation
+
+| Tool Name     | Description                                                                                                                                                                                                                                                                                                |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `invokeAgent` | Hands one step of a task to another of your agents, which runs with its own system prompt and tools and returns its result to the calling agent. Also what an `@agent-name` mention in the message box uses. See [Delegating a task to another agent with `@`](#delegating-a-task-to-another-agent-with-). |
 
 <details>
 <summary>Tips for Integrate Bedrock Agents</summary>
@@ -499,6 +575,8 @@ For detailed setup instructions and examples, see:
 
 Detailed documentation is available for advanced features and configuration methods of Bedrock Engineer:
 
+- [User Guide](./docs/USER_GUIDE.md) - A complete, non-technical walkthrough of every page, tool and setting, with a "how do I…" question index, a glossary and a troubleshooting section
+- [Setting up access to Amazon Bedrock](./docs/USER_GUIDE.md#4-setting-up-access-to-amazon-bedrock) - Start-to-finish AWS setup: enabling model access in the Bedrock console, the IAM policy the app needs, creating access keys in the console or with the API, installing the AWS CLI, populating `~/.aws/credentials` and `~/.aws/config` (including profiles, session tokens and IAM Identity Center), and commands to verify it works
 - [Custom Model Import Configuration Guide](./docs/custom-model-import/README.md) - How to configure custom models imported using Amazon Bedrock's Custom Model Import feature for use with Bedrock Engineer
 - [MCP Server Configuration Guide](./docs/mcp-server/MCP_SERVER_CONFIGURATION.md) - How to configure Model Context Protocol (MCP) servers
 - [Organization Sharing Guide](./docs/agent-directory-organization/README.md) - How to set up agent sharing within organizations in Agent Directory

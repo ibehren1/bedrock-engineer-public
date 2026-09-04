@@ -139,6 +139,8 @@ export const agent = {
       'This AI mentor helps you with programming tasks and provides learning guidance.',
     'productDesigner.description':
       'This AI designer helps you with product design and UX/UI tasks.',
+    'helpAgent.description':
+      'Answers questions about using this app from the user guide that ships with it.',
     pleaseEnterNameAndDescription: 'Please enter the agent name and description',
     generating: 'Generating...',
     generateSystemPrompt: 'Generate system prompt',
@@ -311,6 +313,8 @@ export const agent = {
       '初心者に優しいプログラミングメンターとして、プログラミングタスクのサポートと学習ガイダンスを提供します。',
     'productDesigner.description':
       'ユーザーインターフェースとUXの専門家として、魅力的で使いやすいデザインを提案します。',
+    'helpAgent.description':
+      'アプリに同梱されたユーザーガイドをもとに、このアプリの使い方に関する質問に答えます。',
     pleaseEnterNameAndDescription: 'エージェント名と説明を入力してください',
     generating: '生成中...',
     generateSystemPrompt: 'System Prompt を自動生成する',

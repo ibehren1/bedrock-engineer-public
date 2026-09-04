@@ -32,6 +32,7 @@ npm run test:integration:watch             # Integration tests in watch mode
 This is an **Electron + React + TypeScript** app built with `electron-vite`. The three Electron layers live under `src/`:
 
 ### Main Process (`src/main/`)
+
 - `index.ts` — App lifecycle, window creation, proxy config, IPC handler registration
 - `api/bedrock/` — `BedrockService` facade with sub-services: converse, image, video, agent, flow, guardrail, translate, inference profiles, structured output
 - `api/bedrock/client.ts` — AWS SDK client factories (supports both IAM credentials and named profiles)
@@ -42,6 +43,7 @@ This is an **Electron + React + TypeScript** app built with `electron-vite`. The
 - `store/` — Electron-store persistence
 
 ### Preload (`src/preload/`)
+
 - Exposes APIs to renderer via `contextBridge`: `api`, `store`, `file`, `chatHistory`, `appWindow`, `ipc`, `logger`, `preloadTools`
 - `tools/` — Tool execution system with a `ToolRegistry` pattern:
   - `base/` — `BaseTool` abstract class, error types
@@ -49,6 +51,7 @@ This is an **Electron + React + TypeScript** app built with `electron-vite`. The
   - `registry.ts` — Registers all tools, dispatches by name
 
 ### Renderer (`src/renderer/src/`)
+
 - React 18 + React Router (hash router) + Tailwind CSS + Flowbite React
 - `contexts/` — `SettingsContext` (AWS creds, model, agents, tools), `ChatHistoryContext`, `AgentDirectoryContext`, `WebsiteGeneratorContext`
 - `pages/` — ChatPage, SpeakPage (voice), WebsiteGeneratorPage, DiagramGeneratorPage, StepFunctionsGeneratorPage, AgentDirectoryPage, BackgroundAgentPage, SettingPage
@@ -56,6 +59,7 @@ This is an **Electron + React + TypeScript** app built with `electron-vite`. The
 - Path aliases: `@renderer` → `src/renderer/src`, `@` → `src/`, `@common` → `src/common`
 
 ### Common (`src/common/`)
+
 - `models/` — Model definitions, pricing, prompt cache config (shared between main/renderer)
 - `agents/` — Tool description provider, tool rule generator
 - `mcp/` — MCP schemas and utilities
@@ -64,6 +68,7 @@ This is an **Electron + React + TypeScript** app built with `electron-vite`. The
 - `validation/` — Shared validation logic
 
 ### Types (`src/types/`)
+
 - `agent-chat.ts` / `agent-chat.schema.ts` — Core types for agents, tools, MCP config (Zod schemas)
 - `tools.ts` — Built-in tool name union type and tool-related types
 - `llm.ts` — Model IDs, regions, inference parameters, thinking mode
