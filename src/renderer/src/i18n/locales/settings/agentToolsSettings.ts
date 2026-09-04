@@ -280,6 +280,7 @@ export const agentToolsSettings = {
       todo: 'Task management and workflow tracking tools for systematic project management',
       cameraCapture: 'Capture images from PC camera and analyze with AI vision capabilities',
       codeInterpreter: 'Execute Python code with data analysis capabilities and file operations',
+      dockerSandbox: "Run commands in this chat's own Docker container instead of on your machine",
       screenCapture: 'Capture screenshots of the screen for analysis and documentation',
       invokeAgent:
         'Delegate a self-contained task to another configured agent that the user @mentioned'
@@ -562,6 +563,7 @@ export const agentToolsSettings = {
       todo: 'タスク管理とワークフロー追跡ツール',
       cameraCapture: 'PCカメラから画像をキャプチャしてAIビジョン機能で分析',
       codeInterpreter: 'Pythonコードを実行しデータ分析機能とファイル操作を提供',
+      dockerSandbox: 'ホストではなくチャット専用の Docker コンテナでコマンドを実行',
       screenCapture: 'スクリーンのスクリーンショットをキャプチャして分析・文書化',
       invokeAgent: 'ユーザーが@メンションした別のエージェントに独立したタスクを委譲'
     }

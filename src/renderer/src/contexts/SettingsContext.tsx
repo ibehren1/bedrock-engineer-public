@@ -32,6 +32,7 @@ import { AgentCategory } from '@/types/agent-chat'
 import { getToolsForCategory } from '../constants/defaultToolSets'
 import type { Tool } from '@aws-sdk/client-bedrock-runtime'
 import { CodeInterpreterContainerConfig } from 'src/preload/tools/handlers/interpreter/types'
+import { DEFAULT_SANDBOX_CONFIG, DockerSandboxConfig } from '@/main/api/docker/types'
 import { SystemPromptBuilder } from '@/common/agents/toolRuleGenerator'
 import { getImageGenerationModelsForRegion } from '@/common/models/models'
 import { toastService } from '@renderer/services/ToastService'
@@ -87,6 +88,8 @@ export interface SettingsContextType {
   // codeInterpreter Tool Settings
   codeInterpreterConfig: CodeInterpreterContainerConfig
   setCodeInterpreterConfig: (config: CodeInterpreterContainerConfig) => void
+  dockerSandboxConfig: DockerSandboxConfig
+  setDockerSandboxConfig: (config: DockerSandboxConfig) => void
 
   // LLM Settings
   currentLLM: LLM
@@ -347,6 +350,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       timeout: 30
     })
 
+  // Docker Sandbox Tool Settings
+  const [dockerSandboxConfig, setStateDockerSandboxConfig] =
+    useState<DockerSandboxConfig>(DEFAULT_SANDBOX_CONFIG)
+
   // LLM Settings
   const defaultModel = {
     modelId: 'global.anthropic.claude-sonnet-4-6',
@@ -573,6 +580,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           timeout: codeInterpreterSetting.timeout as number
         })
       }
+    }
+
+    // Load Docker Sandbox Tool Settings
+    const dockerSandboxSetting = window.store.get('dockerSandboxTool')
+    if (dockerSandboxSetting && typeof dockerSandboxSetting === 'object') {
+      setStateDockerSandboxConfig({ ...DEFAULT_SANDBOX_CONFIG, ...dockerSandboxSetting })
     }
 
     // Load LLM Settings
@@ -1555,6 +1568,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     window.store.set('codeInterpreterTool', config)
   }, [])
 
+  const setDockerSandboxConfig = useCallback((config: DockerSandboxConfig) => {
+    setStateDockerSandboxConfig(config)
+    window.store.set('dockerSandboxTool', config)
+  }, [])
+
   // エージェント固有のツール設定を取得する関数
   const getAgentTools = useCallback(
     (agentId: string): ToolState[] => {
@@ -2072,6 +2090,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // codeInterpreter Tool Settings
     codeInterpreterConfig,
     setCodeInterpreterConfig,
+
+    // Docker Sandbox Tool Settings
+    dockerSandboxConfig,
+    setDockerSandboxConfig,
 
     // LLM Settings
     currentLLM,

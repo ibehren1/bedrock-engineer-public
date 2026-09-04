@@ -3,6 +3,8 @@ import { AttachedImage, TextArea } from './TextArea'
 import { ToolSettings } from './ToolSettings'
 import { AttachmentsButton } from './AttachmentsButton'
 import { DirectorySelector } from './DirectorySelector'
+import { SandboxButton } from './SandboxButton'
+import type { ChatSandboxStatus } from '../../hooks/useChatSandbox'
 import { SendMsgKey } from '@/types/agent-chat'
 import { FiStopCircle } from 'react-icons/fi'
 import { TbMarkdown, TbMessagePlus, TbFileTypeDocx, TbFileTypePdf } from 'react-icons/tb'
@@ -30,6 +32,14 @@ type InputFormProps = {
   hasMessages: boolean
   onHeightChange?: (height: number) => void // Text area height change handler
   isHistoryOpen?: boolean // Whether the chat history panel is expanded
+  sandbox?: {
+    status: ChatSandboxStatus
+    isBusy: boolean
+    onStop: () => void
+    onStart: () => void
+    onRemove: (deleteData: boolean) => void
+    onOpenFolder: () => void
+  }
 }
 
 export const InputForm: React.FC<InputFormProps> = ({
@@ -52,7 +62,8 @@ export const InputForm: React.FC<InputFormProps> = ({
   onStopGeneration,
   hasMessages,
   onHeightChange,
-  isHistoryOpen = false
+  isHistoryOpen = false,
+  sandbox
 }) => {
   const [isComposing, setIsComposing] = useState(false)
   const { t } = useTranslation()
@@ -93,6 +104,17 @@ export const InputForm: React.FC<InputFormProps> = ({
                     <FiStopCircle />
                   </button>
                 </Tooltip>
+              )}
+              {/* Only present once this chat actually has a sandbox to control */}
+              {sandbox?.status.exists && (
+                <SandboxButton
+                  status={sandbox.status}
+                  isBusy={sandbox.isBusy}
+                  onStop={sandbox.onStop}
+                  onStart={sandbox.onStart}
+                  onRemove={sandbox.onRemove}
+                  onOpenFolder={sandbox.onOpenFolder}
+                />
               )}
               {onExportChat && (
                 <Tooltip

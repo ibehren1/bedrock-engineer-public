@@ -70,3 +70,58 @@ describe('OpenAI GPT model registry integration', () => {
     expect(calc.calculateOutputCost(1_000_000)).toBeCloseTo(33.0, 5)
   })
 })
+
+// xAI Grok 4.6 is served through the standard Bedrock Converse API, but only via
+// cross-region inference profiles (global.* and us.*) — in-region invocation of
+// the bare model ID is not supported on bedrock-runtime. Grok 4.3 is Mantle-only
+// (no Converse), so it must not appear at all.
+describe('xAI Grok model registry integration', () => {
+  test('grok-4.6 is exposed as global.* and us.* inference profiles (no bare model ID)', () => {
+    const ids = allModels.map((m) => m.modelId)
+    expect(ids).toContain('global.xai.grok-4.6')
+    expect(ids).toContain('us.xai.grok-4.6')
+    expect(ids).not.toContain('xai.grok-4.6')
+  })
+
+  test('display names carry the routing suffix and capabilities are set', () => {
+    const usModel = allModels.find((m) => m.modelId === 'us.xai.grok-4.6')
+    expect(usModel?.modelName).toBe('Grok 4.6 (US)')
+    expect(usModel?.toolUse).toBe(true)
+    expect(usModel?.supportsThinking).toBe(true)
+    expect(usModel?.maxTokensLimit).toBe(32768)
+
+    const globalModel = allModels.find((m) => m.modelId === 'global.xai.grok-4.6')
+    expect(globalModel?.modelName).toBe('Grok 4.6 (Global)')
+  })
+
+  test('Grok 4.3 is not registered (not available via Converse)', () => {
+    const ids = allModels.map((m) => m.modelId)
+    expect(ids.some((id) => id.includes('grok-4.3'))).toBe(false)
+  })
+
+  test('getModelConfig resolves prefixed ids to the right config', () => {
+    expect(getModelConfig('us.xai.grok-4.6')?.name).toBe('Grok 4.6')
+    expect(getModelConfig('global.xai.grok-4.6')?.name).toBe('Grok 4.6')
+  })
+
+  test('no explicit prompt cache is declared (implicit caching only)', () => {
+    expect(getModelConfig('us.xai.grok-4.6')?.cache).toBeUndefined()
+  })
+
+  test('only the global profile reaches regions outside the US', () => {
+    const euIds = getModelsForRegion('eu-west-1').map((m) => m.modelId)
+    expect(euIds).toContain('global.xai.grok-4.6')
+    expect(euIds).not.toContain('us.xai.grok-4.6')
+
+    const usIds = getModelsForRegion('us-east-1').map((m) => m.modelId)
+    expect(usIds).toContain('global.xai.grok-4.6')
+    expect(usIds).toContain('us.xai.grok-4.6')
+  })
+
+  test('pricing uses the Geo/US CRIS rate ($2.20/$6.60/$0.55 per 1M)', () => {
+    const calc = new PricingCalculator('us.xai.grok-4.6')
+    expect(calc.calculateInputCost(1_000_000)).toBeCloseTo(2.2, 5)
+    expect(calc.calculateOutputCost(1_000_000)).toBeCloseTo(6.6, 5)
+    expect(calc.calculateCacheReadCost(1_000_000)).toBeCloseTo(0.55, 5)
+  })
+})

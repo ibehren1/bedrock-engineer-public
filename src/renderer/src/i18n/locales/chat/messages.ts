@@ -20,6 +20,7 @@ export const messages = {
     'Stop generation': 'Stop generation',
     'New chat': 'New chat',
     'Generation stopped': 'Generation stopped',
+    'Still responding': 'Still responding',
     confirmClearChat: 'Are you sure you want to start a new chat?',
     'Are you sure you want to delete this message?':
       'Are you sure you want to delete this message?',
@@ -73,6 +74,7 @@ export const messages = {
     'Stop generation': '生成を停止',
     'New chat': '新しいチャット',
     'Generation stopped': '生成を停止しました',
+    'Still responding': '応答中',
     confirmClearChat: '新しいチャットを開始してもよろしいですか？',
     'Are you sure you want to delete this message?': 'このメッセージを削除してもよろしいですか？',
     'Message copied to clipboard': 'メッセージをクリップボードにコピーしました',

@@ -55,6 +55,12 @@ export async function buildChatSections(
      * markdown image, which is the only way to control how large a diagram is shown.
      */
     diagramWidth?: string
+    /**
+     * Leave mermaid blocks as ```mermaid source instead of rasterizing them. Set for targets
+     * that render mermaid themselves (GitHub, VS Code, Obsidian, …), where source stays
+     * readable, diffable, and editable; DrawIO diagrams are still rasterized either way.
+     */
+    keepMermaidSource?: boolean
   } = {}
 ): Promise<ChatSectionsResult> {
   const images: ChatExportImage[] = []
@@ -83,7 +89,12 @@ export async function buildChatSections(
     const rendered: string[] = []
     for (const block of blocks) {
       if (block && 'text' in block && block.text) {
-        rendered.push(await processText(block.text, pushImage, options.rasterizeDrawio))
+        rendered.push(
+          await processText(block.text, pushImage, {
+            rasterizeDrawio: options.rasterizeDrawio,
+            keepMermaidSource: options.keepMermaidSource
+          })
+        )
       } else if (block && 'image' in block && block.image) {
         const dataUrl = await imageBlockToPngDataUrl(block.image)
         if (dataUrl) {
@@ -119,6 +130,10 @@ const MARKDOWN_DIAGRAM_SCALE = 0.5
 /**
  * Build a markdown document from a chat session. See {@link buildChatSections} for the content
  * rules. The output is CommonMark apart from the sized `<img>` tag used for diagrams.
+ *
+ * Mermaid diagrams are kept as ```mermaid source: markdown readers that matter for this output
+ * (GitHub, VS Code, Obsidian) render mermaid natively, and the source stays editable and
+ * diffable. DrawIO diagrams have no such support, so they are still written as PNGs.
  */
 export async function buildChatMarkdown(
   title: string,
@@ -138,7 +153,8 @@ export async function buildChatMarkdown(
   const { sections, images } = await buildChatSections(messages, {
     rasterizeDrawio: options.rasterizeDrawio,
     diagramScale: MARKDOWN_DIAGRAM_SCALE,
-    diagramWidth: MARKDOWN_DIAGRAM_WIDTH
+    diagramWidth: MARKDOWN_DIAGRAM_WIDTH,
+    keepMermaidSource: true
   })
 
   const lines: string[] = [`# ${title}`, '']
@@ -212,15 +228,21 @@ function sanitizeForFilename(value: string): string {
   return capped.replace(/^[-.]+|[-.]+$/g, '') || 'model'
 }
 
+interface ProcessTextOptions {
+  rasterizeDrawio?: DrawioRasterizer
+  keepMermaidSource?: boolean
+}
+
 /**
  * Process a single text block: rasterize any mermaid / DrawIO fenced blocks (and
  * bare `<mxfile>` XML) into PNG image references, leaving all other markdown
- * untouched so it remains portable.
+ * untouched so it remains portable. With `keepMermaidSource`, mermaid fences are
+ * passed through unchanged.
  */
 async function processText(
   text: string,
   pushImage: (dataUrl: string, prefix: 'diagram' | 'image') => Promise<string>,
-  rasterizeDrawio?: DrawioRasterizer
+  { rasterizeDrawio, keepMermaidSource }: ProcessTextOptions = {}
 ): Promise<string> {
   // Pass 1: fenced code blocks
   let out = ''
@@ -234,8 +256,12 @@ async function processText(
     const original = match[0]
 
     if (lang === 'mermaid') {
-      const dataUrl = await rasterizeMermaid(code)
-      out += dataUrl ? await pushImage(dataUrl, 'diagram') : original
+      if (keepMermaidSource) {
+        out += original
+      } else {
+        const dataUrl = await rasterizeMermaid(code)
+        out += dataUrl ? await pushImage(dataUrl, 'diagram') : original
+      }
     } else if (lang === 'xml' || lang === 'drawio' || (lang === '' && isDrawioXml(code))) {
       const xml = extractDrawioXml(code)
       const dataUrl = xml && rasterizeDrawio ? await rasterizeDrawio(xml) : null

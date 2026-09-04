@@ -337,7 +337,8 @@ export const fileHandlers = {
       const imagesDir = path.join(exportDir, 'images')
 
       // ディレクトリを作成（既存の場合は上書き運用なのでそのまま利用）
-      await fs.promises.mkdir(imagesDir, { recursive: true })
+      // images/ は画像がある場合のみ作成する（Mermaid のみの会話で空フォルダを残さない）
+      await fs.promises.mkdir(images.length > 0 ? imagesDir : exportDir, { recursive: true })
 
       // 画像を書き込み
       for (const image of images) {

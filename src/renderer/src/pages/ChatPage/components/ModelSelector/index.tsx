@@ -3,7 +3,7 @@ import { LLM } from '@/types/llm'
 import { useSettings } from '@renderer/contexts/SettingsContext'
 import { PricingCalculator } from '@common/models/pricing'
 import { FiChevronDown } from 'react-icons/fi'
-import { getModelIcon } from '@renderer/components/ModelIcon'
+import { getModelIcon, isWideModelIcon } from '@renderer/components/ModelIcon'
 
 type ModelSelectorProps = {
   openable: boolean
@@ -98,7 +98,16 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                       : ''
                   }
                 >
-                  <div className={`rounded-md ${modelColors.icon}`}>
+                  {/*
+                    アイコン列の幅を固定し、横長のワードマークにはその幅いっぱいを使わせる。
+                    A fixed-width icon column keeps every row's text aligned while letting a
+                    wide wordmark use twice the width a square glyph needs.
+                  */}
+                  <div
+                    className={`rounded-md shrink-0 w-8 flex items-center justify-center ${modelColors.icon} ${
+                      isWideModelIcon(model.modelId) ? 'h-[12px]' : ''
+                    }`}
+                  >
                     {getModelIcon(model.modelId, isInferenceProfile)}
                   </div>
                   <div className="flex flex-col">
@@ -139,7 +148,13 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
           className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 rounded-md transition-colors"
         >
           <span className="flex items-center gap-1.5">
-            <span className={modelColors.icon}>
+            <span
+              className={`${modelColors.icon} ${
+                // 横長のワードマークは1行の高さに収まる範囲で幅を広く取る。
+                // Wide marks take the width a single-line button can afford.
+                isWideModelIcon(selectedModel.modelId) ? 'flex items-center w-7 h-[11px]' : ''
+              }`}
+            >
               {getModelIcon(selectedModel.modelId, selectedModel.isInferenceProfile)}
             </span>
             <span className="text-left whitespace-nowrap">{selectedModel.modelName}</span>

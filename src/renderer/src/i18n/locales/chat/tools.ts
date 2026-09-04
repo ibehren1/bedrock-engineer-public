@@ -225,6 +225,7 @@ export const tools = {
       think: 'Enable AI to perform complex step-by-step reasoning',
       invokeFlow: 'Invoke Amazon Bedrock Flow',
       codeInterpreter: 'Execute Python code in a secure Docker environment',
+      dockerSandbox: 'Give this chat its own Docker container to run commands in',
       generateVideo: 'Generate high-quality videos from text descriptions using Amazon Nova Reel',
       checkVideoStatus: 'Check the status of video generation jobs',
       downloadVideo: 'Download generated videos from S3 to local storage',
@@ -365,6 +366,11 @@ export const tools = {
         description:
           'Allows the AI to execute Python code in a secure Docker environment with no internet access. Perfect for data analysis, mathematical calculations, visualizations, and scientific computing tasks.',
         tip: 'Enable this when you need the AI to perform calculations, analyze data, create visualizations, or execute Python code for problem-solving. All code runs in an isolated container for security.'
+      },
+      dockerSandbox: {
+        description:
+          'Gives this chat its own long-lived Docker container based on ubuntu:26.04, and makes it the default place commands run. The agent can install any packages it needs without touching your machine. Your project directory is mounted at /workspace so files move in and out freely, and the agent can publish ports so you can open what it builds in a browser.',
+        tip: 'Enable this when you want the agent to install tools, build software, or run servers without changing your own environment. Anything is permitted inside the container; reaching your machine requires a separate approval from you each time. The sandbox is removed when you delete the chat.'
       },
       executeCommand: {
         description:
@@ -698,6 +704,7 @@ export const tools = {
       think: 'AIが複雑なステップバイステップの思考を実行',
       invokeFlow: 'Amazon Bedrock Flow を実行',
       codeInterpreter: '安全なDocker環境でPythonコードを実行',
+      dockerSandbox: 'チャット専用の Docker コンテナでコマンドを実行',
       generateVideo: 'Amazon Nova Reelを使用してテキスト説明から高品質な動画を生成',
       checkVideoStatus: '動画生成ジョブのステータスを確認',
       downloadVideo: '生成された動画をS3からローカルストレージにダウンロード',
@@ -834,6 +841,11 @@ export const tools = {
         description:
           'AIが安全なDocker環境でPythonコードを実行できるようにします（インターネットアクセスなし）。データ分析、数学的計算、視覚化、科学計算タスクに最適です。',
         tip: 'AIに計算の実行、データの分析、視覚化の作成、または問題解決のためのPythonコード実行を行わせたい場合に有効にしてください。すべてのコードはセキュリティのため分離されたコンテナで実行されます。'
+      },
+      dockerSandbox: {
+        description:
+          'このチャット専用の ubuntu:26.04 ベースの Docker コンテナを用意し、コマンドの既定の実行先にします。ホストに触れずに必要なパッケージを自由にインストールできます。プロジェクトディレクトリは /workspace にマウントされるためファイルの出し入れが容易で、ポートを公開すればビルドしたものをブラウザで確認できます。',
+        tip: '自分の環境を変えずにツールのインストール、ビルド、サーバーの起動をエージェントに任せたい場合に有効にしてください。コンテナ内は無制限ですが、ホスト側で実行する場合は毎回ユーザーの承認が必要です。チャットを削除するとサンドボックスも削除されます。'
       },
       executeCommand: {
         description:

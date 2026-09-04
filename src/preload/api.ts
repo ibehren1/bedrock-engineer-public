@@ -291,6 +291,47 @@ export const api = {
       return ipcRenderer.invoke('check-docker-availability')
     }
   },
+  dockerSandbox: {
+    availability: async (force?: boolean) => {
+      return ipcRenderer.invoke('docker-sandbox-availability', { force })
+    },
+    create: async (sessionId: string, options?: any) => {
+      return ipcRenderer.invoke('docker-sandbox-create', { sessionId, options })
+    },
+    status: async (sessionId: string) => {
+      return ipcRenderer.invoke('docker-sandbox-status', { sessionId })
+    },
+    start: async (sessionId: string) => {
+      return ipcRenderer.invoke('docker-sandbox-start', { sessionId })
+    },
+    stop: async (sessionId: string) => {
+      return ipcRenderer.invoke('docker-sandbox-stop', { sessionId })
+    },
+    remove: async (sessionId: string, options?: { deleteData?: boolean }) => {
+      return ipcRenderer.invoke('docker-sandbox-remove', { sessionId, options })
+    },
+    rename: async (sessionId: string) => {
+      return ipcRenderer.invoke('docker-sandbox-rename', { sessionId })
+    },
+    logs: async (sessionId: string, options?: { service?: string; tail?: number }) => {
+      return ipcRenderer.invoke('docker-sandbox-logs', { sessionId, ...options })
+    },
+    exec: async (sessionId: string, command: string, options?: any) => {
+      return ipcRenderer.invoke('docker-sandbox-exec', { sessionId, command, options })
+    },
+    sendInput: async (pid: number, stdin: string) => {
+      return ipcRenderer.invoke('docker-sandbox-send-input', { pid, stdin })
+    },
+    hasPid: async (pid: number) => {
+      return ipcRenderer.invoke('docker-sandbox-has-pid', { pid })
+    },
+    list: async () => {
+      return ipcRenderer.invoke('docker-sandbox-list')
+    },
+    openFolder: async (sessionId: string) => {
+      return ipcRenderer.invoke('docker-sandbox-open-folder', { sessionId })
+    }
+  },
   screen: {
     listAvailableWindows: async () => {
       return ipcRenderer.invoke('screen:list-available-windows')

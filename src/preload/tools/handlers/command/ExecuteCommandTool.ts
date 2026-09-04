@@ -3,6 +3,7 @@
  */
 
 import { Tool } from '@aws-sdk/client-bedrock-runtime'
+import { ipcRenderer } from 'electron'
 import { BaseTool } from '../../base/BaseTool'
 import { ValidationResult } from '../../base/types'
 import { ExecutionError, PermissionDeniedError } from '../../base/errors'
@@ -16,6 +17,14 @@ import {
   CommandPatternConfig
 } from '../../../../main/api/command/types'
 import { findAgentById } from '../../../helpers/agent-helpers'
+import { resolveSessionId } from '../docker'
+
+/** Extra fields accepted alongside a command, for sandbox routing. */
+type SandboxRouting = {
+  target?: 'sandbox' | 'host'
+  service?: string
+  detach?: boolean
+}
 
 /**
  * Input type for ExecuteCommandTool
@@ -23,7 +32,8 @@ import { findAgentById } from '../../../helpers/agent-helpers'
 type ExecuteCommandInput = {
   type: 'executeCommand'
   _agentId?: string // BackgroundAgentService用のメタデータ
-} & (CommandInput | CommandStdinInput)
+  _sessionId?: string // BackgroundAgentService用のセッションID（context を持たない経路向け）
+} & ((CommandInput & SandboxRouting) | CommandStdinInput)
 
 /**
  * Result type for ExecuteCommandTool
@@ -54,7 +64,7 @@ let commandServiceState: CommandServiceState | null = null
 export class ExecuteCommandTool extends BaseTool<ExecuteCommandInput, ExecuteCommandResult> {
   static readonly toolName = 'executeCommand'
   static readonly toolDescription =
-    'Execute a command or send input to a running process. First execute the command to get a PID, then use that PID to send input if needed. Usage: 1) First call with command and cwd to start process, 2) If input is required, call again with pid and stdin.\n\nRun system commands with user permission. Only use commands from allowed list: {{allowedCommands}}.'
+    'Execute a command or send input to a running process. First execute the command to get a PID, then use that PID to send input if needed. Usage: 1) First call with command and cwd to start process, 2) If input is required, call again with pid and stdin.\n\nWhen the dockerSandbox tool is enabled, commands run inside this chat\'s isolated Docker container by default and any command is permitted there — the sandbox is created automatically on first use. The project directory ({{projectPath}}) is mounted at /workspace, so use /workspace paths for cwd. The sandbox is bare Ubuntu, so run "apt-get update" before installing packages.\n\nSet target: "host" to run on the user\'s own machine instead. Host commands require the user to approve them, and only commands from this allowed list may be used: {{allowedCommands}}. Prefer the sandbox unless the task genuinely needs the host (for example git operations on the real repository).\n\nSet detach: true to start a long-running process in the background and return immediately; read its output later with the dockerSandbox logs operation.'
 
   readonly name = ExecuteCommandTool.toolName
   readonly description = ExecuteCommandTool.toolDescription
@@ -84,6 +94,22 @@ export class ExecuteCommandTool extends BaseTool<ExecuteCommandInput, ExecuteCom
           stdin: {
             type: 'string',
             description: 'Standard input to send to the process (used with pid)'
+          },
+          target: {
+            type: 'string',
+            enum: ['sandbox', 'host'],
+            description:
+              'Where to run the command. Defaults to the chat\'s Docker sandbox when that tool is enabled. Use "host" only when the task requires the user\'s own machine; the user must approve each host command.'
+          },
+          service: {
+            type: 'string',
+            description:
+              "Sandbox service to run the command in. Defaults to the sandbox's first service. Ignored on the host."
+          },
+          detach: {
+            type: 'boolean',
+            description:
+              'Start the command in the background and return immediately. Use for dev servers and other long-running processes, then read output with the dockerSandbox logs operation. Sandbox only.'
           }
         }
       }
@@ -147,9 +173,120 @@ export class ExecuteCommandTool extends BaseTool<ExecuteCommandInput, ExecuteCom
   }
 
   /**
+   * Decide whether this invocation runs in the chat's Docker sandbox.
+   *
+   * The sandbox is used when the agent has the dockerSandbox tool enabled and a chat
+   * session is available. Voice chat carries no session id, so it always falls back to
+   * the host path with its allowlist.
+   */
+  private resolveSandboxSession(input: ExecuteCommandInput, context?: any): string | undefined {
+    if ('target' in input && input.target === 'host') {
+      return undefined
+    }
+
+    const agentId = input?._agentId || (this.store.get('selectedAgentId') as string | undefined)
+    if (!agentId) return undefined
+
+    const agent = findAgentById(agentId)
+    if (!agent?.tools?.includes('dockerSandbox')) return undefined
+
+    return resolveSessionId(input, context)
+  }
+
+  /**
+   * Run a command inside the chat's sandbox via the main-process service.
+   */
+  private async executeInSandbox(
+    sessionId: string,
+    input: ExecuteCommandInput & { command: string; cwd: string } & SandboxRouting
+  ): Promise<ExecuteCommandResult> {
+    this.logger.info('Executing command in Docker sandbox', {
+      sessionId,
+      command: this.truncateForLogging(input.command, 100),
+      service: input.service,
+      detach: input.detach
+    })
+
+    const result = await ipcRenderer.invoke('docker-sandbox-exec', {
+      sessionId,
+      command: input.command,
+      options: {
+        service: input.service,
+        // The model is told to use /workspace paths, but a host-shaped cwd would be
+        // meaningless inside the container, so anything outside /workspace is ignored.
+        cwd: input.cwd?.startsWith('/') ? input.cwd : undefined,
+        detach: input.detach
+      }
+    })
+
+    return {
+      success: true,
+      name: 'executeCommand',
+      message: `Command executed in sandbox: ${input.command}`,
+      result: {
+        target: 'sandbox',
+        stdout: result.stdout,
+        stderr: result.stderr,
+        exitCode: result.exitCode,
+        processInfo: result.processInfo,
+        requiresInput: result.requiresInput,
+        prompt: result.prompt,
+        detached: result.detached
+      },
+      ...result
+    }
+  }
+
+  /**
    * Execute the tool
    */
-  protected async executeInternal(input: ExecuteCommandInput): Promise<ExecuteCommandResult> {
+  protected async executeInternal(
+    input: ExecuteCommandInput,
+    context?: any
+  ): Promise<ExecuteCommandResult> {
+    // stdin follow-ups have to reach whichever executor owns the PID. Sandbox PIDs are
+    // tracked in the main process, host PIDs in CommandService.
+    if ('pid' in input && 'stdin' in input) {
+      const { tracked } = await ipcRenderer.invoke('docker-sandbox-has-pid', { pid: input.pid })
+      if (tracked) {
+        this.logger.info('Sending stdin to sandbox process', { pid: input.pid })
+
+        const result = await ipcRenderer.invoke('docker-sandbox-send-input', {
+          pid: input.pid,
+          stdin: input.stdin
+        })
+
+        return {
+          success: true,
+          name: 'executeCommand',
+          message: `Sent input to sandbox process ${input.pid}`,
+          result: {
+            target: 'sandbox',
+            stdout: result.stdout,
+            stderr: result.stderr,
+            exitCode: result.exitCode,
+            processInfo: result.processInfo,
+            requiresInput: result.requiresInput,
+            prompt: result.prompt
+          },
+          ...result
+        }
+      }
+    } else if ('command' in input && 'cwd' in input) {
+      const sessionId = this.resolveSandboxSession(input, context)
+      if (sessionId) {
+        try {
+          return await this.executeInSandbox(sessionId, input as any)
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error)
+          this.logger.error('Sandbox command failed', { sessionId, error: message })
+          throw new ExecutionError(message, this.name, error instanceof Error ? error : undefined, {
+            input
+          })
+        }
+      }
+    }
+
     // Get command configuration
     const config = this.getCommandConfig(input)
 
@@ -212,6 +349,7 @@ export class ExecuteCommandTool extends BaseTool<ExecuteCommandInput, ExecuteCom
         name: 'executeCommand',
         message: `Command executed: ${JSON.stringify(input)}`,
         result: {
+          target: 'host',
           stdout: result.stdout,
           stderr: result.stderr,
           exitCode: result.exitCode,

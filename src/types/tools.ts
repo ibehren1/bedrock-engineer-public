@@ -22,6 +22,7 @@ export type BuiltInToolName =
   | 'recognizeImage'
   | 'invokeFlow'
   | 'codeInterpreter'
+  | 'dockerSandbox'
   | 'mcp'
   | 'screenCapture'
   | 'cameraCapture'
@@ -58,6 +59,7 @@ export const BUILT_IN_TOOLS: readonly BuiltInToolName[] = [
   'recognizeImage',
   'invokeFlow',
   'codeInterpreter',
+  'dockerSandbox',
   'mcp',
   'screenCapture',
   'cameraCapture',
@@ -229,16 +231,86 @@ export type ExecuteCommandInput = {
   | {
       command: string
       cwd: string
+      /**
+       * Where to run the command. Defaults to the chat's Docker sandbox when the
+       * dockerSandbox tool is enabled, otherwise the host shell.
+       */
+      target?: 'sandbox' | 'host'
+      /** Sandbox service to exec into. Ignored on the host. */
+      service?: string
+      /** Start the command in the background and return immediately. */
+      detach?: boolean
       pid?: never
       stdin?: never
     }
   | {
       command?: never
       cwd?: never
+      target?: never
+      service?: never
+      detach?: never
       pid: number
       stdin: string
     }
 )
+
+// dockerSandbox ツールの入力型（操作別にディスクリミネーテッドユニオン化）
+export type DockerSandboxInput =
+  | DockerSandboxCreateInput
+  | DockerSandboxStatusInput
+  | DockerSandboxStopInput
+  | DockerSandboxStartInput
+  | DockerSandboxRemoveInput
+  | DockerSandboxLogsInput
+
+export type DockerSandboxPort = { host: number; container: number }
+
+export type DockerSandboxServiceSpec = {
+  name: string
+  image?: string
+  command?: string
+  ports?: DockerSandboxPort[]
+  environment?: Record<string, string>
+  dataVolumes?: { name: string; containerPath: string }[]
+}
+
+// サンドボックスの作成（既存の場合は再利用、recreate で作り直し）
+export type DockerSandboxCreateInput = {
+  type: 'dockerSandbox'
+  operation: 'create'
+  services?: DockerSandboxServiceSpec[]
+  composeYaml?: string
+  env?: Record<string, string>
+  recreate?: boolean
+}
+
+export type DockerSandboxStatusInput = {
+  type: 'dockerSandbox'
+  operation: 'status'
+}
+
+export type DockerSandboxStopInput = {
+  type: 'dockerSandbox'
+  operation: 'stop'
+}
+
+export type DockerSandboxStartInput = {
+  type: 'dockerSandbox'
+  operation: 'start'
+}
+
+export type DockerSandboxRemoveInput = {
+  type: 'dockerSandbox'
+  operation: 'remove'
+  deleteData?: boolean
+}
+
+export type DockerSandboxLogsInput = {
+  type: 'dockerSandbox'
+  operation: 'logs'
+  service?: string
+  tail?: number
+}
 
 // 新しい applyDiffEdit ツールの入力型
 export type ApplyDiffEditInput = {
@@ -479,6 +551,7 @@ export type ToolInput =
   | CameraCaptureInput
   | InvokeFlowInput
   | CodeInterpreterInput
+  | DockerSandboxInput
   | TodoInput
   | TodoInitInput
   | TodoUpdateInput
@@ -509,6 +582,7 @@ export type ToolInputTypeMap = {
   cameraCapture: CameraCaptureInput
   invokeFlow: InvokeFlowInput
   codeInterpreter: CodeInterpreterInput
+  dockerSandbox: DockerSandboxInput
   todo: TodoInput
   todoInit: TodoInitInput
   todoUpdate: TodoUpdateInput

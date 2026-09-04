@@ -2,6 +2,7 @@ import React, { useState, memo, useImperativeHandle } from 'react'
 import { InputForm } from '../InputForm'
 import { AttachedImage } from '../InputForm/TextArea'
 import { SendMsgKey } from '@/types/agent-chat'
+import type { ChatSandboxStatus } from '../../hooks/useChatSandbox'
 
 // InputFormContainer の参照タイプを定義
 export type InputFormContainerRef = {
@@ -27,6 +28,14 @@ type InputFormContainerProps = {
   hasMessages: boolean
   onHeightChange?: (height: number) => void // Text area height change handler
   isHistoryOpen?: boolean // Whether the chat history panel is expanded
+  sandbox?: {
+    status: ChatSandboxStatus
+    isBusy: boolean
+    onStop: () => void
+    onStart: () => void
+    onRemove: (deleteData: boolean) => void
+    onOpenFolder: () => void
+  }
 }
 
 /**
@@ -53,7 +62,8 @@ const InputFormContainer = React.forwardRef<InputFormContainerRef, InputFormCont
       onStopGeneration,
       hasMessages,
       onHeightChange,
-      isHistoryOpen
+      isHistoryOpen,
+      sandbox
     },
     ref
   ) => {
@@ -101,6 +111,7 @@ const InputFormContainer = React.forwardRef<InputFormContainerRef, InputFormCont
         hasMessages={hasMessages}
         onHeightChange={onHeightChange}
         isHistoryOpen={isHistoryOpen}
+        sandbox={sandbox}
       />
     )
   }

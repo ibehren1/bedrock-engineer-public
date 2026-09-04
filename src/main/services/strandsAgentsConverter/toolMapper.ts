@@ -127,6 +127,13 @@ export const TOOL_MAPPING: Record<BuiltInToolName, StrandsTool> = {
   },
 
   // Unsupported tools
+  dockerSandbox: {
+    strandsName: '',
+    importPath: '',
+    supported: false,
+    reason:
+      'The Docker sandbox is scoped to a Bedrock Engineer chat session and has no equivalent in Strands Agents'
+  },
   screenCapture: {
     strandsName: '',
     importPath: '',

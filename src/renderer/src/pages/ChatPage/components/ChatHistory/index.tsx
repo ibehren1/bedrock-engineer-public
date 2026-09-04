@@ -6,6 +6,8 @@ import { SessionMetadata } from '@/types/chat/history'
 import { useChatHistory } from '@renderer/contexts/ChatHistoryContext'
 import { generateSessionTitle } from '../../utils/titleGenerator'
 import { useLightProcessingModel } from '@renderer/lib/modelSelection'
+import { useRunningSessions } from '../../runners/useRunningSessions'
+import { ConfirmDeleteChatModal, DeleteChatRequest } from '../../modals/ConfirmDeleteChatModal'
 
 interface ChatHistoryProps {
   onSessionSelect: (sessionId: string) => void
@@ -21,8 +23,11 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedSessionIds, setSelectedSessionIds] = useState<Set<string>>(new Set())
+  const [deleteRequest, setDeleteRequest] = useState<DeleteChatRequest | null>(null)
   const { getLightModelId } = useLightProcessingModel()
   const { t } = useTranslation()
+  // A turn keeps running after you switch away from its chat, so mark the ones still working.
+  const runningSessionIds = useRunningSessions()
 
   // ChatHistoryContext から sessions と操作関数を取得
   const {
@@ -31,7 +36,8 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
     updateSessionTitle,
     deleteSession,
     deleteSessions,
-    deleteAllSessions
+    deleteAllSessions,
+    getSessionsWithSandbox
   } = useChatHistory()
 
   useEffect(() => {
@@ -91,31 +97,51 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
     )
   }
 
+  // Open the confirm dialog, first checking whether any target chat owns a Docker
+  // sandbox so the extra "also delete sandbox data" choice is only offered when it means
+  // something.
+  const openDeleteDialog = async (
+    scope: DeleteChatRequest['scope'],
+    sessionIds: string[]
+  ): Promise<void> => {
+    const withSandbox = await getSessionsWithSandbox(
+      scope === 'all' ? sessions.map((session) => session.id) : sessionIds
+    )
+    setDeleteRequest({ scope, sessionIds, hasSandbox: withSandbox.length > 0 })
+  }
+
   const handleDeleteSelected = () => {
     if (selectedSessionIds.size === 0) return
-    const count = selectedSessionIds.size
-    const confirmed = window.confirm(
-      t('Are you sure you want to delete {{count}} selected chat(s)?', { count })
-    )
-    if (confirmed) {
-      deleteSessions(Array.from(selectedSessionIds))
-      exitSelectionMode()
-    }
+    void openDeleteDialog('selected', Array.from(selectedSessionIds))
   }
 
   const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    deleteSession(sessionId)
     setMenuOpenSessionId(undefined)
+    await openDeleteDialog('single', [sessionId])
   }
 
   const handleDeleteAllSessions = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    const confirmed = window.confirm(t('Are you sure you want to delete all chat sessions?'))
-    if (confirmed) {
-      deleteAllSessions()
-      setIsGlobalMenuOpen(false)
+    setIsGlobalMenuOpen(false)
+    await openDeleteDialog('all', [])
+  }
+
+  const handleConfirmDelete = async (deleteSandboxData: boolean) => {
+    const request = deleteRequest
+    setDeleteRequest(null)
+    if (!request) return
+
+    if (request.scope === 'all') {
+      await deleteAllSessions(deleteSandboxData)
+      return
     }
+    if (request.scope === 'selected') {
+      await deleteSessions(request.sessionIds, deleteSandboxData)
+      exitSelectionMode()
+      return
+    }
+    await deleteSession(request.sessionIds[0], deleteSandboxData)
   }
 
   const startEditing = (sessionId: string, title: string, e: React.MouseEvent) => {
@@ -354,9 +380,19 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
                     >
                       {session.title}
                     </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                      {formatDate(session.updatedAt)} · {session.messageCount} messages
-                    </p>
+                    {runningSessionIds.includes(session.id) ? (
+                      <p className="text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap flex items-center gap-1.5">
+                        <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500" />
+                        </span>
+                        {t('Still responding')}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        {formatDate(session.updatedAt)} · {session.messageCount} messages
+                      </p>
+                    )}
                   </div>
                   <div className={`relative flex-shrink-0 ${selectionMode ? 'hidden' : ''}`}>
                     <button
@@ -407,6 +443,12 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
           </div>
         ))}
       </div>
+
+      <ConfirmDeleteChatModal
+        request={deleteRequest}
+        onCancel={() => setDeleteRequest(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { LiaUserCircleSolid } from 'react-icons/lia'
 import { IdentifiableMessage } from '@/types/chat/message'
-import { getModelIcon } from '@renderer/components/ModelIcon'
+import { getModelIcon, isWideModelIcon, WIDE_ICON_ASPECT } from '@renderer/components/ModelIcon'
 import AILogo from '@renderer/assets/images/icons/bedrock-color.png'
 import { participantKey, svgToPngDataUrl, type ChatSection } from './chatExport'
 
@@ -117,10 +117,14 @@ export async function avatarDataUrl(
 ): Promise<string | null> {
   try {
     let raw: string | null
+    // A wide wordmark fitted into a square canvas ends up a fraction of the height every
+    // other avatar gets, so it is baked to a canvas of its own proportions instead.
+    let wide = false
     if (message.role === 'assistant') {
       const modelId = message.metadata?.modelId
       if (modelId) {
         const model = ctx.resolveModel(modelId)
+        wide = !model?.isInferenceProfile && isWideModelIcon(modelId)
         raw = await svgToPngDataUrl(
           normalizeSvgSize(renderToStaticMarkup(getModelIcon(modelId, model?.isInferenceProfile)))
         )
@@ -134,8 +138,9 @@ export async function avatarDataUrl(
       raw = await svgToPngDataUrl(normalizeSvgSize(renderToStaticMarkup(<LiaUserCircleSolid />)))
     }
 
-    // Bake all avatars to a uniform square size so they render consistently.
-    return raw ? await normalizeToSquarePng(raw, sizePx) : null
+    // Bake all avatars to a uniform height so they render consistently: a square canvas,
+    // except for wide wordmarks, which keep their proportions at the same height.
+    return raw ? await normalizeToPng(raw, sizePx, wide ? WIDE_ICON_ASPECT : 1) : null
   } catch (error) {
     console.error('Failed to rasterize avatar for export:', error)
     return null
@@ -182,25 +187,33 @@ function normalizeSvgSize(svg: string): string {
   return svg.replace(/<svg\b[^>]*>/i, (tag) => tag.replace(/\s(width|height)="[^"]*"/gi, ''))
 }
 
-/** Draw a source image (data URL) centered on a fixed square canvas → PNG data URL. */
-function normalizeToSquarePng(srcDataUrl: string, size: number): Promise<string | null> {
+/**
+ * Draw a source image (data URL) centered on a fixed canvas `size` tall and `size * aspect`
+ * wide → PNG data URL. `aspect` is 1 (a square) for every avatar except wide wordmarks.
+ */
+function normalizeToPng(
+  srcDataUrl: string,
+  size: number,
+  aspect: number = 1
+): Promise<string | null> {
   return new Promise((resolve) => {
     const img = new Image()
     img.onload = () => {
+      const canvasW = Math.round(size * aspect)
       const canvas = document.createElement('canvas')
-      canvas.width = size
+      canvas.width = canvasW
       canvas.height = size
       const context = canvas.getContext('2d')
       if (!context) {
         resolve(null)
         return
       }
-      const srcW = img.naturalWidth || size
+      const srcW = img.naturalWidth || canvasW
       const srcH = img.naturalHeight || size
-      const scale = Math.min(size / srcW, size / srcH)
+      const scale = Math.min(canvasW / srcW, size / srcH)
       const w = srcW * scale
       const h = srcH * scale
-      context.drawImage(img, (size - w) / 2, (size - h) / 2, w, h)
+      context.drawImage(img, (canvasW - w) / 2, (size - h) / 2, w, h)
       resolve(canvas.toDataURL('image/png'))
     }
     img.onerror = () => resolve(null)

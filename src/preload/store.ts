@@ -11,6 +11,7 @@ import { CustomAgent } from '../types/agent-chat'
 import { BedrockAgent } from '../types/agent'
 import { AWSCredentials } from '../main/api/bedrock/types'
 import { CodeInterpreterContainerConfig } from './tools/handlers/interpreter/types'
+import { DEFAULT_SANDBOX_CONFIG, DockerSandboxConfig } from '../main/api/docker/types'
 
 const DEFAULT_SHELL =
   process.platform === 'win32'
@@ -88,6 +89,9 @@ type StoreScheme = {
 
   /** コードインタープリタツールの設定 */
   codeInterpreterTool?: CodeInterpreterContainerConfig
+
+  /** Docker サンドボックスツールの設定（チャットごとのコンテナのリソース上限） */
+  dockerSandboxTool?: DockerSandboxConfig
 
   /** アプリケーションの表示言語設定（日本語または英語） */
   language: 'ja' | 'en'
@@ -325,6 +329,12 @@ const init = () => {
       cpuLimit: 0.5,
       timeout: 30
     })
+  }
+
+  // Initialize dockerSandboxTool if not present
+  const dockerSandboxTool = electronStore.get('dockerSandboxTool')
+  if (!dockerSandboxTool) {
+    electronStore.set('dockerSandboxTool', DEFAULT_SANDBOX_CONFIG)
   }
 
   // Initialize selectedVoiceId if not present

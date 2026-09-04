@@ -676,7 +676,7 @@ export class BackgroundAgentService {
 
       for (const block of toolUseBlocks) {
         if ('toolUse' in block && block.toolUse) {
-          const toolExecution = await this.executeTool(block.toolUse, agent, config)
+          const toolExecution = await this.executeTool(block.toolUse, agent, config, sessionId)
           toolExecutions?.push(toolExecution)
 
           // ツール結果をメッセージに追加
@@ -863,7 +863,8 @@ export class BackgroundAgentService {
   private async executeTool(
     toolUse: any,
     agent: CustomAgent,
-    config: BackgroundAgentConfig
+    config: BackgroundAgentConfig,
+    sessionId: string
   ): Promise<NonNullable<BackgroundChatResult['toolExecutions']>[0]> {
     try {
       logger.debug('Executing tool via preload tool system', {
@@ -881,6 +882,9 @@ export class BackgroundAgentService {
         // BackgroundAgentService用のメタデータを追加
         // モデルが生成した input で上書きされないよう、必ず後ろに展開する
         _agentId: config.agentId,
+        // Docker サンドボックスはセッション単位。この経路は context を持たない
+        // （preload-tool-request 経由）ので、input に載せて渡す。
+        _sessionId: sessionId,
         _mcpServers: agent.mcpServers,
         // 委譲メタデータ。invokeAgent 以外では未使用
         _delegationDepth: currentDepth,

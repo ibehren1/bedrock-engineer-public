@@ -13,6 +13,7 @@ import { GenerateImageSettingForm } from './GenerateImageSettingForm'
 import { GenerateVideoSettingForm } from './GenerateVideoSettingForm'
 import { FlowSettingForm } from './FlowSettingForm'
 import { CodeInterpreterSettingForm } from './CodeInterpreterSettingForm'
+import { DockerSandboxSettingForm } from './DockerSandboxSettingForm'
 import { ScreenCaptureSettingForm } from './ScreenCaptureSettingForm'
 import { CameraCaptureSettingForm } from './CameraCaptureSettingForm'
 import { Modal, ToggleSwitch } from 'flowbite-react'
@@ -52,6 +53,7 @@ const TOOLS_WITH_SETTINGS = [
   'generateVideo',
   'invokeFlow',
   'codeInterpreter',
+  'dockerSandbox',
   'screenCapture',
   'cameraCapture'
 ]
@@ -732,6 +734,7 @@ const ToolSettingModal = memo(({ isOpen, onClose }: ToolSettingModalProps) => {
                         />
                       )}
                       {selectedTool === 'codeInterpreter' && <CodeInterpreterSettingForm />}
+                      {selectedTool === 'dockerSandbox' && <DockerSandboxSettingForm />}
                       {selectedTool === 'screenCapture' && <ScreenCaptureSettingForm />}
                       {selectedTool === 'cameraCapture' && <CameraCaptureSettingForm />}
                     </div>

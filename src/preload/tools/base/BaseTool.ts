@@ -14,9 +14,20 @@ import { ContentChunker } from '../../lib/contentChunker'
 /**
  * Utility function to convert Zod schema to JSON Schema body
  */
+/**
+ * Narrowed view of `zodToJsonSchema`. Its declared return type is a generic
+ * intersection over the recursive `JsonSchema7Type` union, which TypeScript 5.9
+ * gives up on instantiating (TS2589). Only `definitions` is read here, so the
+ * call is typed to just that.
+ */
+const zodToJsonSchemaNarrowed = zodToJsonSchema as unknown as (
+  schema: ZodSchema,
+  name: string
+) => { definitions?: Record<string, unknown> }
+
 export const zodToJsonSchemaBody = (schema: ZodSchema) => {
   const key = 'mySchema'
-  const jsonSchema = zodToJsonSchema(schema, key)
+  const jsonSchema = zodToJsonSchemaNarrowed(schema, key)
   return jsonSchema.definitions?.[key] as any
 }
 

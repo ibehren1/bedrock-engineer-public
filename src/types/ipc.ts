@@ -465,6 +465,60 @@ export interface IPCChannelDefinitions {
       lastChecked: Date
     }
   }
+
+  // Docker サンドボックス関連（チャットごとのコンテナ）
+  'docker-sandbox-availability': {
+    params?: { force?: boolean }
+    result: any // DockerAvailability
+  }
+  'docker-sandbox-create': {
+    params: { sessionId: string; options?: any } // CreateSandboxOptions
+    result: { metadata: any; warnings: string[] } // SandboxMetadata
+  }
+  'docker-sandbox-status': {
+    params: { sessionId: string }
+    result: any // SandboxStatus
+  }
+  'docker-sandbox-start': {
+    params: { sessionId: string }
+    result: any // SandboxStatus
+  }
+  'docker-sandbox-stop': {
+    params: { sessionId: string }
+    result: any // SandboxStatus
+  }
+  'docker-sandbox-remove': {
+    params: { sessionId: string; options?: { deleteData?: boolean } }
+    result: { removed: boolean; dataDeleted: boolean }
+  }
+  'docker-sandbox-rename': {
+    params: { sessionId: string }
+    result: { renamed: boolean; directory?: string }
+  }
+  'docker-sandbox-logs': {
+    params: { sessionId: string; service?: string; tail?: number }
+    result: { stdout: string; stderr: string; exitCode: number }
+  }
+  'docker-sandbox-exec': {
+    params: { sessionId: string; command: string; options?: any } // SandboxExecOptions
+    result: any // SandboxExecResult
+  }
+  'docker-sandbox-send-input': {
+    params: { pid: number; stdin: string }
+    result: any // SandboxExecResult
+  }
+  'docker-sandbox-has-pid': {
+    params: { pid: number }
+    result: { tracked: boolean }
+  }
+  'docker-sandbox-list': {
+    params: void
+    result: { sessionIds: string[] }
+  }
+  'docker-sandbox-open-folder': {
+    params: { sessionId: string }
+    result: { success: boolean; path?: string; error?: string }
+  }
   'get-todo-list': {
     params?: { sessionId?: string }
     result: any | null // TodoList | null

@@ -115,7 +115,7 @@ import {
   TbVacuumCleaner,
   TbBell,
   TbLockAccess,
-  TbSeeding,
+  TbSeedling,
   TbApple,
   TbBed,
   TbZzz,
@@ -208,7 +208,6 @@ import {
   SiAngular,
   SiNpm,
   SiWebpack,
-  SiMicrosoftazure,
   SiGooglecloud,
   SiDigitalocean,
   SiJenkins,
@@ -216,6 +215,8 @@ import {
   SiCircleci,
   SiAnsible
 } from 'react-icons/si'
+// Simple Icons dropped the Microsoft Azure mark, so the Azure entry uses the Codicon one.
+import { VscAzure } from 'react-icons/vsc'
 import {
   GiCookingPot,
   GiNoodles,
@@ -335,7 +336,7 @@ export const AGENT_ICONS: AgentIconOption[] = [
   { value: 'laptop', icon: <BsLaptopFill />, label: 'Infrastructure', category: 'cloud' },
   { value: 'microchip', icon: <FaMicrochip />, label: 'Hardware', category: 'cloud' },
   // Cloud Providers
-  { value: 'azure', icon: <SiMicrosoftazure />, label: 'Azure', category: 'cloud' },
+  { value: 'azure', icon: <VscAzure />, label: 'Azure', category: 'cloud' },
   { value: 'google-cloud', icon: <SiGooglecloud />, label: 'Google Cloud', category: 'cloud' },
   { value: 'digitalocean', icon: <SiDigitalocean />, label: 'DigitalOcean', category: 'cloud' },
   // Cloud Services
@@ -437,7 +438,7 @@ export const AGENT_ICONS: AgentIconOption[] = [
   { value: 'vacuum', icon: <TbVacuumCleaner />, label: 'Vacuum', category: 'lifestyle' },
   { value: 'doorbell', icon: <TbBell />, label: 'Doorbell', category: 'lifestyle' },
   { value: 'lock-smart', icon: <TbLockAccess />, label: 'Smart Lock', category: 'lifestyle' },
-  { value: 'garden', icon: <TbSeeding />, label: 'Garden', category: 'lifestyle' },
+  { value: 'garden', icon: <TbSeedling />, label: 'Garden', category: 'lifestyle' },
 
   // Health & Medical
   { value: 'heartbeat', icon: <TbHeartbeat />, label: 'Heart Rate', category: 'health' },

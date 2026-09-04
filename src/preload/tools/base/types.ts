@@ -57,6 +57,7 @@ export type ToolCategory =
   | 'interpreter'
   | 'system'
   | 'agent'
+  | 'docker'
 
 /**
  * Tool execution context

@@ -89,18 +89,26 @@ and automated requests get a Vercel bot challenge, so the app doesn't read it.
   icons.
 - **Export the conversation** as Markdown, Word (`.docx`) or PDF from the buttons above the input
   box. All three exclude tool use/results, label turns as `Assistant – <model ID>` / `User – <name>`,
-  embed the avatars, and render Mermaid/DrawIO diagrams as images.
+  and embed the avatars. Word and PDF render Mermaid and DrawIO diagrams as images; the Markdown
+  export keeps Mermaid diagrams as ```` ```mermaid ```` code blocks so they stay editable and are
+  rendered by GitHub, VS Code and Obsidian, and writes DrawIO diagrams and other images to an
+  `images/` folder next to the `.md` file.
 - Select text in a message to get a **floating toolbar** that copies just the selection as Markdown
   or rich text; whole messages can be copied either way too.
 - The stop-generation button is red while inference runs; the new-conversation button is green.
+- **Answers keep running in the background.** Switching to another chat, starting a new one, or
+  leaving the Chat page no longer cancels an agent mid-turn — it keeps calling tools and the reply is
+  waiting when you return. Chats still working are marked "Still responding" in the history list, and
+  stop only ever stops the chat on screen. Reloading the window still cancels everything.
+- The **chat history panel starts open** when you go to Chat.
 - Streaming output auto-scrolls through the tool-use phase and then stops, and respects a manual
   scroll up.
 - Attachments can be dropped onto the window, and chat history supports multi-select delete.
 
 ### Models
 
-- Added Claude Fable 5, Opus 5, Sonnet 5 and Opus 4.8, Kimi 2.5, and the OpenAI GPT-5.6
-  (Sol/Terra/Luna) models, all served through the standard Bedrock Converse API.
+- Added Claude Fable 5.1, Fable 5, Opus 5, Sonnet 5 and Opus 4.8, Kimi 2.5, xAI Grok 4.6, and the
+  OpenAI GPT-5.6 (Sol/Terra/Luna) models, all served through the standard Bedrock Converse API.
 - Adaptive thinking for newer Claude models, with the thinking type translated per model so
   switching model generations doesn't 400.
 - Model pricing kept current, and per-model input/output pricing shown in the model dropdown.
@@ -321,6 +329,7 @@ The supported tools are:
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `executeCommand`  | Manages command execution and process input handling. Features two operational modes: 1) initiating new processes with command and working directory specification, 2) sending standard input to existing processes using process ID. For security reasons, only allowed commands can be executed, using the configured shell. Unregistered commands cannot be executed. The agent's capabilities can be extended by registering commands that connect to databases, execute APIs, or invoke other AI agents.                    |
 | `codeInterpreter` | Executes Python code in a secure Docker environment with pre-installed data science libraries. Provides isolated code execution with no internet access for security. Supports two environments: "basic" (numpy, pandas, matplotlib, requests) and "datascience" (full ML stack including scikit-learn, scipy, seaborn, etc.). Input files can be mounted read-only at /data/ directory for analysis. Generated files are automatically detected and reported. Perfect for data analysis, visualization, and ML experimentation. |
+| `dockerSandbox`   | Gives each chat its own long-lived Docker container based on `ubuntu:26.04`, and makes it the default place `executeCommand` runs. The agent can install any packages it needs without touching your machine, and because the container cannot reach the host, no command allowlist applies inside it. The project directory is mounted read-write at `/workspace`, data written to `/data` persists on the host, and the agent can publish ports so you can open what it builds in a browser. Reaching your own machine instead requires `target: "host"`, which asks for your approval every time. Each sandbox lives in `docker-sandboxes/<chat-title>-<id>/` inside your project directory and is renamed to follow the chat's title, and the Docker whale in the chat toolbar can open that folder in your file manager. Requires Docker; Docker Compose is used when available (multi-service stacks need it). |
 | `screenCapture`   | Captures the current screen and saves as PNG image file. Optionally analyzes the captured image with AI using vision models (Claude/Nova) to extract text content, identify UI elements, and provide detailed visual descriptions for debugging and documentation purposes. Platform-specific permissions required (macOS: Screen Recording permission in System Preferences required).                                                                                                                                          |
 | `cameraCapture`   | Captures images from PC camera using HTML5 getUserMedia API and saves as an image file. Supports different quality settings (low, medium, high) and formats (JPG, PNG). Optionally analyzes the captured image with AI to extract text content, identify objects, and provide detailed visual descriptions for analysis and documentation purposes. Camera access permission is required in your browser settings.                                                                                                               |
 

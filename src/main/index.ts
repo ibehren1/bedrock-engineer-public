@@ -34,6 +34,8 @@ import { pubsubHandlers } from './handlers/pubsub-handlers'
 import { todoHandlers } from './handlers/todo-handlers'
 import { subAgentHandlers } from './handlers/sub-agent-handlers'
 import { mcpHandlers, cleanupMcpHandlers } from './handlers/mcp-handlers'
+import { dockerSandboxHandlers } from './handlers/docker-sandbox-handlers'
+import { stopAllSandboxes } from './api/docker'
 import { cleanupMcpClients } from './mcp/index'
 
 // 動的インポートを使用してfix-pathパッケージを読み込む
@@ -459,6 +461,7 @@ app.whenReady().then(async () => {
   registerIpcHandlers(todoHandlers, { loggerCategory: 'todo:ipc' })
   registerIpcHandlers(mcpHandlers, { loggerCategory: 'mcp:ipc' })
   registerIpcHandlers(proxyHandlers, { loggerCategory: 'proxy:ipc' })
+  registerIpcHandlers(dockerSandboxHandlers, { loggerCategory: 'docker-sandbox:ipc' })
 
   // ログハンドラーの登録
   registerLogHandler()
@@ -519,6 +522,25 @@ app.whenReady().then(async () => {
       log.info('Task history window force close completed')
     } catch (error) {
       log.error('Failed to force close task history window', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+    }
+
+    // Docker サンドボックスの停止処理
+    // コンテナがアプリより長く生き残らないよう停止する。削除はしないので、
+    // 次回利用時にインストール済みパッケージを保ったまま起動できる。
+    try {
+      stopAllSandboxes()
+        .then(() => {
+          log.info('Docker sandboxes stopped')
+        })
+        .catch((error) => {
+          log.error('Failed to stop Docker sandboxes', {
+            error: error instanceof Error ? error.message : String(error)
+          })
+        })
+    } catch (error) {
+      log.error('Failed to stop Docker sandboxes', {
         error: error instanceof Error ? error.message : String(error)
       })
     }

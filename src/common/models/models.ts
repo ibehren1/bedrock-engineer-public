@@ -15,6 +15,7 @@ export type ModelProvider =
   | 'stability'
   | 'openai'
   | 'moonshotai'
+  | 'xai'
 
 /**
  * Type definition for model categories
@@ -686,6 +687,56 @@ const MODEL_REGISTRY: ModelConfig[] = [
     }
   },
 
+  // Claude Fable 5.1
+  // Anthropic's most capable model for demanding reasoning and long-horizon agentic
+  // work. Same always-on adaptive thinking, 1M context and 128K max output as Fable 5.
+  // Bedrock currently offers the global endpoint plus a regional endpoint in
+  // us-east-1 only (no EU/JP regional profiles yet).
+  {
+    baseId: 'claude-fable-5-1',
+    name: 'Claude Fable 5.1',
+    provider: 'anthropic',
+    category: 'text',
+    toolUse: true,
+    maxTokensLimit: 128000,
+    supportsThinking: true,
+    supportedThinkingTypes: ['adaptive'],
+    inferenceProfiles: [
+      {
+        type: 'global',
+        prefix: 'global',
+        regions: [
+          'us-west-2',
+          'us-east-1',
+          'us-east-2',
+          'eu-west-1',
+          'eu-central-1',
+          'ap-northeast-1',
+          'ap-northeast-3',
+          'ap-southeast-1',
+          'ap-southeast-2'
+        ],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1'],
+        displaySuffix: '(US)'
+      }
+    ],
+    pricing: {
+      input: 0.01,
+      output: 0.05,
+      cacheRead: 0.001,
+      cacheWrite: 0.0125
+    },
+    cache: {
+      supported: true,
+      cacheableFields: ['messages', 'system', 'tools']
+    }
+  },
+
   // Amazon Nova Premier
   {
     baseId: 'nova-premier-v1:0',
@@ -1074,6 +1125,79 @@ const MODEL_REGISTRY: ModelConfig[] = [
       input: 0.0006,
       output: 0.003,
       cacheRead: 0,
+      cacheWrite: 0
+    }
+  },
+
+  // xAI Grok 4.6
+  // xAI's frontier model for coding, agentic tasks and knowledge work, with a
+  // 500K context window. Reasoning is always active; the effort level (low,
+  // medium, high, xhigh) is set through `additionalModelRequestFields.reasoning`
+  // rather than an Anthropic-style `thinking` field, and the model rejects
+  // temperature/topP the way the GPT-5.x models do — see converseService.
+  // On bedrock-runtime the model is only reachable through cross-region
+  // inference profiles (`us.xai.grok-4.6` / `global.xai.grok-4.6`); in-region
+  // invocation of the bare model ID is not supported, so no `base` profile.
+  // Bedrock also lists structured output as unsupported for this model on
+  // bedrock-runtime, so structured-output requests may fail with it selected.
+  // Only implicit prompt caching is offered, so no `cache` block is declared:
+  // explicit cachePoint blocks would be rejected. Cache-read pricing is still
+  // recorded because implicit hits are billed and reported in usage.
+  // Pricing (Geo/US CRIS, per 1M in/out/cache-read): $2.20/$6.60/$0.55, stored
+  // per 1K. Global CRIS bills about 10% less ($2.00/$6.00/$0.50) but the
+  // registry keeps one rate per model, so the higher US rate is used.
+  {
+    baseId: 'grok-4.6',
+    name: 'Grok 4.6',
+    provider: 'xai',
+    category: 'text',
+    toolUse: true,
+    // The model card documents no output cap, so this is a conservative floor:
+    // selecting a model sets maxTokens to this value, and an over-high guess
+    // would make every request fail validation.
+    maxTokensLimit: 32768,
+    supportsThinking: true,
+    supportedThinkingTypes: ['enabled'],
+    inferenceProfiles: [
+      {
+        type: 'global',
+        prefix: 'global',
+        regions: [
+          'us-east-1',
+          'us-east-2',
+          'us-west-1',
+          'us-west-2',
+          'ca-central-1',
+          'eu-central-1',
+          'eu-central-2',
+          'eu-north-1',
+          'eu-south-1',
+          'eu-south-2',
+          'eu-west-1',
+          'eu-west-2',
+          'eu-west-3',
+          'ap-northeast-1',
+          'ap-northeast-2',
+          'ap-northeast-3',
+          'ap-south-1',
+          'ap-south-2',
+          'ap-southeast-1',
+          'ap-southeast-2',
+          'sa-east-1'
+        ],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2'],
+        displaySuffix: '(US)'
+      }
+    ],
+    pricing: {
+      input: 0.0022,
+      output: 0.0066,
+      cacheRead: 0.00055,
       cacheWrite: 0
     }
   }

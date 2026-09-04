@@ -3,7 +3,7 @@ import React from 'react'
 import { LiaUserCircleSolid } from 'react-icons/lia'
 import AILogo from '@renderer/assets/images/icons/bedrock-color.png'
 import { useSettings } from '@renderer/contexts/SettingsContext'
-import { getModelIcon } from '@renderer/components/ModelIcon'
+import { getModelIcon, isWideModelIcon } from '@renderer/components/ModelIcon'
 import { allModels } from '@common/models/models'
 
 export const Avatar: React.FC<{ role?: ConversationRole; modelId?: string }> = ({
@@ -34,7 +34,15 @@ export const Avatar: React.FC<{ role?: ConversationRole; modelId?: string }> = (
           title={modelName}
           className="h-8 w-8 flex justify-center items-center border border-black dark:border-white rounded-lg"
         >
-          <div className="h-5 w-5 flex items-center justify-center text-[20px] pointer-events-none">
+          <div
+            className={`flex items-center justify-center pointer-events-none ${
+              // 横長のワードマークは正方形のスロットだと潰れるので、枠内の幅をすべて使う。
+              // A wide wordmark gets the full width inside the 32px frame instead of a
+              // 20px square, so it renders about 1.5x larger. The frame is unchanged, so
+              // this doesn't shift the message layout.
+              modelId && isWideModelIcon(modelId) ? 'w-[30px] h-[12px]' : 'h-5 w-5 text-[20px]'
+            }`}
+          >
             {modelId ? (
               getModelIcon(modelId, model?.isInferenceProfile)
             ) : (

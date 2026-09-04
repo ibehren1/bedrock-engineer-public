@@ -27,6 +27,7 @@ import { InvokeFlowTool } from './handlers/bedrock/InvokeFlowTool'
 import { ExecuteCommandTool } from './handlers/command/ExecuteCommandTool'
 import { ThinkTool } from './handlers/thinking/ThinkTool'
 import { CodeInterpreterTool } from './handlers/interpreter/CodeInterpreterTool'
+import { DockerSandboxTool } from './handlers/docker/DockerSandboxTool'
 import { ScreenCaptureTool } from './handlers/system/ScreenCaptureTool'
 import { CameraCaptureTool } from './handlers/system/CameraCaptureTool'
 import { TodoInitTool } from './handlers/todo/TodoInitTool'
@@ -59,7 +60,8 @@ export class ToolRegistry {
       'mcp',
       'interpreter',
       'system',
-      'agent'
+      'agent',
+      'docker'
     ]
     categories.forEach((category) => {
       this.categories.set(category, new Set())
@@ -441,6 +443,11 @@ export class ToolMetadataCollector {
     // Phase 5: Interpreter Tools
     if (CodeInterpreterTool.toolSpec) {
       specs.push({ toolSpec: CodeInterpreterTool.toolSpec })
+    }
+
+    // Phase 5b: Docker Sandbox Tools
+    if (DockerSandboxTool.toolSpec) {
+      specs.push({ toolSpec: DockerSandboxTool.toolSpec })
     }
 
     // Phase 6: System Tools

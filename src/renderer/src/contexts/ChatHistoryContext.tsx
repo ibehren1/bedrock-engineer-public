@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { SessionMetadata, ChatSession, ChatMessage } from '@/types/chat/history'
+import { clearHostApproval } from '@renderer/pages/ChatPage/lib/hostCommandApproval'
 
 interface ChatHistoryContextType {
   sessions: SessionMetadata[]
@@ -8,9 +9,11 @@ interface ChatHistoryContextType {
   createSession: (agentId: string, modelId: string, systemPrompt?: string) => Promise<string>
   addMessage: (sessionId: string, message: ChatMessage) => Promise<void>
   updateSessionTitle: (sessionId: string, title: string) => Promise<void>
-  deleteSession: (sessionId: string) => void
-  deleteSessions: (sessionIds: string[]) => void
-  deleteAllSessions: () => void
+  deleteSession: (sessionId: string, deleteSandboxData?: boolean) => Promise<void>
+  deleteSessions: (sessionIds: string[], deleteSandboxData?: boolean) => Promise<void>
+  deleteAllSessions: (deleteSandboxData?: boolean) => Promise<void>
+  /** Session ids that currently have a Docker sandbox on disk. */
+  getSessionsWithSandbox: (sessionIds: string[]) => Promise<string[]>
   setActiveSession: (sessionId: string) => void
   updateMessageContent: (
     sessionId: string,
@@ -72,39 +75,91 @@ export const ChatHistoryProvider: React.FC<{ children: React.ReactNode }> = ({ c
     async (sessionId: string, title: string): Promise<void> => {
       await window.chatHistory.updateSessionTitle(sessionId, title)
       loadSessions() // セッション一覧を更新
+
+      // サンドボックスのフォルダ名をタイトルに追従させる。コンテナは作り直さないので
+      // インストール済みパッケージは保たれる。サンドボックスが無い場合は何も起きない。
+      try {
+        await window.api.dockerSandbox.rename(sessionId)
+      } catch {
+        // 名前が読みやすくなるだけの処理なので、失敗してもリネーム自体は妨げない。
+      }
     },
     [loadSessions]
   )
 
+  // チャット削除に伴う Docker サンドボックスの後始末。
+  // コンテナは常に削除し、データフォルダは呼び出し側の指定に従う。
+  const teardownSandboxes = useCallback(
+    async (sessionIds: string[], deleteSandboxData: boolean): Promise<void> => {
+      await Promise.all(
+        sessionIds.map(async (sessionId) => {
+          clearHostApproval(sessionId)
+          try {
+            await window.api.dockerSandbox.remove(sessionId, { deleteData: deleteSandboxData })
+          } catch {
+            // A chat without a sandbox is the common case, and a Docker daemon that is
+            // down must not block deleting the chat itself.
+          }
+        })
+      )
+    },
+    []
+  )
+
+  // Docker サンドボックスを持つセッションを絞り込む（削除ダイアログの表示制御用）
+  const getSessionsWithSandbox = useCallback(async (sessionIds: string[]): Promise<string[]> => {
+    try {
+      const { sessionIds: withSandbox } = await window.api.dockerSandbox.list()
+      return sessionIds.filter((id) => withSandbox.includes(id))
+    } catch {
+      return []
+    }
+  }, [])
+
   // セッションを削除
   const deleteSession = useCallback(
-    (sessionId: string): void => {
+    async (sessionId: string, deleteSandboxData = false): Promise<void> => {
+      await teardownSandboxes([sessionId], deleteSandboxData)
       window.chatHistory.deleteSession(sessionId)
       loadSessions() // セッション一覧を更新
     },
-    [loadSessions]
+    [loadSessions, teardownSandboxes]
   )
 
   // 選択した複数のセッションを削除
   const deleteSessions = useCallback(
-    (sessionIds: string[]): void => {
+    async (sessionIds: string[], deleteSandboxData = false): Promise<void> => {
       if (!sessionIds || sessionIds.length === 0) {
         return
       }
+      await teardownSandboxes(sessionIds, deleteSandboxData)
       window.chatHistory.deleteSessions(sessionIds)
       loadSessions() // セッション一覧を更新
       // 現在のセッションが削除対象に含まれる場合はクリア
       setCurrentSessionId((prev) => (prev && sessionIds.includes(prev) ? undefined : prev))
     },
-    [loadSessions]
+    [loadSessions, teardownSandboxes]
   )
 
   // 全セッションを削除
-  const deleteAllSessions = useCallback((): void => {
-    window.chatHistory.deleteAllSessions()
-    loadSessions() // セッション一覧を更新
-    setCurrentSessionId(undefined)
-  }, [loadSessions])
+  const deleteAllSessions = useCallback(
+    async (deleteSandboxData = false): Promise<void> => {
+      // サイドバーはメッセージ 0 件のセッションを隠すので、一覧ではなくディスク上の
+      // サンドボックス全件を対象にする。取り残しを防ぐため。
+      let sandboxSessionIds: string[] = []
+      try {
+        sandboxSessionIds = (await window.api.dockerSandbox.list()).sessionIds
+      } catch {
+        sandboxSessionIds = []
+      }
+      await teardownSandboxes(sandboxSessionIds, deleteSandboxData)
+
+      window.chatHistory.deleteAllSessions()
+      loadSessions() // セッション一覧を更新
+      setCurrentSessionId(undefined)
+    },
+    [loadSessions, teardownSandboxes]
+  )
 
   // アクティブセッションを設定
   const setActiveSession = useCallback((sessionId: string): void => {
@@ -140,6 +195,7 @@ export const ChatHistoryProvider: React.FC<{ children: React.ReactNode }> = ({ c
     deleteSession,
     deleteSessions,
     deleteAllSessions,
+    getSessionsWithSandbox,
     setActiveSession,
     updateMessageContent,
     deleteMessage

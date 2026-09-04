@@ -8,7 +8,23 @@ import type {
 import { ToolState } from '@/types/agent-chat'
 import { generateMessageId } from '@/types/chat/metadata'
 import { StreamChatCompletionProps, streamChatCompletion } from '@renderer/lib/api'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import {
+  abortRun,
+  getAbortController,
+  getLastAssistantMessageId,
+  getLastCachePoint,
+  getRunState,
+  patchRunState,
+  releaseRunner,
+  seedRunMessages,
+  setAbortController,
+  setLastAssistantMessageId,
+  setLastCachePoint,
+  setRunMessages,
+  subscribeToRunState,
+  updateRunField
+} from '../runners/sessionRunners'
 import { generateSessionTitle } from '../utils/titleGenerator'
 import { useSettings } from '@renderer/contexts/SettingsContext'
 import { useChatHistory } from '@renderer/contexts/ChatHistoryContext'
@@ -20,7 +36,8 @@ import { getThinkingSupportedModelIds } from '@common/models/models'
 
 import { AttachedImage } from '../components/InputForm/TextArea'
 import { ChatMessage } from '@/types/chat/history'
-import { ToolName, isMcpTool } from '@/types/tools'
+import { isMcpTool } from '@/types/tools'
+import { clearHostApproval, requestHostApproval } from '../lib/hostCommandApproval'
 import { notificationService } from '@renderer/services/NotificationService'
 import { limitContextLength } from '@renderer/lib/contextLength'
 import { IdentifiableMessage } from '@/types/chat/message'
@@ -108,19 +125,31 @@ export const useAgentChat = (
 ) => {
   const { enableHistory = true, tools: explicitTools } = options || {} // デフォルトで履歴保存は有効
 
-  const [messages, setMessages] = useState<IdentifiableMessage[]>([])
-  const [loading, setLoading] = useState(false)
-  const [waitingForResponse, setWaitingForResponse] = useState(false)
-  const [timeoutCountdown, setTimeoutCountdown] = useState<number>(0)
-  const [heartbeatCount, setHeartbeatCount] = useState<number>(0)
-  const [reasoning, setReasoning] = useState(false)
-  const [executingTools, setExecutingTools] = useState<Set<ToolName>>(new Set())
-  const [latestReasoningText, setLatestReasoningText] = useState<string>('')
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(sessionId)
-  const lastAssistantMessageId = useRef<string | null>(null)
-  const abortController = useRef<AbortController | null>(null)
-  // キャッシュポイントを保持するための状態
-  const lastCachePoint = useRef<number | undefined>(undefined)
+
+  // 実行中のターンの状態はセッション単位でReactの外（sessionRunners）に置く。
+  // 別のチャットを開いてもターンは走り続け、戻ればその続きが表示される。
+  //
+  // Consumers without history (the diagram generator, prompt generation) have no session id,
+  // so each hook instance falls back to a private key and stays isolated as before.
+  const fallbackRunKey = useRef<string>(`local-${generateMessageId()}`)
+  const runKey = currentSessionId ?? fallbackRunKey.current
+
+  const runState = useSyncExternalStore(
+    useCallback((onChange: () => void) => subscribeToRunState(runKey, onChange), [runKey]),
+    useCallback(() => getRunState(runKey), [runKey])
+  )
+  const {
+    messages,
+    loading,
+    waitingForResponse,
+    timeoutCountdown,
+    heartbeatCount,
+    reasoning,
+    executingTools,
+    latestReasoningText
+  } = runState
+
   // タイトル生成済みフラグ（同じセッションで複数回生成しないため）
   const titleGenerated = useRef<Set<string>>(new Set())
   // メッセージ数が閾値を超えたときにタイトル生成を実行
@@ -184,20 +213,20 @@ export const useAgentChat = (
   // Plan/Act モードに基づいてツールをフィルタリング
   const enabledTools = useAgentTools(rawEnabledTools)
 
-  // 通信を中断する関数
-  const abortCurrentRequest = useCallback(() => {
-    if (abortController.current) {
-      abortController.current.abort()
-      abortController.current = null
-    }
-    setLoading(false)
-  }, [])
+  // ChatHistoryContext から操作関数を取得
+  const {
+    getSession,
+    createSession,
+    addMessage,
+    updateSessionTitle,
+    setActiveSession,
+    deleteMessage
+  } = useChatHistory()
 
   // 通信を中断し、不完全なtoolUse/toolResultペアを削除する関数
   const stopGeneration = useCallback(() => {
-    if (abortController.current) {
-      abortController.current.abort()
-      abortController.current = null
+    if (getAbortController(runKey)) {
+      abortRun(runKey)
 
       if (messages.length > 0) {
         // メッセージのコピーを作成
@@ -256,7 +285,7 @@ export const useAgentChat = (
           }
 
           // 更新されたメッセージ配列を設定
-          setMessages(updatedMessages)
+          setRunMessages(runKey, updatedMessages)
 
           toast.success(t('Generation stopped'))
         } else {
@@ -266,73 +295,61 @@ export const useAgentChat = (
       }
     }
 
-    setLoading(false)
-    setExecutingTools(new Set())
-  }, [messages, currentSessionId, t])
+    patchRunState(runKey, { loading: false, executingTools: new Set() })
+  }, [messages, currentSessionId, runKey, deleteMessage, t])
 
-  // ChatHistoryContext から操作関数を取得
-  const {
-    getSession,
-    createSession,
-    addMessage,
-    updateSessionTitle,
-    setActiveSession,
-    deleteMessage
-  } = useChatHistory()
-
-  // セッションの初期化
+  // セッションの初期化。進行中のターンは中断せず、そのセッションのランナーに残す。
   useEffect(() => {
     const initSession = async () => {
       if (sessionId) {
         const session = getSession(sessionId)
         if (session) {
-          // 既存の通信があれば中断
-          abortCurrentRequest()
-          setMessages(session.messages as Message[])
+          // seedRunMessages は実行中のセッションでは何もしないので、
+          // 走っているターンの新しいメッセージがストアの内容で上書きされることはない。
+          seedRunMessages(sessionId, session.messages as IdentifiableMessage[])
           setCurrentSessionId(sessionId)
-          // 新しいセッションに切り替えた場合はキャッシュポイントをリセット
-          lastCachePoint.current = undefined
         }
       } else if (enableHistory) {
         // 履歴保存が有効な場合のみ新しいセッションを作成
         const newSessionId = await createSession('defaultAgent', modelId, systemPrompt)
         setCurrentSessionId(newSessionId)
-        // 新しいセッションを作成した場合はキャッシュポイントをリセット
-        lastCachePoint.current = undefined
       }
     }
 
     initSession()
-  }, [sessionId, enableHistory, getSession, createSession, abortCurrentRequest])
-
-  // コンポーネントのアンマウント時にアクティブな通信を中断
-  useEffect(() => {
-    return () => {
-      abortCurrentRequest()
-    }
-  }, [])
+  }, [sessionId, enableHistory, getSession, createSession])
 
   // currentSessionId が変わった時の処理
   useEffect(() => {
     if (currentSessionId) {
-      // セッション切り替え時に進行中の通信を中断
-      abortCurrentRequest()
       const session = getSession(currentSessionId)
       if (session) {
-        setMessages(session.messages as Message[])
+        seedRunMessages(currentSessionId, session.messages as IdentifiableMessage[])
         setActiveSession(currentSessionId)
-        // セッション切り替え時にキャッシュポイントをリセット
-        lastCachePoint.current = undefined
+      }
+      // 表示をやめたセッションがアイドルなら、メッセージ配列を溜め込まないよう解放する。
+      // Releasing only happens for idle sessions with no subscribers, so a run in flight
+      // and the session currently on screen both survive. Queued as a microtask because
+      // the store's own unsubscribe runs in the same cleanup pass and the order between
+      // the two isn't defined — releasing an entry that still has listeners would leave
+      // the mounted subscriber attached to an orphaned entry.
+      return () => {
+        // "Allow for this chat" must not outlive the chat it was granted in.
+        clearHostApproval(currentSessionId)
+        queueMicrotask(() => releaseRunner(currentSessionId))
       }
     }
-  }, [currentSessionId, getSession, setActiveSession, abortCurrentRequest])
+    return undefined
+  }, [currentSessionId, getSession, setActiveSession])
 
-  // メッセージの永続化を行うラッパー関数
+  // メッセージの永続化を行うラッパー関数。
+  // ターン開始時のセッションIDを引数で受け取るので、途中で別のチャットに切り替えても
+  // 書き込み先がぶれない。
   const persistMessage = useCallback(
-    async (message: IdentifiableMessage) => {
+    async (message: IdentifiableMessage, targetSessionId?: string) => {
       if (!enableHistory) return
 
-      if (currentSessionId && message.role && message.content) {
+      if (targetSessionId && message.role && message.content) {
         // メッセージにIDがなければ生成する
         if (!message.id) {
           message.id = generateMessageId()
@@ -349,15 +366,24 @@ export const useAgentChat = (
             converseMetadata: message.metadata?.converseMetadata // メッセージ内のメタデータを使用
           }
         }
-        await addMessage(currentSessionId, chatMessage)
+        await addMessage(targetSessionId, chatMessage)
       }
 
       return message
     },
-    [currentSessionId, modelId, enabledTools, enableHistory, addMessage]
+    [modelId, enabledTools, enableHistory, addMessage]
   )
 
-  const streamChat = async (props: StreamChatCompletionProps, currentMessages: Message[]) => {
+  /**
+   * 1リクエスト分のストリーミング。`turnKey` はターン開始時に確定したセッションキーで、
+   * 途中でユーザーが別のチャットを開いても状態の書き込み先は変わらない。
+   */
+  const streamChat = async (
+    props: StreamChatCompletionProps,
+    currentMessages: Message[],
+    turnKey: string,
+    turnSessionId?: string
+  ) => {
     // Track last data received time for timeout detection
     let lastDataTime = Date.now()
     let timedOut = false
@@ -377,7 +403,7 @@ export const useAgentChat = (
       const isWaiting = timeSinceLastData > WAIT_THRESHOLD
       if (isWaiting !== lastIsWaiting) {
         lastIsWaiting = isWaiting
-        setWaitingForResponse(isWaiting)
+        patchRunState(turnKey, { waitingForResponse: isWaiting })
       }
 
       if (isWaiting) {
@@ -385,11 +411,11 @@ export const useAgentChat = (
         const countdown = Math.floor(remainingTime / 1000)
         if (countdown !== lastCountdown) {
           lastCountdown = countdown
-          setTimeoutCountdown(countdown)
+          patchRunState(turnKey, { timeoutCountdown: countdown })
         }
 
         // Abort when timeout is reached
-        if (remainingTime === 0 && abortController.current && !timedOut) {
+        if (remainingTime === 0 && getAbortController(turnKey) && !timedOut) {
           timedOut = true
           console.log(`Request timed out after ${requestTimeout} minutes - aborting request`)
 
@@ -402,33 +428,32 @@ export const useAgentChat = (
             role: 'assistant' as ConversationRole,
             content: [{ text: timeoutMessage }]
           }
-          setMessages((prev) => [...prev, timeoutChatMessage])
+          setRunMessages(turnKey, (prev) => [...prev, timeoutChatMessage])
 
-          abortController.current.abort()
+          getAbortController(turnKey)?.abort()
         }
       }
     }, 1000)
 
     // Heartbeat check every 30 seconds
     const heartbeatCheck = setInterval(() => {
-      if (!requestCompleted && abortController.current) {
+      if (!requestCompleted && getAbortController(turnKey)) {
         const timeSinceLastData = Date.now() - lastDataTime
         // If no data for 30+ seconds, verify connection is still alive
         if (timeSinceLastData >= HEARTBEAT_INTERVAL) {
-          setHeartbeatCount((prev) => prev + 1)
+          updateRunField(turnKey, 'heartbeatCount', (prev) => prev + 1)
           console.log(`Heartbeat: ${Math.floor(timeSinceLastData / 1000)}s since last data`)
         }
       }
     }, HEARTBEAT_INTERVAL)
 
     try {
-      // 既存の通信があれば中断
-      if (abortController.current) {
-        abortController.current.abort()
-      }
+      // 同じセッションで走っている通信があれば中断（他セッションのターンには触らない）
+      getAbortController(turnKey)?.abort()
 
       // 新しい AbortController を作成
-      abortController.current = new AbortController()
+      const controller = new AbortController()
+      setAbortController(turnKey, controller)
 
       // モデルがthinkingをサポートしているか確認
       const thinkingSupportedModelIds = getThinkingSupportedModelIds()
@@ -447,14 +472,14 @@ export const useAgentChat = (
         const cacheManager = new PromptCacheManager(modelId)
         props.messages = cacheManager.addCachePointsToMessages(
           limitedMessages,
-          lastCachePoint.current
+          getLastCachePoint(turnKey)
         )
 
         // キャッシュポイントが更新された場合、次回の会話ためにキャッシュポイントのインデックスを更新
         if (props.messages[props.messages.length - 1].content?.some((b) => b.cachePoint?.type)) {
           // 次回の会話のために現在のキャッシュポイントを更新
           // 現在のメッセージ配列の最後のインデックスを次回の最初のキャッシュポイントとして設定
-          lastCachePoint.current = props.messages.length - 1
+          setLastCachePoint(turnKey, props.messages.length - 1)
         }
 
         // システムプロンプトとツール設定にもキャッシュポイントを追加
@@ -469,7 +494,7 @@ export const useAgentChat = (
         props.messages = limitedMessages
       }
 
-      const generator = streamChatCompletion(props, abortController.current.signal)
+      const generator = streamChatCompletion(props, controller.signal)
 
       let s = ''
       let reasoningContentText = ''
@@ -492,8 +517,8 @@ export const useAgentChat = (
           } else if (json.messageStop) {
             if (!messageStart) {
               console.warn('messageStop without messageStart')
-              console.log(messages)
-              await streamChat(props, currentMessages)
+              console.log(getRunState(turnKey).messages)
+              await streamChat(props, currentMessages, turnKey, turnSessionId)
               return
             }
             // 新しいメッセージIDを生成
@@ -507,11 +532,11 @@ export const useAgentChat = (
 
             // アシスタントメッセージの場合、最後のメッセージIDを保持
             if (role === 'assistant') {
-              lastAssistantMessageId.current = messageId
+              setLastAssistantMessageId(turnKey, messageId)
             }
 
             // UI表示のために即時メッセージを追加
-            setMessages([...currentMessages, newMessage])
+            setRunMessages(turnKey, [...currentMessages, newMessage])
             currentMessages.push(newMessage)
 
             // メッセージ停止時点では永続化せず、後のメタデータ処理で永続化する
@@ -593,7 +618,7 @@ export const useAgentChat = (
               }
             }
             input = ''
-            setReasoning(false)
+            patchRunState(turnKey, { reasoning: false })
           } else if (json.contentBlockDelta) {
             const text = json.contentBlockDelta.delta?.text
             if (text) {
@@ -627,22 +652,22 @@ export const useAgentChat = (
               }
 
               const contentBlocks = getContentBlocks()
-              setMessages([...currentMessages, { role, content: contentBlocks }])
+              setRunMessages(turnKey, [...currentMessages, { role, content: contentBlocks }])
             }
 
             const reasoningContent = json.contentBlockDelta.delta?.reasoningContent
             if (reasoningContent && supportsThinking) {
-              setReasoning(true)
+              patchRunState(turnKey, { reasoning: true })
               if (reasoningContent?.text || reasoningContent?.signature) {
                 reasoningContentText = reasoningContentText + (reasoningContent?.text || '')
                 reasoningContentSignature = reasoningContent?.signature || ''
 
                 // 最新のreasoningTextを状態として保持
                 if (reasoningContent?.text) {
-                  setLatestReasoningText(reasoningContentText)
+                  patchRunState(turnKey, { latestReasoningText: reasoningContentText })
                 }
 
-                setMessages([
+                setRunMessages(turnKey, [
                   ...currentMessages,
                   {
                     role: 'assistant',
@@ -661,7 +686,7 @@ export const useAgentChat = (
                 ])
               } else if (reasoningContent.redactedContent) {
                 redactedContent = reasoningContent.redactedContent
-                setMessages([
+                setRunMessages(turnKey, [
                   ...currentMessages,
                   {
                     role: 'assistant',
@@ -719,7 +744,7 @@ export const useAgentChat = (
                 }
               }
 
-              setMessages([
+              setRunMessages(turnKey, [
                 ...currentMessages,
                 {
                   role,
@@ -758,11 +783,12 @@ export const useAgentChat = (
             }
 
             // 直近のアシスタントメッセージにメタデータを関連付ける
-            if (lastAssistantMessageId.current) {
+            const metadataTargetId = getLastAssistantMessageId(turnKey)
+            if (metadataTargetId) {
               // メッセージ配列からIDが一致するメッセージを見つけてメタデータを追加
-              setMessages((prevMessages) => {
+              setRunMessages(turnKey, (prevMessages) => {
                 return prevMessages.map((msg) => {
-                  if (msg.id === lastAssistantMessageId.current) {
+                  if (msg.id === metadataTargetId) {
                     return {
                       ...msg,
                       metadata: {
@@ -780,11 +806,7 @@ export const useAgentChat = (
               const lastMessageIndex = currentMessages.length - 1
               const lastMessage = currentMessages[lastMessageIndex]
 
-              if (
-                lastMessage &&
-                'id' in lastMessage &&
-                lastMessage.id === lastAssistantMessageId.current
-              ) {
+              if (lastMessage && 'id' in lastMessage && lastMessage.id === metadataTargetId) {
                 // 型を明確にしてメタデータを追加
                 const updatedMessage: IdentifiableMessage = {
                   ...(lastMessage as IdentifiableMessage),
@@ -837,21 +859,19 @@ export const useAgentChat = (
       }
 
       // エラーメッセージIDを記録
-      lastAssistantMessageId.current = messageId
-      setMessages([...currentMessages, errorMessage])
-      await persistMessage(errorMessage)
+      setLastAssistantMessageId(turnKey, messageId)
+      setRunMessages(turnKey, [...currentMessages, errorMessage])
+      await persistMessage(errorMessage, turnSessionId)
       throw error
     } finally {
       // Cleanup intervals
       clearInterval(checkWaitingState)
       clearInterval(heartbeatCheck)
-      setWaitingForResponse(false)
-      setTimeoutCountdown(0)
-      setHeartbeatCount(0)
+      patchRunState(turnKey, { waitingForResponse: false, timeoutCountdown: 0, heartbeatCount: 0 })
 
       // 使用済みの AbortController をクリア
-      if (abortController.current?.signal.aborted) {
-        abortController.current = null
+      if (getAbortController(turnKey)?.signal.aborted) {
+        setAbortController(turnKey, null)
       }
     }
   }
@@ -875,7 +895,9 @@ export const useAgentChat = (
   const recursivelyExecTool = async (
     contentBlocks: ContentBlock[],
     currentMessages: Message[],
-    turnCtx: TurnContext
+    turnCtx: TurnContext,
+    turnKey: string,
+    turnSessionId?: string
   ) => {
     const contentBlock = contentBlocks.find((block) => block.toolUse)
     if (!contentBlock) {
@@ -907,15 +929,45 @@ export const useAgentChat = (
       }
 
       // 実行中ツールセットに追加
-      setExecutingTools((prev) => new Set([...prev, toolInput.type]))
+      updateRunField(turnKey, 'executingTools', (prev) => new Set([...prev, toolInput.type]))
 
       try {
+        // Commands aimed at the user's own machine need explicit consent. The sandbox
+        // path is unrestricted precisely because it cannot touch the host.
+        if (toolInput.type === 'executeCommand' && toolInput.target === 'host') {
+          const decision = await requestHostApproval({
+            sessionId: turnSessionId,
+            command: String(toolInput.command ?? ''),
+            cwd: String(toolInput.cwd ?? '')
+          })
+
+          if (decision === 'deny') {
+            updateRunField(turnKey, 'executingTools', (prev) => {
+              const next = new Set(prev)
+              next.delete(toolInput.type)
+              return next
+            })
+
+            return {
+              toolResult: {
+                toolUseId: toolUse.toolUseId,
+                content: [
+                  {
+                    text: 'The user declined to run this command on the host machine. Run it in the Docker sandbox instead (omit the target parameter), or continue without it.'
+                  }
+                ],
+                status: 'error'
+              }
+            } as ContentBlock
+          }
+        }
+
         const toolResult = await window.api.bedrock.executeTool(toolInput, {
-          sessionId: currentSessionId
+          sessionId: turnSessionId
         })
 
         // 実行中ツールセットから削除
-        setExecutingTools((prev) => {
+        updateRunField(turnKey, 'executingTools', (prev) => {
           const next = new Set(prev)
           next.delete(toolInput.type)
           return next
@@ -1011,7 +1063,7 @@ export const useAgentChat = (
         console.error(`Error executing tool ${toolInput.type}:`, e)
 
         // 実行中ツールセットから削除
-        setExecutingTools((prev) => {
+        updateRunField(turnKey, 'executingTools', (prev) => {
           const next = new Set(prev)
           next.delete(toolInput.type)
           return next
@@ -1054,8 +1106,8 @@ export const useAgentChat = (
       id: generateMessageId()
     }
     currentMessages.push(toolResultMessage)
-    setMessages((prev) => [...prev, toolResultMessage])
-    await persistMessage(toolResultMessage)
+    setRunMessages(turnKey, (prev) => [...prev, toolResultMessage])
+    await persistMessage(toolResultMessage, turnSessionId)
 
     const stopReason = await streamChat(
       {
@@ -1064,7 +1116,9 @@ export const useAgentChat = (
         system: systemPrompt ? [{ text: systemPrompt }] : undefined,
         toolConfig: turnCtx.tools.length ? { tools: turnCtx.tools } : undefined
       },
-      currentMessages
+      currentMessages,
+      turnKey,
+      turnSessionId
     )
 
     if (stopReason === 'tool_use' || stopReason === 'max_tokens') {
@@ -1093,14 +1147,14 @@ export const useAgentChat = (
           }
 
           currentMessages.push(toolResultMessage)
-          setMessages((prev) => [...prev, toolResultMessage])
-          await persistMessage(toolResultMessage)
+          setRunMessages(turnKey, (prev) => [...prev, toolResultMessage])
+          await persistMessage(toolResultMessage, turnSessionId)
 
-          setLoading(false)
+          patchRunState(turnKey, { loading: false })
           return
         }
 
-        await recursivelyExecTool(lastMessage, currentMessages, turnCtx)
+        await recursivelyExecTool(lastMessage, currentMessages, turnCtx, turnKey, turnSessionId)
         return
       }
     }
@@ -1134,10 +1188,15 @@ export const useAgentChat = (
       }
     }
 
+    // ターン開始時のセッションを固定する。この後ユーザーが別のチャットを開いても、
+    // このターンの状態とメッセージはこのキーに書き込まれ続ける。
+    const turnKey = runKey
+    const turnSessionId = currentSessionId
+
     let result
     try {
-      setLoading(true)
-      const currentMessages = [...messages]
+      patchRunState(turnKey, { loading: true })
+      const currentMessages = [...getRunState(turnKey).messages]
 
       const imageContents: any =
         attachedImages?.map((image) => ({
@@ -1171,8 +1230,8 @@ export const useAgentChat = (
       }
 
       currentMessages.push(userMessage)
-      setMessages((prev) => [...prev, userMessage])
-      await persistMessage(userMessage)
+      setRunMessages(turnKey, (prev) => [...prev, userMessage])
+      await persistMessage(userMessage, turnSessionId)
 
       // ユーザーが2つ目のプロンプトを送信したタイミングでタイトル生成を前倒しで実行する。
       // role === 'user' のメッセージにはツール実行結果（toolResult）も含まれるため、
@@ -1195,7 +1254,9 @@ export const useAgentChat = (
           system: systemPrompt ? [{ text: systemPrompt }] : undefined,
           toolConfig: turnCtx.tools.length ? { tools: turnCtx.tools } : undefined
         },
-        currentMessages
+        currentMessages,
+        turnKey,
+        turnSessionId
       )
 
       const lastMessage = currentMessages[currentMessages.length - 1]
@@ -1204,7 +1265,13 @@ export const useAgentChat = (
           console.warn(lastMessage)
           result = null
         } else {
-          result = await recursivelyExecTool(lastMessage.content, currentMessages, turnCtx)
+          result = await recursivelyExecTool(
+            lastMessage.content,
+            currentMessages,
+            turnCtx,
+            turnKey,
+            turnSessionId
+          )
         }
       }
 
@@ -1249,27 +1316,19 @@ export const useAgentChat = (
       console.error('Error in handleSubmit:', error)
       toast.error(error.message || 'An error occurred')
     } finally {
-      setLoading(false)
-      setExecutingTools(new Set())
+      patchRunState(turnKey, { loading: false, executingTools: new Set() })
     }
     return result
   }
 
   // チャットをクリアする機能
   const clearChat = useCallback(async () => {
-    // 進行中の通信を中断
-    abortCurrentRequest()
-
-    // 新しいセッションを作成
+    // 進行中のターンは中断しない。新しいセッションに移るだけで、
+    // 前のチャットの応答はそのまま続き、戻れば結果が見られる。
     const newSessionId = await createSession('defaultAgent', modelId, systemPrompt)
+    seedRunMessages(newSessionId, [])
     setCurrentSessionId(newSessionId)
-
-    // メッセージをクリア
-    setMessages([])
-
-    // キャッシュポイントもリセット
-    lastCachePoint.current = undefined
-  }, [modelId, systemPrompt, abortCurrentRequest, createSession])
+  }, [modelId, systemPrompt, createSession])
 
   // 軽量処理用モデルIDを取得
   const { getLightModelId } = useLightProcessingModel()
@@ -1328,12 +1387,11 @@ export const useAgentChat = (
         generateTitleForCurrentSession()
       }
 
-      // 進行中の通信を中断してから新しいセッションを設定
-      abortCurrentRequest()
+      // 進行中のターンは中断しない。切り替え先を表示するだけで、
+      // 元のチャットの応答は裏で続き、戻ればその続きが見られる。
       setCurrentSessionId(newSessionId)
     },
     [
-      abortCurrentRequest,
       messages.length,
       currentSessionId,
       MESSAGE_THRESHOLD,
@@ -1352,7 +1410,12 @@ export const useAgentChat = (
     executingTools,
     latestReasoningText, // 最新のreasoningTextを外部に公開
     handleSubmit,
-    setMessages,
+    /** Replace the visible session's messages (used when a message is edited or deleted). */
+    setMessages: useCallback(
+      (next: IdentifiableMessage[] | ((prev: IdentifiableMessage[]) => IdentifiableMessage[])) =>
+        setRunMessages(runKey, next),
+      [runKey]
+    ),
     currentSessionId,
     setCurrentSessionId: setSession, // 中断処理付きのセッション切り替え関数を返す
     clearChat,

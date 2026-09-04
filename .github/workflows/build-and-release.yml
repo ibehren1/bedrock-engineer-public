@@ -16,13 +16,17 @@ jobs:
     name: Build (${{ matrix.os }})
     strategy:
       fail-fast: false
+      # The macOS and Windows lanes exist to package installers, which only a
+      # public repo does (see the "Build app" step). A private repo therefore runs
+      # a single ubuntu lane for the platform-independent checks — same lint,
+      # typecheck and tests, at the 1x minute rate instead of macOS's 10x and
+      # Windows's 2x.
       matrix:
-        os: [macos-latest, windows-latest]
-        include:
-          - os: macos-latest
-            build_command: build:mac
-          - os: windows-latest
-            build_command: build:win
+        include: >-
+          ${{ github.event.repository.private
+          && fromJSON('[{"os": "ubuntu-latest"}]')
+          || fromJSON('[{"os": "macos-latest", "build_command": "build:mac"},
+          {"os": "windows-latest", "build_command": "build:win"}]') }}
 
     runs-on: ${{ matrix.os }}
     env:
@@ -35,7 +39,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install dependencies
         run: npm ci
@@ -49,7 +53,12 @@ jobs:
       - name: Run unit tests
         run: npm test -- --coverage
 
+      # Packaging installers only happens on a public repo. The private repo is
+      # where work is merged, so it still runs the checks above, but building
+      # macOS and Windows installers there costs multiplied runner minutes to
+      # produce binaries that are never published.
       - name: Build app
+        if: github.event.repository.private == false
         run: npm run ${{ matrix.build_command }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

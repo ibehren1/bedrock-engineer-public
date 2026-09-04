@@ -16,6 +16,8 @@ import { ChatHistory } from './components/ChatHistory'
 import { useSystemPromptModal } from './modals/useSystemPromptModal'
 import { useTokenAnalyticsModal, calculateAnalytics } from './modals/useTokenAnalyticsModal'
 import { useTodoModal } from './modals/useTodoModal'
+import { HostCommandApprovalModal } from './modals/HostCommandApprovalModal'
+import { useChatSandbox } from './hooks/useChatSandbox'
 import { useChatHistory } from '@renderer/contexts/ChatHistoryContext'
 import { useLocation } from 'react-router-dom'
 import { useStreamingAutoScroll } from '@renderer/hooks/useStreamingAutoScroll'
@@ -176,6 +178,56 @@ export default function ChatPage() {
     handleOpen: handleOpenToolSettingModal,
     ToolSettingModal
   } = useToolSettingModal()
+
+  // このチャットの Docker サンドボックス状態（存在しなければツールバーに何も出ない）
+  const {
+    status: sandboxStatus,
+    isBusy: isSandboxBusy,
+    stop: stopSandbox,
+    start: startSandbox,
+    remove: removeSandbox,
+    openFolder: openSandboxFolder
+  } = useChatSandbox(currentSessionId)
+
+  const handleStopSandbox = useCallback(async () => {
+    try {
+      await stopSandbox()
+      toast.success(t('dockerSandbox.toast.stopped'))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error))
+    }
+  }, [stopSandbox, t])
+
+  const handleStartSandbox = useCallback(async () => {
+    try {
+      await startSandbox()
+      toast.success(t('dockerSandbox.toast.started'))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error))
+    }
+  }, [startSandbox, t])
+
+  const handleRemoveSandbox = useCallback(
+    async (deleteData: boolean) => {
+      try {
+        await removeSandbox(deleteData)
+        toast.success(
+          deleteData ? t('dockerSandbox.toast.removedWithData') : t('dockerSandbox.toast.removed')
+        )
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : String(error))
+      }
+    },
+    [removeSandbox, t]
+  )
+
+  const handleOpenSandboxFolder = useCallback(async () => {
+    try {
+      await openSandboxFolder()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error))
+    }
+  }, [openSandboxFolder])
 
   // クリアハンドラをuseCallbackでメモ化
   const handleClearChat = useCallback(() => {
@@ -340,7 +392,9 @@ export default function ChatPage() {
     }
   }, [])
 
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  // 履歴は開いた状態で始める。ChatPage は画面遷移でアンマウントされるので、
+  // Chat を開き直すたびに履歴が開く。
+  const [isHistoryOpen, setIsHistoryOpen] = useState(true)
   const DEFAULT_TEXTAREA_HEIGHT = 72 // Default height (3 lines * 24px)
 
   const [textareaHeight, setTextareaHeight] = useState(DEFAULT_TEXTAREA_HEIGHT)
@@ -470,6 +524,7 @@ export default function ChatPage() {
           </div>
 
           {/* Modals */}
+          <HostCommandApprovalModal />
           <SystemPromptModal
             isOpen={showSystemPromptModal}
             onClose={handleCloseSystemPromptModal}
@@ -561,6 +616,14 @@ export default function ChatPage() {
                 hasMessages={messages.length > 0}
                 onHeightChange={setTextareaHeight}
                 isHistoryOpen={isHistoryOpen}
+                sandbox={{
+                  status: sandboxStatus,
+                  isBusy: isSandboxBusy,
+                  onStop: handleStopSandbox,
+                  onStart: handleStartSandbox,
+                  onRemove: handleRemoveSandbox,
+                  onOpenFolder: handleOpenSandboxFolder
+                }}
               />
             </div>
           </div>

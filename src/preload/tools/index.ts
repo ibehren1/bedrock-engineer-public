@@ -14,6 +14,7 @@ import { createCommandTools } from './handlers/command'
 import { createMcpTools } from './handlers/mcp'
 import { createBedrockTools } from './handlers/bedrock'
 import { createCodeInterpreterTools } from './handlers/interpreter'
+import { createDockerSandboxTools } from './handlers/docker'
 import { createSystemTools } from './handlers/system'
 import { createTodoTools } from './handlers/todo'
 import { createAgentTools } from './handlers/agent'
@@ -48,6 +49,7 @@ export function initializeToolSystem(): void {
     ...createMcpTools(dependencies),
     ...createBedrockTools(dependencies),
     ...createCodeInterpreterTools(dependencies),
+    ...createDockerSandboxTools(dependencies),
     ...createSystemTools(dependencies),
     ...createTodoTools(dependencies),
     ...createAgentTools(dependencies)
