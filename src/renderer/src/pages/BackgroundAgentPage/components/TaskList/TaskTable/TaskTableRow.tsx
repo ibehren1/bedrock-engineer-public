@@ -136,14 +136,12 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 
   return (
     <>
-      <tr className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+      <tr className="bg-surface hover:bg-surface-2 transition-colors">
         {/* Name Column */}
-        <td className="px-6 py-4 whitespace-nowrap">
+        <td className="px-2 py-1 whitespace-nowrap">
           <div className="flex flex-col">
             <div className="flex items-center space-x-2">
-              <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-xs">
-                {task.name}
-              </div>
+              <div className="text-sm font-medium text-ink truncate max-w-xs">{task.name}</div>
               {task.lastError && (
                 <StatusBadge type="error">{t('backgroundAgent.ui.error')}</StatusBadge>
               )}
@@ -159,24 +157,20 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </td>
 
         {/* Schedule Column */}
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="text-sm text-gray-900 dark:text-white font-mono">
-            {task.cronExpression}
-          </div>
+        <td className="px-2 py-1 whitespace-nowrap">
+          <div className="text-sm text-ink font-mono">{task.cronExpression}</div>
         </td>
 
         {/* Agent Column */}
-        <td className="px-6 py-4 whitespace-nowrap">
+        <td className="px-2 py-1 whitespace-nowrap">
           <div className="flex items-center space-x-2">
             <AgentIcon agent={getAgent(task.agentId)} size="sm" />
-            <div className="text-sm text-gray-900 dark:text-white truncate max-w-32">
-              {getAgentName(task.agentId)}
-            </div>
+            <div className="text-sm text-ink truncate max-w-32">{getAgentName(task.agentId)}</div>
           </div>
         </td>
 
         {/* Status Column */}
-        <td className="px-6 py-4 whitespace-nowrap">
+        <td className="px-2 py-1 whitespace-nowrap">
           <div className="flex items-center space-x-2">
             <ToggleSwitch
               enabled={task.enabled}
@@ -192,8 +186,8 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </td>
 
         {/* Last Run Column */}
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+        <td className="px-2 py-1 whitespace-nowrap">
+          <div className="text-sm text-ink-muted">
             <div>{formatDate(task.lastRun)}</div>
             <div className="text-xs">
               {task.runCount}
@@ -203,13 +197,13 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </td>
 
         {/* Actions Column */}
-        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <td className="px-2 py-1 whitespace-nowrap text-right text-sm font-medium">
           <div className="flex items-center justify-end space-x-2">
             {/* Execute Button */}
             <button
               onClick={handleExecute}
               disabled={isExecuting || isTaskLoading}
-              className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800 transition-colors"
+              className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-control text-accent bg-accent-tint hover:bg-accent-tint-strong disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title={
                 isExecuting || isTaskLoading
                   ? t('common.executing')

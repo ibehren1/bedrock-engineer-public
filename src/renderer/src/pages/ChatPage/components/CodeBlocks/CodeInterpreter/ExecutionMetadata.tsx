@@ -25,7 +25,7 @@ export const ExecutionMetadata: React.FC<ExecutionMetadataProps> = ({
   }
 
   return (
-    <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+    <div className="flex items-center gap-4 text-xs text-ink-muted">
       {/* Execution Time */}
       <div
         className="flex items-center gap-1"
@@ -41,13 +41,7 @@ export const ExecutionMetadata: React.FC<ExecutionMetadataProps> = ({
         title={t('code interpreter display.Exit code', 'Exit code')}
       >
         <FiHash className="size-3" />
-        <span
-          className={
-            exitCode === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-          }
-        >
-          {exitCode}
-        </span>
+        <span className={exitCode === 0 ? 'text-success' : 'text-danger'}>{exitCode}</span>
       </div>
 
       {/* File Count */}

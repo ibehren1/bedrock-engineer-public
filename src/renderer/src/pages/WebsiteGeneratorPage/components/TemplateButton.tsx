@@ -20,16 +20,16 @@ export const TemplateButton: React.FC<TemplateButtonProps> = ({
     <button
       type="button"
       className={`
-        text-gray-900
-        ${isSelected ? 'bg-green-50' : 'bg-white'}
-        hover:bg-green-50
+        text-ink
+        ${isSelected ? 'bg-success-soft' : 'bg-surface'}
+        hover:bg-success-soft-strong
         border
-        ${isSelected ? 'border-green-600' : 'border-gray-200'}
+        ${isSelected ? 'border-success' : 'border-subtle'}
         focus:ring-4
         focus:outline-none
-        focus:ring-gray-100
+        focus:ring-accent
         font-medium
-        rounded-[1rem]
+        rounded-full
         text-xs
         px-3
         py-1.5
@@ -37,10 +37,10 @@ export const TemplateButton: React.FC<TemplateButtonProps> = ({
         items-center
         flex
         gap-2
-        dark:bg-gray-800
-        dark:text-white
-        dark:border-gray-600
-        dark:hover:bg-gray-700
+        bg-surface
+        text-ink
+        border-subtle
+        hover:bg-raised
       `}
       onClick={async () => {
         onSelect(id)

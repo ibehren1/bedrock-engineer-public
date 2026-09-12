@@ -50,8 +50,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   }
 
   const modelColors = {
-    icon: 'text-gray-600 dark:text-gray-400',
-    hover: 'hover:bg-gray-50 dark:hover:bg-gray-800'
+    icon: 'text-ink-muted',
+    hover: 'hover:bg-surface-2'
   }
 
   // Pricing stored in the model config is per 1,000 tokens; display it per
@@ -77,8 +77,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       <div className="relative">
         {isOpen && (
           <div
-            className="absolute z-20 w-[25rem] bottom-full mb-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg
-            border border-gray-200 dark:border-gray-700 py-2 px-2 max-h-[40vh] overflow-y-auto"
+            className="absolute z-20 w-[25rem] bottom-full mb-1 bg-surface rounded-container shadow-lg
+            border border-subtle py-2 px-2 max-h-[40vh] overflow-y-auto"
           >
             {visibleModels.map((model: LLM) => {
               const isInferenceProfile = model.isInferenceProfile || false
@@ -88,9 +88,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                   onClick={() => handleModelSelect(model)}
                   className={`
                     flex items-center gap-4 px-3 py-2.5 cursor-pointer
-                    ${model.modelId === selectedModelId ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}
+                    ${model.modelId === selectedModelId ? 'bg-surface-2' : 'bg-surface'}
                     ${modelColors.hover}
-                    transition-colors rounded-md
+                    transition-colors rounded-control
                   `}
                   title={
                     isInferenceProfile
@@ -104,22 +104,22 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                     wide wordmark use twice the width a square glyph needs.
                   */}
                   <div
-                    className={`rounded-md shrink-0 w-8 flex items-center justify-center ${modelColors.icon} ${
+                    className={`rounded-control shrink-0 w-8 flex items-center justify-center ${modelColors.icon} ${
                       isWideModelIcon(model.modelId) ? 'h-[12px]' : ''
                     }`}
                   >
                     {getModelIcon(model.modelId, isInferenceProfile)}
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                    <span className="font-medium text-ink">
                       {model.modelName}
                       {isInferenceProfile && (
-                        <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded">
+                        <span className="ml-2 px-2 py-0.5 text-xs bg-accent-tint text-accent rounded-control">
                           Profile
                         </span>
                       )}
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    <span className="text-xs text-ink-muted mt-0.5">
                       {isInferenceProfile
                         ? model.description || 'Application Inference Profile for cost tracking'
                         : model.toolUse
@@ -130,9 +130,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                       (() => {
                         const pricingLabel = getModelPricingLabel(model.modelId)
                         return pricingLabel ? (
-                          <span className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                            {pricingLabel}
-                          </span>
+                          <span className="text-xs text-ink-faint mt-0.5">{pricingLabel}</span>
                         ) : null
                       })()}
                   </div>
@@ -145,7 +143,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
         <button
           type="button"
           onClick={() => (openable ? setIsOpen(!isOpen) : undefined)}
-          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 rounded-md transition-colors"
+          className="flex items-center gap-1 text-sm text-ink-muted rounded-control transition-colors"
         >
           <span className="flex items-center gap-1.5">
             <span
@@ -158,7 +156,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
               {getModelIcon(selectedModel.modelId, selectedModel.isInferenceProfile)}
             </span>
             <span className="text-left whitespace-nowrap">{selectedModel.modelName}</span>
-            <FiChevronDown className="text-gray-400 dark:text-gray-500" size={16} />
+            <FiChevronDown className="text-ink-faint" size={16} />
           </span>
         </button>
       </div>

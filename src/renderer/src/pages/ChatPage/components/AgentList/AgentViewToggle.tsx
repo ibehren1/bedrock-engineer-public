@@ -18,16 +18,16 @@ export const AgentViewToggle: React.FC<AgentViewToggleProps> = ({
     <div
       className={`
         relative inline-flex items-center
-        bg-gray-100 dark:bg-gray-800
-        rounded p-0.5
-        border border-gray-200 dark:border-gray-700
+        bg-raised
+        rounded-control p-0.5
+        border border-subtle
         cursor-pointer
         ${className}
       `}
     >
       {/* Animation background */}
       <motion.div
-        className="absolute top-0.5 h-8 w-10 bg-white/60 dark:bg-gray-600/60 rounded shadow-sm"
+        className="absolute top-0.5 h-8 w-10 bg-surface/60 rounded-control shadow-sm"
         animate={{
           x: viewMode === 'table' ? 40 : 0
         }}
@@ -45,13 +45,9 @@ export const AgentViewToggle: React.FC<AgentViewToggleProps> = ({
           onClick={() => onToggle('card')}
           className={`
             relative z-10 flex items-center justify-center
-            w-10 h-8 rounded
+            w-10 h-8 rounded-control
             transition-colors duration-200
-            ${
-              viewMode === 'card'
-                ? 'text-gray-700 dark:text-gray-200'
-                : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'
-            }
+            ${viewMode === 'card' ? 'text-ink' : 'text-ink-faint hover:text-ink-muted'}
           `}
         >
           <HiViewGrid size={18} />
@@ -64,13 +60,9 @@ export const AgentViewToggle: React.FC<AgentViewToggleProps> = ({
           onClick={() => onToggle('table')}
           className={`
             relative z-10 flex items-center justify-center
-            w-10 h-5 rounded
+            w-10 h-5 rounded-control
             transition-colors duration-200
-            ${
-              viewMode === 'table'
-                ? 'text-gray-700 dark:text-gray-200'
-                : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'
-            }
+            ${viewMode === 'table' ? 'text-ink' : 'text-ink-faint hover:text-ink-muted'}
           `}
         >
           <HiViewList size={18} />

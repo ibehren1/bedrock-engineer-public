@@ -35,37 +35,37 @@ export const RemoveIcon = () => <TbTrash size={18} />
 
 // 標準ツールのアイコン定義
 const standardToolIcons = {
-  createFolder: <FaFolderPlus className="text-blue-500 size-6" />,
-  writeToFile: <FaFileSignature className="text-green-500 size-6" />,
-  readFiles: <FaFileAlt className="text-yellow-500 size-6" />,
-  listFiles: <FaList className="text-purple-500 size-6" />,
-  moveFile: <FaArrowRight className="text-orange-500 size-6" />,
-  copyFile: <FaCopy className="text-indigo-500 size-6" />,
-  tavilySearch: <FaSearch className="text-red-500 size-6" />,
-  fetchWebsite: <FaGlobe className="text-teal-500 size-6" />,
-  generateImage: <FaImage className="text-pink-500 size-6" />,
-  generateVideo: <FaPlay className="text-red-500 size-6" />,
-  checkVideoStatus: <FaClock className="text-blue-500 size-6" />,
-  downloadVideo: <FaDownload className="text-green-500 size-6" />,
-  recognizeImage: <FaCamera className="text-violet-500 size-6" />,
-  retrieve: <FaDatabase className="text-green-500 size-6" />,
-  invokeBedrockAgent: <BiFace className="text-purple-700 size-6" />,
-  executeCommand: <FaTerminal className="text-gray-500 size-6" />,
-  applyDiffEdit: <MdDifference className="text-cyan-500 size-6" />,
-  think: <FaBrain className="text-amber-500 size-6" />,
-  invokeFlow: <FaProjectDiagram className="text-blue-600 size-6" />,
-  codeInterpreter: <FaCode className="text-green-600 size-6" />,
-  dockerSandbox: <FaDocker className="text-[#2496ED] size-6" />,
-  screenCapture: <FaDesktop className="text-slate-500 size-6" />,
-  cameraCapture: <FaVideo className="text-blue-500 size-6" />,
-  todo: <FaListCheck className="text-blue-600 size-6" />,
-  todoInit: <FaListCheck className="text-blue-600 size-6" />,
-  todoUpdate: <FaListCheck className="text-blue-600 size-6" />,
-  invokeAgent: <FaUsers className="text-fuchsia-500 size-6" />
+  createFolder: <FaFolderPlus className="text-accent size-4" />,
+  writeToFile: <FaFileSignature className="text-success size-4" />,
+  readFiles: <FaFileAlt className="text-warning size-4" />,
+  listFiles: <FaList className="text-purple-500 size-4" />,
+  moveFile: <FaArrowRight className="text-warning size-4" />,
+  copyFile: <FaCopy className="text-accent size-4" />,
+  tavilySearch: <FaSearch className="text-danger size-4" />,
+  fetchWebsite: <FaGlobe className="text-success size-4" />,
+  generateImage: <FaImage className="text-pink-500 size-4" />,
+  generateVideo: <FaPlay className="text-danger size-4" />,
+  checkVideoStatus: <FaClock className="text-accent size-4" />,
+  downloadVideo: <FaDownload className="text-success size-4" />,
+  recognizeImage: <FaCamera className="text-violet-500 size-4" />,
+  retrieve: <FaDatabase className="text-success size-4" />,
+  invokeBedrockAgent: <BiFace className="text-purple-700 size-4" />,
+  executeCommand: <FaTerminal className="text-ink-muted size-4" />,
+  applyDiffEdit: <MdDifference className="text-accent size-4" />,
+  think: <FaBrain className="text-warning size-4" />,
+  invokeFlow: <FaProjectDiagram className="text-accent size-4" />,
+  codeInterpreter: <FaCode className="text-success size-4" />,
+  dockerSandbox: <FaDocker className="text-[#2496ED] size-4" />,
+  screenCapture: <FaDesktop className="text-ink-muted size-4" />,
+  cameraCapture: <FaVideo className="text-accent size-4" />,
+  todo: <FaListCheck className="text-accent size-4" />,
+  todoInit: <FaListCheck className="text-accent size-4" />,
+  todoUpdate: <FaListCheck className="text-accent size-4" />,
+  invokeAgent: <FaUsers className="text-fuchsia-500 size-4" />
 }
 
 // MCPツール用のアイコン（すべてのMCPツールで共通）
-const mcpIcon = <FaServer className="text-cyan-500 size-6" />
+const mcpIcon = <FaServer className="text-accent size-4" />
 
 // ツール名に応じて動的にアイコンを返すプロキシ
 export const toolIcons = new Proxy({} as { [key in ToolName]: React.ReactElement }, {

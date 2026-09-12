@@ -19,19 +19,15 @@ export const HtmlBlock: React.FC<HtmlBlockProps> = ({ code, className = '' }) =>
   }
 
   return (
-    <div
-      className={`my-4 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden ${className}`}
-    >
+    <div className={`my-4 border border-strong rounded-container overflow-hidden ${className}`}>
       {/* Header with toggle buttons */}
-      <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-4 py-2 border-b border-gray-300 dark:border-gray-600">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">HTML</span>
+      <div className="flex items-center justify-between bg-raised px-2.5 py-1 border-b border-strong">
+        <span className="text-sm font-medium text-ink">HTML</span>
         <div className="flex items-center space-x-2">
           <button
             onClick={toggleMode}
-            className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${
-              !isPreviewMode
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            className={`flex items-center space-x-1 px-3 py-1 rounded-control text-xs font-medium transition-colors ${
+              !isPreviewMode ? 'bg-accent text-accent-fg' : 'bg-raised text-ink hover:bg-sunken'
             }`}
           >
             <VscCode size={12} />
@@ -39,10 +35,8 @@ export const HtmlBlock: React.FC<HtmlBlockProps> = ({ code, className = '' }) =>
           </button>
           <button
             onClick={toggleMode}
-            className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${
-              isPreviewMode
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            className={`flex items-center space-x-1 px-3 py-1 rounded-control text-xs font-medium transition-colors ${
+              isPreviewMode ? 'bg-accent text-accent-fg' : 'bg-raised text-ink hover:bg-sunken'
             }`}
           >
             <VscEye size={12} />
@@ -54,7 +48,7 @@ export const HtmlBlock: React.FC<HtmlBlockProps> = ({ code, className = '' }) =>
       {/* Resizable Content area */}
       <ResizableContainer initialHeight={800} minHeight={200} maxHeight={1800}>
         {isPreviewMode ? (
-          <div className="h-full bg-white dark:bg-gray-900 relative">
+          <div className="h-full bg-surface relative">
             <iframe
               srcDoc={code}
               className="w-full h-full border-0"
@@ -64,7 +58,7 @@ export const HtmlBlock: React.FC<HtmlBlockProps> = ({ code, className = '' }) =>
             />
           </div>
         ) : (
-          <div className="h-full bg-gray-50 dark:bg-gray-900 overflow-auto">
+          <div className="h-full bg-surface-2 overflow-auto">
             <SyntaxHighlighter
               language="html"
               style={tomorrow}

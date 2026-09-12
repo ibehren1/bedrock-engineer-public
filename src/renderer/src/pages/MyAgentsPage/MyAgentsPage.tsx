@@ -22,7 +22,16 @@ export const MyAgentsPage: React.FC = () => {
     unhideDefaultAgent,
     unhideAllDefaultAgents
   } = useSetting()
-  const { saveAgent, deleteAgent, duplicateAgent, saveAsShared, convertToStrands } = useAgentCrud()
+  const {
+    saveAgent,
+    deleteAgent,
+    duplicateAgent,
+    saveAsShared,
+    deleteSharedFile,
+    downloadYaml,
+    importAgent,
+    convertToStrands
+  } = useAgentCrud()
 
   const [editingAgent, setEditingAgent] = useState<CustomAgent | null>(null)
   const [isInfoExpanded, setIsInfoExpanded] = useState(false)
@@ -57,15 +66,15 @@ export const MyAgentsPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full px-4 py-6">
+    <div className="flex flex-col h-full px-2.5 py-1.5">
       <header className="mb-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold dark:text-white">
+          <h1 className="text-title text-ink">
             {editingAgent ? t('editAgent') : t('myAgents.title')}
           </h1>
           <div
-            className="flex items-center cursor-pointer text-blue-600 dark:text-blue-400
-              hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+            className="flex items-center cursor-pointer text-accent
+              hover:text-accent transition-colors duration-200"
             onClick={() => setIsInfoExpanded(!isInfoExpanded)}
           >
             <FiInfo className="mr-1" />
@@ -74,20 +83,16 @@ export const MyAgentsPage: React.FC = () => {
         </div>
 
         {!editingAgent && (
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-ink-muted mt-1">
             {t('myAgents.description')}{' '}
-            <span className="text-gray-500 dark:text-gray-500">{t('myAgents.reorderHint')}</span>
+            <span className="text-ink-muted">{t('myAgents.reorderHint')}</span>
           </p>
         )}
 
         {isInfoExpanded && (
-          <div className="bg-blue-50 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-200 dark:border-gray-600/30 mt-4">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              {t('agentSettings.description')}
-            </p>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
-              {t('agentSettings.sharedAgentsDescription')}
-            </p>
+          <div className="bg-accent-tint p-2.5 rounded-container border border-accent mt-4">
+            <p className="text-sm text-ink">{t('agentSettings.description')}</p>
+            <p className="text-sm text-ink mt-2">{t('agentSettings.sharedAgentsDescription')}</p>
           </div>
         )}
       </header>
@@ -106,10 +111,13 @@ export const MyAgentsPage: React.FC = () => {
               selectedAgentId={selectedAgentId}
               onSelectAgent={handleActivateAgent}
               onAddNewAgent={() => setEditingAgent({} as CustomAgent)}
+              onImportAgent={importAgent}
               onEditAgent={setEditingAgent}
               onDuplicateAgent={duplicateAgent}
               onDeleteAgent={deleteAgent}
               onSaveAsShared={saveAsShared}
+              onDeleteSharedFile={deleteSharedFile}
+              onDownloadYaml={downloadYaml}
               onShareToOrganization={openShareToOrganizationModal}
               onConvertToStrands={convertToStrands}
               hiddenAgents={hiddenDefaultAgents}

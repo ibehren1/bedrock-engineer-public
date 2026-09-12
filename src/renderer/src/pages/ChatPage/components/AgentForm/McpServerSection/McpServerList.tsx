@@ -36,8 +36,8 @@ export const McpServerList: React.FC<McpServerListProps> = ({
 
   if (mcpServers.length === 0) {
     return (
-      <div className="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-md">
-        <p className="text-gray-500 dark:text-gray-400">{t('No MCP servers configured yet')}</p>
+      <div className="text-center p-2.5 border border-subtle rounded-control">
+        <p className="text-ink-muted">{t('No MCP servers configured yet')}</p>
       </div>
     )
   }
@@ -45,9 +45,7 @@ export const McpServerList: React.FC<McpServerListProps> = ({
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
-        <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">
-          {t('Registered MCP Servers')}
-        </h4>
+        <h4 className="font-medium text-sm text-ink">{t('Registered MCP Servers')}</h4>
 
         {/* 全サーバーテストボタン */}
         {mcpServers.length > 0 && (
@@ -59,10 +57,10 @@ export const McpServerList: React.FC<McpServerListProps> = ({
               testAllConnections()
             }}
             disabled={testingAll || testingConnection !== null}
-            className="text-xs px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded border border-blue-200 flex items-center gap-1 disabled:opacity-50 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-900/40"
+            className="text-xs px-2 py-1 bg-accent-tint hover:bg-accent-tint-strong text-accent rounded-control border border-accent flex items-center gap-1 disabled:opacity-50"
           >
             {testingAll ? (
-              <div className="w-3 h-3 border-2 border-t-transparent border-blue-500 rounded-full animate-spin mr-1"></div>
+              <div className="w-3 h-3 border-2 border-t-transparent border-accent rounded-full animate-spin mr-1"></div>
             ) : (
               <FiZap className="w-3 h-3 mr-1" />
             )}
@@ -80,7 +78,7 @@ export const McpServerList: React.FC<McpServerListProps> = ({
 
       {/* サーバーリスト */}
       <div
-        className="border border-gray-200 dark:border-gray-700 rounded-md divide-y divide-gray-200 dark:divide-gray-700"
+        className="border border-subtle rounded-control divide-y divide-subtle"
         onClick={preventModalClose}
       >
         {mcpServers.map((server) => (

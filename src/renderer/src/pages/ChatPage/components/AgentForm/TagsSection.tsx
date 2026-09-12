@@ -48,10 +48,8 @@ export const TagsSection: React.FC<TagsSectionProps> = ({ tags, availableTags = 
 
   return (
     <div className="space-y-2 pb-4">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        Tags {t('optional')}
-      </label>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('tagsDescription')}</p>
+      <label className="block text-sm font-medium text-ink">Tags {t('optional')}</label>
+      <p className="text-xs text-ink-muted mb-1">{t('tagsDescription')}</p>
 
       {/* 登録済みタグの表示 */}
       <div className="flex flex-wrap gap-2 mb-2">
@@ -59,13 +57,13 @@ export const TagsSection: React.FC<TagsSectionProps> = ({ tags, availableTags = 
           <span
             key={tag}
             className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-              bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+              bg-accent-tint text-accent"
           >
             {tag}
             <button
               type="button"
               onClick={() => handleRemoveTag(tag)}
-              className="ml-1 inline-flex items-center p-0.5 hover:bg-blue-200 dark:hover:bg-blue-800
+              className="ml-1 inline-flex items-center p-0.5 hover:bg-accent-tint
                 rounded-full"
             >
               <span className="sr-only">{t('remove')}</span>
@@ -80,9 +78,9 @@ export const TagsSection: React.FC<TagsSectionProps> = ({ tags, availableTags = 
         <div className="relative">
           <div className="flex">
             <ComboboxInput
-              className="flex-1 block w-full rounded-md border-gray-300 dark:border-gray-600
-                shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm
-                dark:bg-gray-800 dark:text-gray-200"
+              className="flex-1 block w-full rounded-control border-strong
+                shadow-sm focus:border-accent focus:ring-accent sm:text-sm
+                bg-surface text-ink"
               placeholder={t('enterTag')}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={(e) => {
@@ -94,17 +92,17 @@ export const TagsSection: React.FC<TagsSectionProps> = ({ tags, availableTags = 
             />
             <ComboboxButton
               className="ml-2 inline-flex items-center px-3 py-2 border
-              border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm
-              text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800
-              hover:bg-gray-50 dark:hover:bg-gray-700"
+              border-strong rounded-control text-sm shadow-sm
+              text-ink bg-surface
+              hover:bg-surface-2"
             >
               <FiChevronDown className="h-4 w-4" />
             </ComboboxButton>
           </div>
 
           <ComboboxOptions
-            className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800
-            shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5
+            className="absolute z-10 mt-1 w-full bg-surface
+            shadow-lg max-h-60 rounded-control py-1 text-base ring-1 ring-black ring-opacity-5
             overflow-auto focus:outline-none sm:text-sm"
           >
             {filteredTags.map((tag) => (
@@ -113,9 +111,7 @@ export const TagsSection: React.FC<TagsSectionProps> = ({ tags, availableTags = 
                 value={tag}
                 className={({ active }) =>
                   `cursor-default select-none relative py-2 pl-3 pr-9 ${
-                    active
-                      ? 'text-white bg-blue-600 dark:bg-blue-700'
-                      : 'text-gray-900 dark:text-gray-200'
+                    active ? 'text-accent-fg bg-accent' : 'text-ink'
                   }`
                 }
               >

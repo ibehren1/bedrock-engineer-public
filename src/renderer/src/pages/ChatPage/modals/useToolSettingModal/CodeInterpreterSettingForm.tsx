@@ -78,8 +78,8 @@ export const CodeInterpreterSettingForm: React.FC = () => {
   }
 
   const getStatusColor = () => {
-    if (isCheckingDocker) return 'bg-yellow-500'
-    return dockerStatus.available ? 'bg-green-500' : 'bg-red-500'
+    if (isCheckingDocker) return 'bg-warning-soft'
+    return dockerStatus.available ? 'bg-success-soft' : 'bg-danger-soft'
   }
 
   const getStatusText = () => {
@@ -91,12 +91,10 @@ export const CodeInterpreterSettingForm: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div>
-        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">
-          {t('Code Interpreter')}
-        </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <h3 className="text-base font-bold text-ink mb-2">{t('Code Interpreter')}</h3>
+        <p className="text-sm text-ink-muted">
           {t(
             '安全なDocker環境でPythonコードを実行し、データ分析、計算、コード実行のためのコンテナ設定を行います。'
           )}
@@ -104,7 +102,7 @@ export const CodeInterpreterSettingForm: React.FC = () => {
       </div>
 
       {/* Docker Status Section */}
-      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
+      <div className="bg-surface-2 p-2.5 rounded-control">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
@@ -112,48 +110,44 @@ export const CodeInterpreterSettingForm: React.FC = () => {
                 className={`w-3 h-3 rounded-full ${getStatusColor()} ${isCheckingDocker ? 'animate-pulse' : ''}`}
                 title={getStatusText()}
               />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {t('Docker ステータス')}
-              </span>
+              <span className="text-sm font-medium text-ink">{t('Docker ステータス')}</span>
             </div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">{getStatusText()}</span>
+            <span className="text-sm text-ink-muted">{getStatusText()}</span>
           </div>
           <button
             onClick={checkDockerStatus}
             disabled={isCheckingDocker}
-            className="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded hover:bg-blue-200 dark:hover:bg-blue-800 disabled:opacity-50"
+            className="px-3 py-1 text-xs bg-accent-tint text-accent rounded-control hover:bg-accent-tint-strong disabled:opacity-50"
           >
             {isCheckingDocker ? t('チェック中...') : t('再チェック')}
           </button>
         </div>
 
         {dockerStatus.lastChecked && (
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-ink-muted">
             {t('最終チェック')}: {dockerStatus.lastChecked.toLocaleTimeString()}
           </p>
         )}
 
         {!dockerStatus.available && dockerStatus.error && (
-          <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
+          <div className="mt-2 p-2 bg-danger-soft border border-danger rounded-control text-sm text-danger">
             {dockerStatus.error}
           </div>
         )}
       </div>
 
       {/* Container Configuration Section */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-        <h5 className="font-medium mb-4 text-blue-800 dark:text-blue-200">{t('コンテナ設定')}</h5>
+      <div className="bg-accent-tint p-2.5 rounded-control">
+        <h5 className="font-medium mb-4 text-accent">{t('コンテナ設定')}</h5>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Memory Limit */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('メモリ制限')}
-            </label>
+            <label className="block text-sm font-medium text-ink mb-2">{t('メモリ制限')}</label>
             <select
               value={codeInterpreterConfig.memoryLimit}
               onChange={(e) => handleConfigChange('memoryLimit', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-strong rounded-control shadow-sm focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent bg-surface text-ink"
             >
               {memoryOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -165,13 +159,11 @@ export const CodeInterpreterSettingForm: React.FC = () => {
 
           {/* CPU Limit */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('CPU制限')}
-            </label>
+            <label className="block text-sm font-medium text-ink mb-2">{t('CPU制限')}</label>
             <select
               value={codeInterpreterConfig.cpuLimit}
               onChange={(e) => handleConfigChange('cpuLimit', parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-strong rounded-control shadow-sm focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent bg-surface text-ink"
             >
               {cpuOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -183,13 +175,11 @@ export const CodeInterpreterSettingForm: React.FC = () => {
 
           {/* Timeout */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('タイムアウト')}
-            </label>
+            <label className="block text-sm font-medium text-ink mb-2">{t('タイムアウト')}</label>
             <select
               value={codeInterpreterConfig.timeout}
               onChange={(e) => handleConfigChange('timeout', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-strong rounded-control shadow-sm focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent bg-surface text-ink"
             >
               {timeoutOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -200,9 +190,9 @@ export const CodeInterpreterSettingForm: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800/30 rounded text-sm text-blue-800 dark:text-blue-200">
+        <div className="mt-4 p-3 bg-accent-tint rounded-control text-sm text-accent">
           <div className="flex items-start space-x-2">
-            <span className="font-medium">💡</span>
+            <span className="font-medium"></span>
             <div>
               <p className="font-medium mb-1">{t('設定のガイダンス')}:</p>
               <ul className="space-y-1 text-xs">
@@ -216,63 +206,59 @@ export const CodeInterpreterSettingForm: React.FC = () => {
       </div>
 
       {/* Features & Capabilities Section */}
-      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
-        <h5 className="font-medium mb-2 text-green-800 dark:text-green-200">
-          {t('Features & Capabilities')}
-        </h5>
-        <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+      <div className="bg-success-soft p-2.5 rounded-control">
+        <h5 className="font-medium mb-2 text-success">{t('Features & Capabilities')}</h5>
+        <ul className="text-sm text-ink space-y-2">
           <li className="flex items-start">
-            <span className="text-green-500 mr-2">•</span>
+            <span className="text-success mr-2">•</span>
             {t('Execute Python code in a secure Docker container')}
           </li>
           <li className="flex items-start">
-            <span className="text-green-500 mr-2">•</span>
+            <span className="text-success mr-2">•</span>
             {t('No internet access for enhanced security')}
           </li>
           <li className="flex items-start">
-            <span className="text-green-500 mr-2">•</span>
+            <span className="text-success mr-2">•</span>
             {t('Automatic file generation and detection')}
           </li>
           <li className="flex items-start">
-            <span className="text-green-500 mr-2">•</span>
+            <span className="text-success mr-2">•</span>
             {t('Support for data analysis and visualization')}
           </li>
           <li className="flex items-start">
-            <span className="text-green-500 mr-2">•</span>
+            <span className="text-success mr-2">•</span>
             {t('Mathematical calculations and scientific computing')}
           </li>
         </ul>
       </div>
 
       {/* Security & Limitations Section */}
-      <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-md border border-amber-200 dark:border-amber-800">
-        <h5 className="font-medium mb-2 text-amber-800 dark:text-amber-200">
-          {t('Security & Limitations')}
-        </h5>
-        <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+      <div className="bg-warning-soft p-2.5 rounded-control border border-warning">
+        <h5 className="font-medium mb-2 text-warning">{t('Security & Limitations')}</h5>
+        <ul className="text-sm text-ink space-y-2">
           <li className="flex items-start">
-            <span className="text-amber-500 mr-2">•</span>
+            <span className="text-warning mr-2">•</span>
             {t('Code runs in an isolated Docker environment')}
           </li>
           <li className="flex items-start">
-            <span className="text-amber-500 mr-2">•</span>
+            <span className="text-warning mr-2">•</span>
             {t('No network access to external resources')}
           </li>
           <li className="flex items-start">
-            <span className="text-amber-500 mr-2">•</span>
+            <span className="text-warning mr-2">•</span>
             {t('Generated files are temporary and may be cleared')}
           </li>
           <li className="flex items-start">
-            <span className="text-amber-500 mr-2">•</span>
+            <span className="text-warning mr-2">•</span>
             {t('設定されたリソース制限内で実行')}
           </li>
         </ul>
       </div>
 
       {/* Usage Examples Section */}
-      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
-        <h5 className="font-medium mb-2 text-gray-800 dark:text-gray-200">{t('Usage Examples')}</h5>
-        <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+      <div className="bg-surface-2 p-2.5 rounded-control">
+        <h5 className="font-medium mb-2 text-ink">{t('Usage Examples')}</h5>
+        <div className="text-sm text-ink space-y-2">
           <p>
             <strong>{t('Data Analysis:')}</strong>{' '}
             {t('Process CSV files, perform statistical analysis')}

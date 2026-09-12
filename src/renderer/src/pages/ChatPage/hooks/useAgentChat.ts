@@ -351,8 +351,14 @@ export const useAgentChat = (
   // メッセージの永続化を行うラッパー関数。
   // ターン開始時のセッションIDを引数で受け取るので、途中で別のチャットに切り替えても
   // 書き込み先がぶれない。
+  //
+  // targetSessionId は「省略可能」にしてはいけない。省略できるようにしていたため、
+  // アシスタント応答を保存する呼び出しが引数を渡し忘れていても型エラーにならず、
+  // 下の `if (targetSessionId && ...)` が常に false になって黙って保存されなかった。
+  // undefined を渡すこと自体は正しい（履歴なしのセッション）ので、型は
+  // `string | undefined` の必須引数にして、渡し忘れだけをコンパイルエラーにする。
   const persistMessage = useCallback(
-    async (message: IdentifiableMessage, targetSessionId?: string) => {
+    async (message: IdentifiableMessage, targetSessionId: string | undefined) => {
       if (!enableHistory) return
 
       if (targetSessionId && message.role && message.content) {
@@ -832,8 +838,10 @@ export const useAgentChat = (
                 // 配列の最後のメッセージを更新
                 currentMessages[lastMessageIndex] = updatedMessage
 
-                // メタデータを受信した時点で永続化を行う
-                await persistMessage(updatedMessage)
+                // メタデータを受信した時点で永続化を行う。
+                // turnSessionId はターン開始時に確定した書き込み先。これを渡し忘れて
+                // いたため、アシスタントの応答だけが履歴に保存されていなかった。
+                await persistMessage(updatedMessage, turnSessionId)
               }
             }
           } else {

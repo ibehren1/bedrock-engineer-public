@@ -34,11 +34,11 @@ export const UnhideAgentsDropdown: React.FC<UnhideAgentsDropdownProps> = ({
       dismissOnClick={true}
       renderTrigger={() => (
         <button
-          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white
-            dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm
-            hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2
-            focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900
-            whitespace-nowrap flex gap-2 items-center"
+          className="px-2 py-1 text-sm font-medium text-ink bg-surface
+            border border-strong rounded-container shadow-raised
+            hover:bg-raised focus:outline-none focus:ring-2
+            focus:ring-offset-2 focus:ring-accent
+            whitespace-nowrap flex gap-1.5 items-center"
         >
           {t('myAgents.unhide', { count: hiddenAgents.length })}
           <FiChevronDown className="w-4 h-4" />
@@ -46,9 +46,7 @@ export const UnhideAgentsDropdown: React.FC<UnhideAgentsDropdownProps> = ({
       )}
     >
       <Dropdown.Header>
-        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-          {t('myAgents.unhideHint')}
-        </span>
+        <span className="text-xs font-medium text-ink-muted">{t('myAgents.unhideHint')}</span>
       </Dropdown.Header>
       {hiddenAgents.map((agent) => (
         <Dropdown.Item

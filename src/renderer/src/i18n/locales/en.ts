@@ -727,7 +727,7 @@ const BackgroundAgent = {
       agentRequired: 'Agent selection is required',
       modelRequired: 'Model selection is required',
       wakeWordRequired: 'Wake word is required',
-      invalidMaxTokens: 'Invalid max tokens value (1-64000)'
+      invalidMaxTokens: 'Invalid max tokens value (1-{{max}})'
     }
   },
 

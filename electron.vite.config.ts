@@ -4,6 +4,7 @@ import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import svgr from 'vite-plugin-svgr'
 import tailwindcss from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
 
 // Single source of truth for the application display name: package.json productName.
 const appName: string = JSON.parse(readFileSync(resolve('package.json'), 'utf-8')).productName
@@ -44,7 +45,9 @@ export default defineConfig({
     ],
     css: {
       postcss: {
-        plugins: [tailwindcss() as any]
+        // autoprefixer was a devDependency but was never registered here, so no
+        // vendor prefixing ran at all.
+        plugins: [tailwindcss() as any, autoprefixer() as any]
       }
     }
   }

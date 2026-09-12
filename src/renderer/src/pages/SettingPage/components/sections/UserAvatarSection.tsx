@@ -41,8 +41,8 @@ export const UserAvatarSection: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsPickerOpen((open) => !open)}
-            className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300
-              dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-blue-500 dark:hover:border-blue-400
+            className="flex items-center justify-center w-12 h-12 rounded-full border border-strong
+              border-subtle bg-surface hover:border-accent
               transition-colors"
             aria-label={t('userAvatar.choose')}
           >
@@ -51,7 +51,7 @@ export const UserAvatarSection: React.FC = () => {
                 {userEmoji}
               </span>
             ) : (
-              <LiaUserCircleSolid className="h-7 w-7 text-gray-600 dark:text-gray-300" />
+              <LiaUserCircleSolid className="h-7 w-7 text-ink-muted" />
             )}
           </button>
 
@@ -70,14 +70,14 @@ export const UserAvatarSection: React.FC = () => {
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700 dark:text-gray-300">
+          <span className="text-sm text-ink">
             {userEmoji ? t('userAvatar.current') : t('userAvatar.usingDefault')}
           </span>
           {userEmoji && (
             <button
               type="button"
               onClick={() => setUserEmoji('')}
-              className="text-xs text-blue-600 dark:text-blue-400 hover:underline text-left"
+              className="text-xs text-accent hover:underline text-left"
             >
               {t('userAvatar.reset')}
             </button>
@@ -86,22 +86,19 @@ export const UserAvatarSection: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-1 mt-4">
-        <label
-          htmlFor="user-name-input"
-          className="text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
+        <label htmlFor="user-name-input" className="text-sm font-medium text-ink">
           {t('userName.title')}
         </label>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{t('userName.description')}</p>
+        <p className="text-xs text-ink-muted">{t('userName.description')}</p>
         <input
           id="user-name-input"
           type="text"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
           placeholder={t('userName.placeholder')}
-          className="mt-1 w-full max-w-sm rounded-lg border border-gray-300 dark:border-gray-600
-            bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100
-            focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400"
+          className="mt-1 w-full max-w-sm rounded-container border border-strong
+            bg-surface px-3 py-2 text-sm text-ink
+            focus:border-accent focus:ring-accent"
         />
       </div>
     </SettingSection>

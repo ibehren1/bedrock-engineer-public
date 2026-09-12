@@ -30,13 +30,13 @@ const SystemPromptModal = React.memo(
     if (!isOpen) return null
 
     return (
-      <Modal dismissible show={isOpen} onClose={onClose} size="7xl" className="dark:bg-gray-900">
-        <div className="border-[0.5px] border-white dark:border-gray-100 rounded-lg shadow-xl dark:shadow-gray-900/80">
-          <Modal.Header className="border-b border-gray-200 dark:border-gray-700/50 dark:bg-gray-900 rounded-t-lg">
+      <Modal dismissible show={isOpen} onClose={onClose} size="7xl" className="bg-canvas">
+        <div className="border-[0.5px] border-surface rounded-container shadow-xl">
+          <Modal.Header className="border-b border-subtle bg-canvas rounded-t-container">
             SYSTEM PROMPT
           </Modal.Header>
-          <Modal.Body className="p-0 bg-white dark:bg-gray-900 rounded-b-lg">
-            <div className="p-6 dark:text-white">
+          <Modal.Body className="p-0 bg-surface rounded-b-container">
+            <div className="p-3 text-ink">
               <MD>{systemPrompt}</MD>
             </div>
           </Modal.Body>

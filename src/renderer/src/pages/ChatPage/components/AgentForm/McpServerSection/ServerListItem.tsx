@@ -28,19 +28,19 @@ export const ServerListItem: React.FC<ServerListItemProps> = ({
   const { t } = useTranslation()
 
   return (
-    <div className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800" onClick={preventModalClose}>
+    <div className="p-3 hover:bg-surface-2" onClick={preventModalClose}>
       {/* サーバー情報表示 */}
       <div className="flex justify-between items-start">
         <div>
-          <h5 className="font-medium text-sm flex items-center text-gray-900 dark:text-gray-100">
+          <h5 className="font-medium text-sm flex items-center text-ink">
             {server.name}
             {testingConnection === server.name && (
-              <div className="ml-2 w-3 h-3 border-2 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
+              <div className="ml-2 w-3 h-3 border-2 border-t-transparent border-accent rounded-full animate-spin"></div>
             )}
           </h5>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{server.description}</p>
-          <p className="text-xs font-mono text-gray-600 dark:text-gray-300 mt-1">
-            <code className="text-gray-600 dark:text-gray-300">
+          <p className="text-xs text-ink-muted">{server.description}</p>
+          <p className="text-xs font-mono text-ink-muted mt-1">
+            <code className="text-ink-muted">
               {server.connectionType === 'url' ? (
                 server.url
               ) : (
@@ -56,12 +56,12 @@ export const ServerListItem: React.FC<ServerListItemProps> = ({
             server.headers &&
             Object.keys(server.headers).length > 0 && (
               <div className="mt-1 text-xs">
-                <p className="text-gray-500 dark:text-gray-400">{t('Headers')}:</p>
-                <div className="pl-2 mt-1 border-l-2 border-gray-200 dark:border-gray-700">
+                <p className="text-ink-muted">{t('Headers')}:</p>
+                <div className="pl-2 mt-1 border-l-2 border-subtle">
                   {Object.entries(server.headers).map(([key, value]) => (
                     <div key={key} className="font-mono">
-                      <span className="text-blue-600 dark:text-blue-400">{key}</span>:{' '}
-                      <span className="text-gray-600 dark:text-gray-300">
+                      <span className="text-accent">{key}</span>:{' '}
+                      <span className="text-ink-muted">
                         {key.toLowerCase() === 'authorization'
                           ? `${value.substring(0, 10)}...`
                           : `${value}`}
@@ -75,26 +75,24 @@ export const ServerListItem: React.FC<ServerListItemProps> = ({
           {/* 接続テスト結果表示 */}
           {connectionResult && (
             <div
-              className={`mt-2 p-2 rounded text-xs ${
+              className={`mt-2 p-2 rounded-control text-xs ${
                 connectionResult.success
-                  ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-                  : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                  ? 'bg-success-soft border border-success'
+                  : 'bg-danger-soft border border-danger'
               }`}
             >
               <div
                 className={`font-medium mb-1 flex items-center ${
-                  connectionResult.success
-                    ? 'text-green-700 dark:text-green-400'
-                    : 'text-red-700 dark:text-red-400'
+                  connectionResult.success ? 'text-success' : 'text-danger'
                 }`}
               >
                 <span
                   className={`inline-block w-2 h-2 mr-1 rounded-full ${
-                    connectionResult.success ? 'bg-green-500' : 'bg-red-500'
+                    connectionResult.success ? 'bg-success-soft' : 'bg-danger-soft'
                   }`}
                 ></span>
                 {connectionResult.success ? t('Connection Successful') : t('Connection Failed')}
-                <span className="ml-2 font-normal text-gray-500">
+                <span className="ml-2 font-normal text-ink-muted">
                   {new Date(connectionResult.testedAt).toLocaleTimeString()}
                 </span>
               </div>
@@ -102,11 +100,11 @@ export const ServerListItem: React.FC<ServerListItemProps> = ({
               {connectionResult.success ? (
                 // 成功時の詳細表示
                 <div>
-                  <div className="text-green-700 dark:text-green-400">
+                  <div className="text-success">
                     {connectionResult.details?.toolCount || 0} {t('tools available')}
                   </div>
                   {connectionResult.details?.startupTime !== undefined && (
-                    <div className="text-gray-600 dark:text-gray-400 mt-1">
+                    <div className="text-ink-muted mt-1">
                       {t('Startup time')}: {connectionResult.details?.startupTime}ms
                     </div>
                   )}
@@ -114,11 +112,9 @@ export const ServerListItem: React.FC<ServerListItemProps> = ({
               ) : (
                 // 失敗時の詳細表示
                 <div>
-                  <div className="text-red-700 dark:text-red-400">
-                    {connectionResult.details?.error}
-                  </div>
+                  <div className="text-danger">{connectionResult.details?.error}</div>
                   {connectionResult.details?.errorDetails && (
-                    <div className="mt-1 text-gray-700 dark:text-gray-300 p-1 bg-gray-100 dark:bg-gray-800 rounded">
+                    <div className="mt-1 text-ink p-1 bg-raised rounded-control">
                       <strong>{t('Solution')}:</strong> {connectionResult.details?.errorDetails}
                     </div>
                   )}
@@ -139,7 +135,7 @@ export const ServerListItem: React.FC<ServerListItemProps> = ({
               testServerConnection(server.name)
             }}
             disabled={testingConnection !== null}
-            className="p-1 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 disabled:opacity-50"
+            className="p-1 text-ink-muted hover:text-accent disabled:opacity-50"
             title={t('Test Connection')}
           >
             <FiZap size={18} />
@@ -153,7 +149,7 @@ export const ServerListItem: React.FC<ServerListItemProps> = ({
               e.stopPropagation()
               onEdit(server.name)
             }}
-            className="p-1 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
+            className="p-1 text-ink-muted hover:text-accent"
             title={t('Edit Server')}
           >
             <FiEdit size={18} />
@@ -167,7 +163,7 @@ export const ServerListItem: React.FC<ServerListItemProps> = ({
               e.stopPropagation()
               onDelete(server.name)
             }}
-            className="p-1 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+            className="p-1 text-ink-muted hover:text-danger-strong"
             title={t('Delete Server')}
           >
             <FiTrash2 size={18} />

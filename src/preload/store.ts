@@ -51,8 +51,14 @@ type StoreScheme = {
   /** Plan/Act モードの設定 (true: Plan, false: Act) */
   planMode?: boolean
 
-  /** アプリの外観テーマ ('light' | 'dim' | 'dark' | 'system')。デフォルトは 'dim' */
-  appTheme?: 'light' | 'dim' | 'dark' | 'system'
+  /** アプリの外観テーマ（明るい順に 'light' | 'newspaper' | 'dim' | 'charcoal' | 'dark'、および OS 追従の 'system'）。デフォルトは 'dim' */
+  appTheme?: 'light' | 'newspaper' | 'dim' | 'charcoal' | 'dark' | 'system'
+
+  /** UI テキストの書体。デフォルトは 'inter' */
+  appFontSans?: 'inter' | 'geist' | 'system'
+
+  /** コード・ID・パスなど等幅テキストの書体。デフォルトは 'jetbrains' */
+  appFontMono?: 'jetbrains' | 'geist-mono' | 'system'
 
   /** 現在選択されている言語モデル (LLM) の設定 */
   llm?: LLM
@@ -377,6 +383,27 @@ const init = () => {
   const appTheme = electronStore.get('appTheme')
   if (appTheme === undefined) {
     electronStore.set('appTheme', 'dim')
+  }
+
+  // 旧名 'midnight' を 'charcoal' に移行する。renderer 側は未知の外観を既定値に
+  // 落とすため、この移行がないと 'midnight' を選んでいたユーザーの設定が黙って
+  // 'dim' に戻ってしまう。
+  if ((appTheme as string) === 'midnight') {
+    electronStore.set('appTheme', 'charcoal')
+  }
+
+  // Initialize the font choices if not present. Interface and code faces are
+  // separate settings because they do different jobs: JetBrains Mono is easier
+  // to read 1/l/I/0/O in, which matters for the tool-use IDs and file paths
+  // this app shows constantly, so preferring Geist for UI text should not force
+  // it on code too.
+  const appFontSans = electronStore.get('appFontSans')
+  if (appFontSans === undefined) {
+    electronStore.set('appFontSans', 'inter')
+  }
+  const appFontMono = electronStore.get('appFontMono')
+  if (appFontMono === undefined) {
+    electronStore.set('appFontMono', 'jetbrains')
   }
 }
 

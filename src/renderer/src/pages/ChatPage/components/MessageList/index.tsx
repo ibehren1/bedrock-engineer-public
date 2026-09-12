@@ -34,24 +34,24 @@ const LoadingMessage = memo(function LoadingMessage({
   return (
     <div className="flex gap-4">
       <div className="flex items-center justify-center w-10 h-10">
-        <div className="h-5 w-5 animate-pulse">
+        <div className="h-4 w-4 animate-pulse">
           <img src={AILogo} className="h-full w-full object-contain" alt="assistant" />
         </div>
       </div>
       <div className="flex flex-col gap-2 w-full">
-        <span className="animate-pulse h-2 w-12 bg-slate-200 rounded"></span>
+        <span className="animate-pulse h-2 w-12 bg-raised rounded-control"></span>
         {waiting && countdown !== undefined && (
-          <div className="text-xs text-amber-600 dark:text-amber-400 mb-2">
-            ⏳ Processing... (Timeout in {formatTime(countdown)}){dots}
+          <div className="text-xs text-warning mb-2">
+            Processing — {formatTime(countdown)} remaining{dots}
           </div>
         )}
-        <div className="flex-1 space-y-6 py-1">
+        <div className="flex-1 space-y-3 py-1">
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-4">
-              <div className="h-2 bg-slate-200 rounded col-span-2"></div>
-              <div className="h-2 bg-slate-200 rounded col-span-1"></div>
+              <div className="h-2 bg-raised rounded-control col-span-2"></div>
+              <div className="h-2 bg-raised rounded-control col-span-1"></div>
             </div>
-            <div className="h-2 bg-slate-200 rounded"></div>
+            <div className="h-2 bg-raised rounded-control"></div>
           </div>
         </div>
       </div>

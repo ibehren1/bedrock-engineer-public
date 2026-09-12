@@ -126,27 +126,27 @@ export function SelectionCopyToolbar({ containerRef }: SelectionCopyToolbarProps
       }}
       // Prevent the toolbar itself from clearing the selection when interacted with.
       onMouseDown={(e) => e.preventDefault()}
-      className="flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg
-        border dark:border-gray-700 p-1 whitespace-nowrap"
+      className="flex items-center gap-1 bg-surface rounded-container shadow-lg
+        border border-subtle p-1 whitespace-nowrap"
     >
       <button
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={handleCopy(copySelectionAsMarkdown)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-gray-100
-          dark:hover:bg-gray-700 dark:text-gray-300"
+        className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-control hover:bg-raised
+          hover:bg-raised text-ink"
       >
-        <FiCopy className="text-blue-500" />
+        <FiCopy className="text-accent" />
         <span>{t('Copy (markdown)')}</span>
       </button>
       <button
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={handleCopy(copySelectionAsRichText)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-gray-100
-          dark:hover:bg-gray-700 dark:text-gray-300"
+        className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-control hover:bg-raised
+          hover:bg-raised text-ink"
       >
-        <LuFileText className="text-blue-500" />
+        <LuFileText className="text-accent" />
         <span>{t('Copy (rich text)')}</span>
       </button>
     </div>,

@@ -24,37 +24,37 @@ interface AsyncTaskCardProps {
 const statusConfig = {
   pending: {
     icon: FaClock,
-    color: 'text-yellow-500',
-    bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
-    borderColor: 'border-yellow-200 dark:border-yellow-800',
+    color: 'text-warning',
+    bgColor: 'bg-warning-soft',
+    borderColor: 'border-warning',
     label: 'Pending'
   },
   running: {
     icon: FaDocker,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-    borderColor: 'border-blue-200 dark:border-blue-800',
+    color: 'text-accent',
+    bgColor: 'bg-accent-tint',
+    borderColor: 'border-accent',
     label: 'Running'
   },
   completed: {
     icon: FaCheck,
-    color: 'text-green-500',
-    bgColor: 'bg-green-50 dark:bg-green-900/20',
-    borderColor: 'border-green-200 dark:border-green-800',
+    color: 'text-success',
+    bgColor: 'bg-success-soft',
+    borderColor: 'border-success',
     label: 'Completed'
   },
   failed: {
     icon: FaTimes,
-    color: 'text-red-500',
-    bgColor: 'bg-red-50 dark:bg-red-900/20',
-    borderColor: 'border-red-200 dark:border-red-800',
+    color: 'text-danger',
+    bgColor: 'bg-danger-soft',
+    borderColor: 'border-danger',
     label: 'Failed'
   },
   cancelled: {
     icon: MdCancel,
-    color: 'text-gray-500',
-    bgColor: 'bg-gray-50 dark:bg-gray-900/20',
-    borderColor: 'border-gray-200 dark:border-gray-800',
+    color: 'text-ink-muted',
+    bgColor: 'bg-surface-2',
+    borderColor: 'border-subtle',
     label: 'Cancelled'
   }
 }
@@ -108,17 +108,15 @@ export const AsyncTaskCard: React.FC<AsyncTaskCardProps> = ({ taskInfo }) => {
 
   return (
     <div
-      className={`rounded-lg border ${displayConfig.borderColor} ${displayConfig.bgColor} p-4 mb-2`}
+      className={`rounded-container border ${displayConfig.borderColor} ${displayConfig.bgColor} p-2.5 mb-2`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <StatusIcon className={`w-5 h-5 ${displayConfig.color}`} />
+          <StatusIcon className={`w-4 h-4 ${displayConfig.color}`} />
           <div>
-            <span className="font-medium text-sm dark:text-gray-200">
-              Code Interpreter Execution
-            </span>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="font-medium text-sm text-ink">Code Interpreter Execution</span>
+            <div className="text-xs text-ink-muted">
               {displayConfig.label} • {taskInfo.taskId.substring(0, 12)}...
             </div>
           </div>
@@ -127,9 +125,9 @@ export const AsyncTaskCard: React.FC<AsyncTaskCardProps> = ({ taskInfo }) => {
         <div className="flex items-center gap-2">
           {/* Progress bar for running tasks */}
           {taskInfo.status === 'running' && taskInfo.progress !== undefined && (
-            <div className="w-20 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+            <div className="w-20 bg-raised rounded-full h-2">
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                className="bg-accent h-2 rounded-full transition-all duration-300"
                 style={{ width: `${taskInfo.progress}%` }}
               />
             </div>
@@ -138,10 +136,10 @@ export const AsyncTaskCard: React.FC<AsyncTaskCardProps> = ({ taskInfo }) => {
       </div>
 
       {/* Status message */}
-      <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">{taskInfo.message}</div>
+      <div className="text-sm text-ink mb-2">{taskInfo.message}</div>
 
       {/* Timing information */}
-      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex items-center gap-4 text-xs text-ink-muted">
         <span>Created: {new Date(taskInfo.createdAt).toLocaleTimeString()}</span>
         {taskInfo.startedAt && (
           <span>Started: {new Date(taskInfo.startedAt).toLocaleTimeString()}</span>
@@ -156,17 +154,17 @@ export const AsyncTaskCard: React.FC<AsyncTaskCardProps> = ({ taskInfo }) => {
 
       {/* Expandable details for non-completed tasks */}
       {!codeInterpreterResult && (taskInfo.executionResult || isExpanded) && (
-        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-3 pt-3 border-t border-subtle">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-2"
+            className="text-xs text-ink-muted hover:text-ink mb-2"
           >
             {isExpanded ? '▼' : '▶'} Details
           </button>
 
           {isExpanded && (
             <div className="text-xs">
-              <div className="bg-gray-100 dark:bg-gray-800 rounded p-2 font-mono">
+              <div className="bg-raised rounded-control p-2 font-mono">
                 Task ID: {taskInfo.taskId}
               </div>
             </div>

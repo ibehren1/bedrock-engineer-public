@@ -28,43 +28,41 @@ export const ToolDetailsTab: React.FC<ToolDetailsTabProps> = ({
   const { t } = useTranslation()
 
   return (
-    <div className="space-y-4" onClick={preventEventPropagation}>
-      <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
-        <p className="text-sm text-gray-700 dark:text-gray-300 font-medium mb-1">
+    <div className="space-y-2" onClick={preventEventPropagation}>
+      <div className="mb-4 bg-accent-tint p-3 rounded-control">
+        <p className="text-sm text-ink font-medium mb-1">
           {t('Configure settings for enabled tools')}
         </p>
-        <p className="text-xs text-gray-600 dark:text-gray-400">
-          {t('Tool Detail Settings Description')}
-        </p>
+        <p className="text-xs text-ink-muted">{t('Tool Detail Settings Description')}</p>
       </div>
 
       {enabledTools.length === 0 ? (
-        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md text-center">
-          <p className="text-gray-500 dark:text-gray-400">
+        <div className="p-2.5 bg-surface-2 rounded-control text-center">
+          <p className="text-ink-muted">
             {t('No tools enabled. Enable tools in the Available Tools tab to configure them.')}
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {/* retrieve ツール設定 */}
           {toolsWithConfigurations.retrieve.isEnabled && (
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div className="border border-subtle rounded-container overflow-hidden">
               <div
-                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 cursor-pointer"
+                className="flex items-center justify-between p-2.5 bg-surface-2 cursor-pointer"
                 onClick={(e) => {
                   preventEventPropagation(e)
                   toggleToolExpand('retrieve')
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <div className="text-gray-600 dark:text-gray-300">
+                  <div className="text-ink-muted">
                     {expandedTools.retrieve ? <FiChevronDown /> : <FiChevronRight />}
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200">
+                    <h4 className="font-medium text-ink">
                       {toolsWithConfigurations.retrieve.title}
                     </h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-ink-muted">
                       {toolsWithConfigurations.retrieve.description}
                     </p>
                   </div>
@@ -72,7 +70,7 @@ export const ToolDetailsTab: React.FC<ToolDetailsTabProps> = ({
               </div>
 
               {expandedTools.retrieve && (
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-2.5 border-t border-subtle">
                   <KnowledgeBasesContent
                     knowledgeBases={knowledgeBases}
                     onChange={onKnowledgeBasesChange}
@@ -84,23 +82,23 @@ export const ToolDetailsTab: React.FC<ToolDetailsTabProps> = ({
 
           {/* executeCommand ツール設定 */}
           {toolsWithConfigurations.executeCommand.isEnabled && (
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div className="border border-subtle rounded-container overflow-hidden">
               <div
-                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 cursor-pointer"
+                className="flex items-center justify-between p-2.5 bg-surface-2 cursor-pointer"
                 onClick={(e) => {
                   preventEventPropagation(e)
                   toggleToolExpand('executeCommand')
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <div className="text-gray-600 dark:text-gray-300">
+                  <div className="text-ink-muted">
                     {expandedTools.executeCommand ? <FiChevronDown /> : <FiChevronRight />}
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200">
+                    <h4 className="font-medium text-ink">
                       {toolsWithConfigurations.executeCommand.title}
                     </h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-ink-muted">
                       {toolsWithConfigurations.executeCommand.description}
                     </p>
                   </div>
@@ -108,7 +106,7 @@ export const ToolDetailsTab: React.FC<ToolDetailsTabProps> = ({
               </div>
 
               {expandedTools.executeCommand && (
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-2.5 border-t border-subtle">
                   <CommandsContent commands={allowedCommands} onChange={onAllowedCommandsChange} />
                 </div>
               )}
@@ -117,23 +115,23 @@ export const ToolDetailsTab: React.FC<ToolDetailsTabProps> = ({
 
           {/* invokeBedrockAgent ツール設定 */}
           {toolsWithConfigurations.invokeBedrockAgent.isEnabled && (
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div className="border border-subtle rounded-container overflow-hidden">
               <div
-                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 cursor-pointer"
+                className="flex items-center justify-between p-2.5 bg-surface-2 cursor-pointer"
                 onClick={(e) => {
                   preventEventPropagation(e)
                   toggleToolExpand('invokeBedrockAgent')
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <div className="text-gray-600 dark:text-gray-300">
+                  <div className="text-ink-muted">
                     {expandedTools.invokeBedrockAgent ? <FiChevronDown /> : <FiChevronRight />}
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200">
+                    <h4 className="font-medium text-ink">
                       {toolsWithConfigurations.invokeBedrockAgent.title}
                     </h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-ink-muted">
                       {toolsWithConfigurations.invokeBedrockAgent.description}
                     </p>
                   </div>
@@ -141,7 +139,7 @@ export const ToolDetailsTab: React.FC<ToolDetailsTabProps> = ({
               </div>
 
               {expandedTools.invokeBedrockAgent && (
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-2.5 border-t border-subtle">
                   <BedrockAgentsContent agents={bedrockAgents} onChange={onBedrockAgentsChange} />
                 </div>
               )}
@@ -150,23 +148,23 @@ export const ToolDetailsTab: React.FC<ToolDetailsTabProps> = ({
 
           {/* invokeFlow ツール設定 */}
           {toolsWithConfigurations.invokeFlow.isEnabled && (
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div className="border border-subtle rounded-container overflow-hidden">
               <div
-                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 cursor-pointer"
+                className="flex items-center justify-between p-2.5 bg-surface-2 cursor-pointer"
                 onClick={(e) => {
                   preventEventPropagation(e)
                   toggleToolExpand('invokeFlow')
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <div className="text-gray-600 dark:text-gray-300">
+                  <div className="text-ink-muted">
                     {expandedTools.invokeFlow ? <FiChevronDown /> : <FiChevronRight />}
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200">
+                    <h4 className="font-medium text-ink">
                       {toolsWithConfigurations.invokeFlow.title}
                     </h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-ink-muted">
                       {toolsWithConfigurations.invokeFlow.description}
                     </p>
                   </div>
@@ -174,7 +172,7 @@ export const ToolDetailsTab: React.FC<ToolDetailsTabProps> = ({
               </div>
 
               {expandedTools.invokeFlow && (
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-2.5 border-t border-subtle">
                   <FlowsContent flows={flows} onChange={onFlowsChange} />
                 </div>
               )}
@@ -184,8 +182,8 @@ export const ToolDetailsTab: React.FC<ToolDetailsTabProps> = ({
           {/* 有効なツールがあるが、設定が必要なツールがない場合 */}
           {enabledTools.length > 0 &&
             !Object.values(toolsWithConfigurations).some((config) => config.isEnabled) && (
-              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-md text-center">
-                <p className="text-gray-500 dark:text-gray-400">
+              <div className="p-2.5 bg-surface-2 rounded-control text-center">
+                <p className="text-ink-muted">
                   {t(
                     'No configurable tools enabled. Enable retrieve, executeCommand, invokeBedrockAgent, or invokeFlow tools to access their configurations.'
                   )}

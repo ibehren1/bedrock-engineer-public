@@ -12,11 +12,11 @@ export const ProjectSection: React.FC = () => {
     <SettingSection title={t('Project Setting')}>
       <label
         onClick={selectDirectory}
-        className="block text-md font-medium text-gray-900 dark:text-white
-          cursor-pointer hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+        className="block text-md font-medium text-ink
+          cursor-pointer hover:text-ink-muted transition-colors"
       >
         <div className="flex gap-2 items-center">
-          <FcFolder className="text-lg" />
+          <FcFolder className="text-base" />
           <span>{projectPath || t('Select Project Directory')}</span>
         </div>
       </label>

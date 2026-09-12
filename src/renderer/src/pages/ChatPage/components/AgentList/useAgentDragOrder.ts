@@ -89,7 +89,7 @@ export const useAgentDragOrder = (agents: CustomAgent[], enabled: boolean) => {
     (agentId?: string) => {
       if (!enabled || !agentId) return ''
       if (agentId === draggingId) return 'opacity-40'
-      if (agentId === dropTargetId) return 'ring-2 ring-blue-400 dark:ring-blue-500'
+      if (agentId === dropTargetId) return 'ring-2 ring-accent'
       return ''
     },
     [enabled, draggingId, dropTargetId]

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import { Button, Input } from '@renderer/components/ui'
 
 interface ApiKeySectionProps {
   apiKey: string
@@ -17,24 +18,22 @@ export const ApiKeySection = ({ apiKey: initialApiKey, onSave }: ApiKeySectionPr
   }
 
   return (
-    <div className="flex flex-col gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-md">
-      <h4 className="font-medium text-sm mb-2 dark:text-gray-200">
-        {t('Tavily Search API Settings')}
-      </h4>
+    <div className="flex flex-col gap-2 p-2.5 border border-subtle rounded-control">
+      <h4 className="font-medium text-sm mb-2 text-ink">{t('Tavily Search API Settings')}</h4>
       <div className="flex-grow">
-        <label className="block text-xs text-gray-600 dark:text-gray-300 mb-1">API Key</label>
+        <label className="block text-xs text-ink-muted mb-1">API Key</label>
         <div className="flex items-center gap-2">
           <div className="flex-grow relative">
-            <input
+            <Input
               type={showApiKey ? 'text' : 'password'}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="tvly-xxxxxxxxxxxxxxx"
-              className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 pr-10"
+              className="pr-10"
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200 cursor-pointer"
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-ink-faint hover:text-ink-muted cursor-pointer"
               onClick={() => setShowApiKey(!showApiKey)}
               aria-label={showApiKey ? t('Hide API Key') : t('Show API Key')}
               title={showApiKey ? t('Hide API Key') : t('Show API Key')}
@@ -42,20 +41,17 @@ export const ApiKeySection = ({ apiKey: initialApiKey, onSave }: ApiKeySectionPr
               {showApiKey ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
             </button>
           </div>
-          <button
-            onClick={handleSave}
-            className="min-w-[80px] px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
-          >
+          <Button onClick={handleSave} variant="primary" className="cursor-pointer">
             {t('Save')}
-          </button>
+          </Button>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-300 mt-2">
+        <p className="text-xs text-ink-muted mt-2">
           {t('You need a Tavily Search API key to use this feature. Get your API key at')}
           <a
             href="https://tavily.com/"
             target="_blank"
             rel="noreferrer"
-            className="ml-1 text-blue-600 dark:text-blue-400 hover:underline"
+            className="ml-1 text-accent hover:underline"
           >
             tavily.com
           </a>

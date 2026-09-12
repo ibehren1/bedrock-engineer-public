@@ -26,8 +26,8 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
   const { t } = useTranslation()
 
   return (
-    <div className="bg-white dark:bg-gray-900 shadow overflow-hidden sm:rounded-lg">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+    <div className="bg-surface shadow overflow-hidden sm:rounded-container">
+      <table className="min-w-full divide-y divide-subtle">
         <TaskTableHeader
           nameLabel={t('backgroundAgent.table.name')}
           scheduleLabel={t('backgroundAgent.table.schedule')}
@@ -36,7 +36,7 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
           lastRunLabel={t('backgroundAgent.table.lastRun')}
           actionsLabel={t('backgroundAgent.table.actions')}
         />
-        <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+        <tbody className="bg-surface divide-y divide-subtle">
           {tasks.map((task) => (
             <TaskTableRow
               key={task.id}

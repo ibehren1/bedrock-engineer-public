@@ -48,7 +48,7 @@ export const TaskExpandedDetails: React.FC<TaskExpandedDetailsProps> = ({
       <div className="flex items-center space-x-3">
         <button
           onClick={onToggleExpanded}
-          className="text-xs text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors flex items-center space-x-1"
+          className="text-xs text-ink-muted hover:text-accent transition-colors flex items-center space-x-1"
         >
           <span>{detailsLabel}</span>
           {isExpanded ? (
@@ -65,10 +65,8 @@ export const TaskExpandedDetails: React.FC<TaskExpandedDetailsProps> = ({
         <div className="mt-3 space-y-3">
           {/* Wake Word */}
           <div>
-            <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {wakeWordLabel}:
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-2 text-xs text-gray-600 dark:text-gray-400 max-h-24 overflow-y-auto">
+            <div className="text-xs font-medium text-ink mb-1">{wakeWordLabel}:</div>
+            <div className="bg-surface-2 rounded-control p-2 text-xs text-ink-muted max-h-24 overflow-y-auto">
               {wakeWord}
             </div>
           </div>
@@ -76,17 +74,15 @@ export const TaskExpandedDetails: React.FC<TaskExpandedDetailsProps> = ({
           {/* Session Continuation */}
           {continueSession && continueSessionPrompt && (
             <div>
-              <div className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
-                {continuationPromptLabel}:
-              </div>
-              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-md p-2 text-xs text-gray-600 dark:text-gray-400 max-h-24 overflow-y-auto">
+              <div className="text-xs font-medium text-accent mb-1">{continuationPromptLabel}:</div>
+              <div className="bg-accent-tint rounded-control p-2 text-xs text-ink-muted max-h-24 overflow-y-auto">
                 {continueSessionPrompt}
               </div>
             </div>
           )}
 
           {/* Created Date */}
-          <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center space-x-2 text-xs text-ink-muted">
             <CalendarIcon className="h-3 w-3" />
             <span>
               {createdLabel}: {formatDate(createdAt)}
@@ -95,7 +91,7 @@ export const TaskExpandedDetails: React.FC<TaskExpandedDetailsProps> = ({
 
           {/* Next Run (only meaningful for enabled tasks) */}
           {enabled && nextRun && (
-            <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex items-center space-x-2 text-xs text-ink-muted">
               <ClockIcon className="h-3 w-3" />
               <span>
                 {nextRunLabel}: {formatDate(nextRun)}

@@ -11,15 +11,15 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ type, children, icon }
   const getTypeClasses = () => {
     switch (type) {
       case 'error':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+        return 'bg-danger-soft text-danger'
       case 'success':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+        return 'bg-success-soft text-success'
       case 'warning':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+        return 'bg-warning-soft text-warning'
       case 'info':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+        return 'bg-accent-tint text-accent'
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+        return 'bg-raised text-ink'
     }
   }
 

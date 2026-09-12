@@ -74,7 +74,7 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
       <button
         onClick={onExecute}
         disabled={isExecuting || isTaskLoading}
-        className="inline-flex items-center justify-center min-w-[2.5rem] px-2 md:px-3 py-1.5 text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800 transition-colors shadow-sm whitespace-nowrap"
+        className="inline-flex items-center justify-center min-w-[2.5rem] px-2 md:px-3 py-1.5 text-sm font-medium rounded-control text-accent bg-accent-tint hover:bg-accent-tint-strong disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm whitespace-nowrap"
         title={isExecuting || isTaskLoading ? executingLabel : testExecutionLabel}
       >
         {isExecuting || isTaskLoading ? (

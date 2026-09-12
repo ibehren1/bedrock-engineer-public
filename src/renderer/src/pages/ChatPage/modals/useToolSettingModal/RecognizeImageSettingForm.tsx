@@ -24,10 +24,10 @@ export const RecognizeImageSettingForm: React.FC = () => {
   }
 
   return (
-    <div className="prose dark:prose-invert max-w-none w-full">
+    <div className="max-w-none w-full">
       {/* ツールの説明 */}
-      <div className="mb-6 w-full">
-        <p className="mb-4 text-gray-700 dark:text-gray-300">
+      <div className="mb-3 w-full">
+        <p className="mb-4 text-ink">
           {t(
             'tool info.recognizeImage.description',
             'The recognizeImage tool uses AI vision capabilities to analyze and describe images. It helps the AI assistant understand image content and provide relevant responses based on what appears in the image.'
@@ -36,7 +36,7 @@ export const RecognizeImageSettingForm: React.FC = () => {
       </div>
 
       {/* 設定フォーム */}
-      <div className="flex flex-col gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-md mb-6 w-full">
+      <div className="flex flex-col gap-2 p-2.5 border border-subtle rounded-control mb-3 w-full">
         <div className="mb-4 w-full">
           <Label htmlFor="recognizeImageModel" value={t('Recognition Model')} />
           <Select

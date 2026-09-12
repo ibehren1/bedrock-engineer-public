@@ -46,11 +46,11 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
         dismissOnClick={true}
         renderTrigger={() => (
           <button
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium
-                            text-gray-700 dark:text-gray-300
-                            border border-gray-300 dark:border-gray-600
-                            bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700
-                            rounded-lg transition-colors duration-200"
+            className="flex items-center gap-1.5 px-2 py-1 text-sm font-medium
+                            text-ink
+                            border border-strong
+                            bg-surface hover:bg-raised
+                            rounded-container transition-colors duration-200"
           >
             <HiOfficeBuilding className="w-4 h-4" />
             <span>{getDisplayName(selectedOrganization)}</span>
@@ -61,7 +61,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
         {/* すべて */}
         <Dropdown.Item
           onClick={() => onSelectOrganization('all')}
-          className={`${selectedOrganization === 'all' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+          className={`${selectedOrganization === 'all' ? 'bg-raised' : ''}`}
         >
           <div className="flex items-center">
             <BsGlobeAmericas className="w-4 h-4 mr-2" />
@@ -72,7 +72,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
         {/* コントリビューター */}
         <Dropdown.Item
           onClick={() => onSelectOrganization('contributors')}
-          className={`${selectedOrganization === 'contributors' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+          className={`${selectedOrganization === 'contributors' ? 'bg-raised' : ''}`}
         >
           <div className="flex items-center">
             <HiUserGroup className="w-4 h-4 mr-2" />
@@ -87,7 +87,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
           <Dropdown.Item
             key={org.id}
             onClick={() => onSelectOrganization(org.id)}
-            className={`group ${selectedOrganization === org.id ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+            className={`group ${selectedOrganization === org.id ? 'bg-raised' : ''}`}
           >
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center min-w-0 flex-1">
@@ -101,9 +101,9 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
                     e.stopPropagation()
                     onEditOrganization(org)
                   }}
-                  className="p-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300
+                  className="p-1 text-ink-muted hover:text-ink
                              opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                             rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                             rounded-control hover:bg-raised"
                   title={t('organization.editOrganization')}
                 >
                   <HiPencil className="w-3 h-3" />
@@ -114,9 +114,9 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
                     e.stopPropagation()
                     onDeleteOrganization(org)
                   }}
-                  className="p-1 text-gray-500 hover:text-red-600 dark:hover:text-red-400
+                  className="p-1 text-ink-muted hover:text-danger-strong
                              opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                             rounded hover:bg-red-100 dark:hover:bg-red-900/20"
+                             rounded-control hover:bg-danger-soft"
                   title={t('organization.deleteOrganization')}
                 >
                   <HiTrash className="w-3 h-3" />

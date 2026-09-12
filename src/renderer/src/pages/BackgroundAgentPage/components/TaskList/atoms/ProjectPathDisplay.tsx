@@ -37,8 +37,8 @@ export const ProjectPathDisplay: React.FC<ProjectPathDisplayProps> = ({
 
   const baseClasses =
     variant === 'card'
-      ? 'text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded'
-      : 'text-xs text-blue-600 dark:text-blue-400'
+      ? 'text-xs bg-accent-tint text-accent px-2 py-1 rounded-control'
+      : 'text-xs text-accent'
 
   if (!showCopyButton || !needsTruncation) {
     return (
@@ -59,13 +59,13 @@ export const ProjectPathDisplay: React.FC<ProjectPathDisplayProps> = ({
       {needsTruncation && showCopyButton && (
         <button
           onClick={handleCopy}
-          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex-shrink-0"
+          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-raised rounded-control flex-shrink-0"
           title={copied ? 'コピーしました！' : 'パスをコピー'}
         >
           {copied ? (
-            <CheckIcon className="h-3 w-3 text-green-600" />
+            <CheckIcon className="h-3 w-3 text-success" />
           ) : (
-            <ClipboardIcon className="h-3 w-3 text-gray-500 hover:text-blue-600" />
+            <ClipboardIcon className="h-3 w-3 text-ink-muted hover:text-accent" />
           )}
         </button>
       )}

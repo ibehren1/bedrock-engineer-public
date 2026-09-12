@@ -10,14 +10,12 @@ export const ConfigDirSection: React.FC = () => {
 
   return (
     <SettingSection title={t('Config Directory')}>
-      <label className="block text-md font-medium text-gray-900 dark:text-white">
+      <label className="block text-md font-medium text-ink">
         <div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {t('Config Directory Description')}
-          </span>
+          <span className="text-xs text-ink-muted">{t('Config Directory Description')}</span>
         </div>
         <div className="flex gap-2 items-center">
-          <FcFolder className="text-lg" />
+          <FcFolder className="text-base" />
           <span className="cursor-text">{userDataPath}</span>
         </div>
       </label>

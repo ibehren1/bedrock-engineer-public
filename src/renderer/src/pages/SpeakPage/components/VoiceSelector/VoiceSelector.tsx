@@ -72,18 +72,18 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
     <Modal dismissible show={isOpen} onClose={onCancel} size="md">
       <Modal.Header>{t('Select Voice')}</Modal.Header>
       <Modal.Body>
-        <div className="p-4">
+        <div className="p-2.5">
           {/* Voice Selection Section */}
           <div className="text-center mb-8">
             {/* Voice Selection */}
-            <div className="flex items-center justify-center gap-8 mb-8">
+            <div className="flex items-center justify-center gap-4 mb-8">
               {/* Previous Button */}
               <button
                 onClick={handlePrevious}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-full hover:bg-raised transition-colors"
                 aria-label="Previous voice"
               >
-                <ChevronLeftIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                <ChevronLeftIcon className="w-4 h-4 text-ink-muted" />
               </button>
 
               {/* Voice Visual and Info */}
@@ -91,25 +91,19 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
                 <VoiceVisual voiceId={currentVoice.id} animationKey={animationKey} />
 
                 <div className="mt-4 text-center">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    {currentVoice.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
-                    {t(currentVoice.description)}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {t(currentVoice.characteristics)}
-                  </p>
+                  <h3 className="text-heading text-ink mb-2">{currentVoice.name}</h3>
+                  <p className="text-sm text-ink-muted mb-1">{t(currentVoice.description)}</p>
+                  <p className="text-xs text-ink-muted">{t(currentVoice.characteristics)}</p>
                 </div>
               </div>
 
               {/* Next Button */}
               <button
                 onClick={handleNext}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-full hover:bg-raised transition-colors"
                 aria-label="Next voice"
               >
-                <ChevronRightIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                <ChevronRightIcon className="w-4 h-4 text-ink-muted" />
               </button>
             </div>
 
@@ -125,9 +119,7 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
                     setAnimationKey((prev) => prev + 1)
                   }}
                   className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentIndex
-                      ? 'bg-blue-500'
-                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                    index === currentIndex ? 'bg-accent-tint' : 'bg-sunken hover:bg-raised'
                   }`}
                   aria-label={`Select ${AVAILABLE_VOICES[index].name}`}
                 />
@@ -136,19 +128,17 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
           </div>
 
           {/* Divider */}
-          <div className="border-t border-gray-200 dark:border-gray-700 mb-6"></div>
+          <div className="border-t border-subtle mb-3"></div>
 
           {/* Translation Settings Section */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             {/* Translation Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <GlobeAltIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <GlobeAltIcon className="w-4 h-4 text-ink-muted" />
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                    {t('Translation')}
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <h3 className="text-sm font-medium text-ink">{t('Translation')}</h3>
+                  <p className="text-xs text-ink-muted">
                     {t('Translate AI responses to your preferred language')}
                   </p>
                 </div>
@@ -160,20 +150,18 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
                   onChange={(e) => setTranslationEnabled(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <div className="w-7 h-4 bg-sunken peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-knob after:shadow-raised after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-accent"></div>
               </label>
             </div>
 
             {/* Language Selection */}
             {translationEnabled && (
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('Target Language')}
-                </label>
+                <label className="block text-sm font-medium text-ink">{t('Target Language')}</label>
                 <select
                   value={translationTargetLanguage}
                   onChange={(e) => setTranslationTargetLanguage(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 bg-surface border border-strong rounded-container shadow-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent text-sm text-ink"
                 >
                   {TRANSLATION_LANGUAGES.map((lang) => (
                     <option key={lang.code} value={lang.code}>
@@ -190,13 +178,13 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
         <div className="flex justify-center gap-4">
           <button
             onClick={onCancel}
-            className="px-6 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors"
+            className="px-6 py-2 text-ink-muted hover:text-ink transition-colors"
           >
             {t('Cancel')}
           </button>
           <button
             onClick={handleStartNewChat}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-3 py-1 bg-accent text-accent-fg rounded-container hover:bg-accent-strong transition-colors"
           >
             {t('Start New Chat')}
           </button>

@@ -132,8 +132,8 @@ export const MonacoJSONEditor: React.FC<MonacoJSONEditorProps> = ({
         <button
           type="button"
           onClick={formatJSON}
-          className="absolute top-2 right-2 z-10 text-xs bg-gray-200 dark:bg-gray-700
-          hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 py-1 px-2 rounded"
+          className="absolute top-2 right-2 z-10 text-xs bg-raised
+          hover:bg-sunken text-ink py-1 px-2 rounded-control"
           title={'Format JSON'}
         >
           Format

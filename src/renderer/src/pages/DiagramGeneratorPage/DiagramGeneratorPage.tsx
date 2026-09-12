@@ -466,9 +466,9 @@ export default function DiagramGeneratorPage() {
       <div className="flex pb-2 justify-between">
         <span className="font-bold flex flex-col gap-2 w-full">
           <div className="flex justify-between">
-            <h1 className="content-center dark:text-white text-lg">Diagram Generator</h1>
+            <h1 className="content-center text-ink text-title">Diagram Generator</h1>
             <span
-              className="text-xs text-gray-400 font-thin cursor-pointer hover:text-gray-700"
+              className="text-xs text-ink-faint font-thin cursor-pointer hover:text-ink"
               onClick={handleOpenSystemPromptModal}
             >
               SYSTEM_PROMPT
@@ -491,10 +491,10 @@ export default function DiagramGeneratorPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     key={index}
-                    className={`p-1 px-3 rounded cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500 dark:text-white ${
+                    className={`p-1 px-3 rounded-control cursor-pointer hover:bg-raised text-ink ${
                       selectedHistoryIndex === index
-                        ? 'bg-gray-300 text-gray-800 dark:bg-gray-500 dark:text-white'
-                        : 'bg-gray-200 text-gray-500 dark:bg-gray-600'
+                        ? 'bg-sunken text-ink'
+                        : 'bg-raised text-ink-muted'
                     }`}
                     onClick={() => loadDiagramFromHistory(index)}
                   >
@@ -508,7 +508,7 @@ export default function DiagramGeneratorPage() {
       </div>
 
       {/* Body */}
-      <div className="flex-1 rounded-lg">
+      <div className="flex-1 rounded-container">
         <div
           className="w-full h-[calc(calc(100vh-14rem)-5rem)] flex overflow-y-auto"
           style={{
@@ -547,7 +547,7 @@ export default function DiagramGeneratorPage() {
             {(() => {
               const shouldShowLoader = xmlLoading || (loading && !xml)
               return shouldShowLoader ? (
-                <div className="absolute inset-0 flex h-full justify-center items-center flex-col bg-gray-50 dark:bg-gray-900">
+                <div className="absolute inset-0 flex h-full justify-center items-center flex-col bg-surface-2">
                   <LoaderWithReasoning
                     reasoningText={latestReasoningText}
                     progress={isXmlGenerating ? xmlProgress : undefined}
@@ -605,12 +605,12 @@ export default function DiagramGeneratorPage() {
               {/* 説明文表示切り替えボタン */}
               <Tooltip content={showExplanation ? 'Hide' : 'Show'} animation="duration-500">
                 <button
-                  className={`cursor-pointer rounded-md py-1.5 px-2 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                    showExplanation ? 'bg-gray-200 dark:bg-gray-700' : ''
+                  className={`cursor-pointer rounded-control py-1.5 px-2 hover:border-strong hover:bg-surface-2 ${
+                    showExplanation ? 'bg-raised' : ''
                   }`}
                   onClick={toggleExplanationView}
                 >
-                  <MdOutlineArticle className="text-xl" />
+                  <MdOutlineArticle className="text-base" />
                 </button>
               </Tooltip>
             </div>

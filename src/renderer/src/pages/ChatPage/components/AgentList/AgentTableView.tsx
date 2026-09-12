@@ -16,6 +16,8 @@ interface AgentTableViewProps {
   onDuplicateAgent: (agent: CustomAgent) => void
   onDeleteAgent: (agentId: string) => void
   onSaveAsShared?: (agent: CustomAgent) => void
+  onDeleteSharedFile?: (agent: CustomAgent) => void
+  onDownloadYaml?: (agent: CustomAgent) => void
   onShareToOrganization?: (agent: CustomAgent) => void
   onConvertToStrands?: (agentId: string) => void
   sortKey: SortKey
@@ -37,6 +39,8 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
   onDuplicateAgent,
   onDeleteAgent,
   onSaveAsShared,
+  onDeleteSharedFile,
+  onDownloadYaml,
   onShareToOrganization,
   onConvertToStrands,
   sortKey,
@@ -66,20 +70,20 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <table className="w-full text-sm text-left text-ink-muted">
+        <thead className="text-xs text-ink uppercase bg-surface-2">
           <tr>
             {dragEnabled && (
               <th scope="col" className="pl-2 w-6">
                 {/* Drag handle column */}
               </th>
             )}
-            <th scope="col" className="px-4 py-3 w-16">
+            <th scope="col" className="px-2 py-1 w-16">
               {/* Icon column - no sort */}
             </th>
             <th
               scope="col"
-              className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+              className="px-2 py-1 cursor-pointer hover:bg-raised"
               onClick={() => onSort('name')}
             >
               <div className="flex items-center gap-1">
@@ -89,7 +93,7 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
             </th>
             <th
               scope="col"
-              className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+              className="px-2 py-1 cursor-pointer hover:bg-raised"
               onClick={() => onSort('description')}
             >
               <div className="flex items-center gap-1">
@@ -99,7 +103,7 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
             </th>
             <th
               scope="col"
-              className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+              className="px-2 py-1 cursor-pointer hover:bg-raised"
               onClick={() => onSort('tags')}
             >
               <div className="flex items-center gap-1">
@@ -109,7 +113,7 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
             </th>
             <th
               scope="col"
-              className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+              className="px-2 py-1 cursor-pointer hover:bg-raised"
               onClick={() => onSort('status')}
             >
               <div className="flex items-center gap-1">
@@ -117,7 +121,7 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
                 <SortIcon columnKey="status" />
               </div>
             </th>
-            <th scope="col" className="px-4 py-3 w-24">
+            <th scope="col" className="px-2 py-1 w-24">
               Actions
             </th>
           </tr>
@@ -130,84 +134,80 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
             return (
               <tr
                 key={agent.id}
-                className={`border-b dark:border-gray-700 cursor-pointer
-                  bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700
+                className={`border-b border-subtle cursor-pointer
+                  bg-surface hover:bg-surface-2
                   ${dragClassName?.(agent.id) || ''}`}
                 onClick={() => onSelectAgent(agent.id!)}
                 {...dragProps?.(agent.id)}
               >
                 {dragEnabled && (
-                  <td className="pl-2 w-6 text-gray-300 dark:text-gray-600">
+                  <td className="pl-2 w-6 text-ink-faint">
                     <MdDragIndicator className="w-4 h-4" title={t('myAgents.dragToReorder')} />
                   </td>
                 )}
                 {/* Icon */}
-                <td className="px-4 py-3">
+                <td className="px-2 py-1">
                   <div
                     className={`w-10 h-10 flex items-center justify-center
-                      ${!isCustomAgent ? 'bg-gray-200 dark:bg-gray-700/80' : 'bg-blue-100 dark:bg-blue-800/80'}
-                      rounded-lg border border-transparent dark:border-gray-600 shadow-sm dark:shadow-inner`}
+                      ${!isCustomAgent ? 'bg-surface-2' : 'bg-raised'}
+                      rounded-container border border-subtle`}
                   >
                     {agent.icon ? (
                       <AgentIconView
                         icon={agent.icon}
-                        className="w-5 h-5 dark:text-gray-100"
+                        className="w-4 h-4 text-ink"
                         style={{
                           color: agent.iconColor || 'var(--tw-text-gray-700)',
                           filter: 'brightness(1.2) contrast(1.2)'
                         }}
                       />
                     ) : (
-                      <TbRobot className="w-5 h-5 text-blue-600 dark:text-gray-100 filter brightness-110 contrast-125" />
+                      <TbRobot className="w-4 h-4 text-accent filter brightness-110 contrast-125" />
                     )}
                   </div>
                 </td>
 
                 {/* Name */}
-                <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
-                  {agent.name}
-                </td>
+                <td className="px-2 py-1 font-medium text-ink">{agent.name}</td>
 
                 {/* Description */}
-                <td className="px-4 py-3">
-                  <div className="line-clamp-2 text-gray-600 dark:text-gray-400">
+                <td className="px-2 py-1">
+                  <div className="line-clamp-2 text-ink-muted">
                     {t(agent.description) || t('noDescription')}
                   </div>
                 </td>
 
                 {/* Tags */}
-                <td className="px-4 py-3">
+                <td className="px-2 py-1">
                   <div className="flex flex-wrap gap-1">
                     {agent.tags?.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                          bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300"
+                        className="inline-flex items-center px-2 py-0.5 rounded-control text-xs font-medium
+                          bg-accent-tint text-accent"
                       >
                         {tag}
                       </span>
                     ))}
                     {agent.tags && agent.tags.length > 3 && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        +{agent.tags.length - 3}
-                      </span>
+                      <span className="text-xs text-ink-muted">+{agent.tags.length - 3}</span>
                     )}
                   </div>
                 </td>
 
                 {/* Status */}
-                <td className="px-4 py-3">
+                <td className="px-2 py-1">
                   <div className="flex items-center gap-1">
                     {isSelected && (
                       <span
                         title={t('myAgents.activeInChat')}
-                        className="px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 rounded"
+                        className="px-2 py-0.5 text-xs font-medium text-accent bg-accent-tint rounded-control"
                       >
                         {t('active')}
                       </span>
                     )}
                     {agent.isShared && (
-                      <span className="px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 rounded">
+                      <span className="px-2 py-0.5 text-xs font-medium text-success bg-success-soft rounded-control">
                         {t('shared')}
                       </span>
                     )}
@@ -215,13 +215,15 @@ export const AgentTableView: React.FC<AgentTableViewProps> = ({
                 </td>
 
                 {/* Actions */}
-                <td className="px-4 py-3">
+                <td className="px-2 py-1">
                   <AgentActionsDropdown
                     agent={agent}
                     onEdit={onEditAgent}
                     onDuplicate={onDuplicateAgent}
                     onDelete={onDeleteAgent}
                     onSaveAsShared={onSaveAsShared}
+                    onDeleteSharedFile={onDeleteSharedFile}
+                    onDownloadYaml={onDownloadYaml}
                     onShareToOrganization={onShareToOrganization}
                     onConvertToStrands={onConvertToStrands}
                   />

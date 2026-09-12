@@ -4,6 +4,7 @@ import { McpServerConfig } from '@/types/agent-chat'
 import { parseServerConfigJson, generateSampleJson } from './utils/mcpServerUtils'
 import { preventModalClose } from './utils/eventUtils'
 import toast from 'react-hot-toast'
+import { Button } from '@renderer/components/ui'
 
 interface McpServerFormProps {
   mcpServers: McpServerConfig[]
@@ -138,24 +139,21 @@ export const McpServerForm: React.FC<McpServerFormProps> = ({
 
   return (
     <div
-      className="flex flex-col gap-2 mt-4 border border-gray-200 dark:border-gray-700 p-4 rounded-md"
+      className="flex flex-col gap-2 mt-4 border border-subtle p-2.5 rounded-control"
       onClick={preventModalClose}
     >
-      <h4 className="font-medium text-sm mb-2 dark:text-gray-300">
+      <h4 className="font-medium text-sm mb-2 text-ink">
         {editMode ? t('Edit MCP Server') : t('Add New MCP Server')}
       </h4>
 
       <div className="mt-2">
-        <label
-          htmlFor="jsonInput"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
+        <label htmlFor="jsonInput" className="block text-sm font-medium text-ink">
           {t('Server Configuration (JSON)')}
         </label>
 
         <button
           type="button"
-          className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          className="text-xs text-accent hover:text-accent"
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
@@ -172,7 +170,7 @@ export const McpServerForm: React.FC<McpServerFormProps> = ({
             if (jsonError) setJsonError(null)
           }}
           onClick={preventModalClose}
-          className="mt-1 block w-full h-64 px-3 py-2 bg-white dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono"
+          className="mt-1 block w-full h-64 px-3 py-2 bg-surface text-ink border border-strong rounded-control shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm font-mono"
           placeholder={`{
   "mcpServers": {
     "my-mcp-server": {
@@ -190,8 +188,8 @@ export const McpServerForm: React.FC<McpServerFormProps> = ({
   }
 }`}
         />
-        {jsonError && <p className="text-xs text-red-500 mt-1 whitespace-pre-line">{jsonError}</p>}
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        {jsonError && <p className="text-xs text-danger mt-1 whitespace-pre-line">{jsonError}</p>}
+        <p className="text-xs text-ink-muted mt-1">
           {t(
             'Use claude_desktop_config.json format with mcpServers object containing server configurations.'
           )}
@@ -208,34 +206,35 @@ export const McpServerForm: React.FC<McpServerFormProps> = ({
                 e.stopPropagation()
                 handleCancelEdit()
               }}
-              className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="px-3 py-1.5 text-sm text-ink-muted border border-strong rounded-control hover:bg-raised"
             >
               {t('Cancel')}
             </button>
-            <button
+            <Button
               type="button"
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
                 handleSaveEdit()
               }}
-              className="px-4 py-1.5 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              variant="primary"
             >
               {t('Update Server')}
-            </button>
+            </Button>
           </>
         ) : (
-          <button
+          <Button
             type="button"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
               handleAddServer()
             }}
-            className="px-4 py-1.5 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed mt-2 w-fit"
+            variant="primary"
+            className="mt-2 w-fit"
           >
             {t('Add Server')}
-          </button>
+          </Button>
         )}
       </div>
     </div>

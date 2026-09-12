@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { FiCopy, FiMaximize2, FiMinimize2 } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import { DiffViewerProps } from './types'
+import { useTheme } from '@renderer/hooks/useTheme'
 
 /**
  * Get language from file extension
@@ -54,6 +55,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   language
 }) => {
   const { t } = useTranslation()
+  const { isDarkMode } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
 
   const detectedLanguage = useMemo(() => {
@@ -94,28 +96,26 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   }
 
   return (
-    <div className="border rounded-lg dark:border-gray-700 bg-white dark:bg-gray-800">
+    <div className="border rounded-container border-subtle bg-surface">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+      <div className="flex items-center justify-between p-3 border-b border-subtle bg-surface-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('File Diff')}:
-          </span>
+          <span className="text-sm font-medium text-ink">{t('File Diff')}:</span>
           <button
             onClick={handleCopyFilePath}
-            className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-mono truncate max-w-xs"
+            className="text-sm text-accent hover:underline font-mono truncate max-w-xs"
             title={filePath}
           >
             {filePath}
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+          <span className="text-xs text-ink-muted bg-raised px-2 py-1 rounded-control">
             {detectedLanguage}
           </span>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+            className="p-1 hover:bg-raised rounded-control"
             title={isExpanded ? t('Collapse') : t('Expand')}
           >
             {isExpanded ? <FiMinimize2 className="w-4 h-4" /> : <FiMaximize2 className="w-4 h-4" />}
@@ -124,7 +124,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
       </div>
 
       {/* Stats */}
-      <div className="flex items-center gap-4 px-3 py-2 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700">
+      <div className="flex items-center gap-4 px-3 py-2 text-xs text-ink-muted bg-surface-2 border-b border-subtle">
         <span>
           {t('Original')}: {diffStats.originalLines} {t('lines')}
         </span>
@@ -137,17 +137,17 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
       </div>
 
       {/* Copy buttons */}
-      <div className="flex gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700">
+      <div className="flex gap-2 px-3 py-2 bg-surface-2 border-b border-subtle">
         <button
           onClick={handleCopyOriginal}
-          className="flex items-center gap-1 text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded"
+          className="flex items-center gap-1 text-xs px-2 py-1 bg-raised hover:bg-sunken rounded-control"
         >
           <FiCopy className="w-3 h-3" />
           {t('Copy Original')}
         </button>
         <button
           onClick={handleCopyUpdated}
-          className="flex items-center gap-1 text-xs px-2 py-1 bg-blue-200 dark:bg-blue-700 hover:bg-blue-300 dark:hover:bg-blue-600 rounded"
+          className="flex items-center gap-1 text-xs px-2 py-1 bg-accent-tint hover:bg-accent-tint-strong rounded-control"
         >
           <FiCopy className="w-3 h-3" />
           {t('Copy Updated')}
@@ -160,7 +160,9 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
           original={originalText}
           modified={updatedText}
           language={detectedLanguage}
-          theme="vs-dark"
+          // Was pinned to "vs-dark", so a dark diff sat inside a light UI in
+          // every appearance except dark. Matches the other Monaco editors now.
+          theme={isDarkMode ? 'vs-dark' : 'light'}
           options={{
             readOnly: true,
             renderSideBySide: true,

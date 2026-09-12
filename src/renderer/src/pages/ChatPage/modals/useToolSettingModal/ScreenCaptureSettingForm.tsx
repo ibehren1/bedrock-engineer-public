@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
+import { FiMonitor, FiSquare } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
 import { Label, Select, Button } from 'flowbite-react'
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
@@ -103,10 +104,10 @@ export const ScreenCaptureSettingForm: React.FC = () => {
   }, [])
 
   return (
-    <div className="prose dark:prose-invert max-w-none w-full">
+    <div className="max-w-none w-full">
       {/* ツールの説明 */}
-      <div className="mb-6 w-full">
-        <p className="mb-4 text-gray-700 dark:text-gray-300">
+      <div className="mb-3 w-full">
+        <p className="mb-4 text-ink">
           {t(
             'tool info.screenCapture.description',
             'The screenCapture tool captures the current screen and saves it as an image file. When a recognition prompt is provided, the captured image will be automatically analyzed with AI to extract text content, identify UI elements, and provide detailed visual descriptions for debugging and documentation purposes.'
@@ -115,10 +116,8 @@ export const ScreenCaptureSettingForm: React.FC = () => {
       </div>
 
       {/* 設定フォーム */}
-      <div className="flex flex-col gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-md mb-6 w-full">
-        <h4 className="font-medium text-sm mb-2 dark:text-gray-200">
-          {t('AI Image Analysis Settings')}
-        </h4>
+      <div className="flex flex-col gap-4 p-2.5 border border-subtle rounded-control mb-3 w-full">
+        <h4 className="font-medium text-sm mb-2 text-ink">{t('AI Image Analysis Settings')}</h4>
 
         {/* LLMモデル選択 */}
         <div className="w-full">
@@ -138,9 +137,9 @@ export const ScreenCaptureSettingForm: React.FC = () => {
         </div>
 
         {/* 使用方法 */}
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 dark:border dark:border-blue-700 rounded-md">
-          <h5 className="font-medium mb-2 dark:text-blue-300">{t('How to Use')}</h5>
-          <ul className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
+        <div className="mt-4 p-3 bg-accent-tint border border-accent rounded-control">
+          <h5 className="font-medium mb-2 text-accent">{t('How to Use')}</h5>
+          <ul className="text-sm text-ink space-y-1">
             <li>
               • <strong>{t('Screen capture only')}:</strong>{' '}
               {t('Use without any prompt to capture screen image only')}
@@ -159,9 +158,9 @@ export const ScreenCaptureSettingForm: React.FC = () => {
         </div>
 
         {/* プラットフォーム要件 */}
-        <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 dark:border dark:border-green-700 rounded-md">
-          <h5 className="font-medium mb-2 dark:text-green-300">{t('Platform Requirements')}</h5>
-          <ul className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
+        <div className="mt-4 p-3 bg-success-soft border border-success rounded-control">
+          <h5 className="font-medium mb-2 text-success">{t('Platform Requirements')}</h5>
+          <ul className="text-sm text-ink space-y-1">
             <li>
               • <strong>macOS:</strong>{' '}
               {t(
@@ -173,11 +172,9 @@ export const ScreenCaptureSettingForm: React.FC = () => {
       </div>
 
       {/* ウィンドウアクセス許可設定 */}
-      <div className="flex flex-col gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-md mb-6 w-full">
+      <div className="flex flex-col gap-4 p-2.5 border border-subtle rounded-control mb-3 w-full">
         <div className="flex items-center justify-between">
-          <h4 className="font-medium text-sm mb-2 dark:text-gray-200">
-            {t('Window Access Permissions')}
-          </h4>
+          <h4 className="font-medium text-sm mb-2 text-ink">{t('Window Access Permissions')}</h4>
           <Button
             size="sm"
             color="light"
@@ -190,7 +187,7 @@ export const ScreenCaptureSettingForm: React.FC = () => {
           </Button>
         </div>
 
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-ink-muted">
           {t(
             'Select which application windows this agent is allowed to capture. Only selected windows can be targeted for screenshot capture.'
           )}
@@ -199,14 +196,12 @@ export const ScreenCaptureSettingForm: React.FC = () => {
         {/* ウィンドウプレビューグリッド */}
         {isLoadingWindows ? (
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
-            <span className="ml-3 text-gray-600 dark:text-gray-300">
-              {t('Loading window previews...')}
-            </span>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
+            <span className="ml-3 text-ink-muted">{t('Loading window previews...')}</span>
           </div>
         ) : availableWindows.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <div className="text-4xl mb-2">🪟</div>
+          <div className="text-center py-8 text-ink-muted">
+            <FiMonitor className="w-4 h-4 mb-2 text-ink-faint" />
             <p>{t('No windows available. Click refresh to try again.')}</p>
           </div>
         ) : (
@@ -222,20 +217,20 @@ export const ScreenCaptureSettingForm: React.FC = () => {
                     relative cursor-pointer transition-all duration-200 transform hover:scale-105
                     ${
                       isSelected
-                        ? 'ring-2 ring-blue-500 dark:ring-blue-400 shadow-lg'
-                        : 'ring-1 ring-gray-200 dark:ring-gray-600 hover:ring-gray-300 dark:hover:ring-gray-500'
+                        ? 'ring-2 ring-accent shadow-lg'
+                        : 'ring-1 ring-subtle hover:ring-subtle'
                     }
-                    rounded-lg overflow-hidden bg-white dark:bg-gray-800
+                    rounded-container overflow-hidden bg-surface
                   `}
                   onClick={() => handleWindowToggle(window, !isSelected)}
                 >
                   {/* サムネイル画像 */}
-                  <div className="relative aspect-video bg-gray-100 dark:bg-gray-700">
+                  <div className="relative aspect-video bg-raised">
                     {hasImageError ? (
                       // React状態ベースのフォールバックUI
-                      <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500">
+                      <div className="flex items-center justify-center h-full text-ink-faint">
                         <div className="text-center">
-                          <div className="text-2xl mb-1">📱</div>
+                          <FiSquare className="w-4 h-4 mb-1 text-ink-faint" />
                           <div className="text-xs">Preview not available</div>
                         </div>
                       </div>
@@ -250,8 +245,8 @@ export const ScreenCaptureSettingForm: React.FC = () => {
 
                     {/* 選択状態のオーバーレイ */}
                     {isSelected && (
-                      <div className="absolute inset-0 bg-blue-500/20 dark:bg-blue-400/20 flex items-center justify-center">
-                        <div className="bg-blue-500 dark:bg-blue-400 text-white rounded-full p-1">
+                      <div className="absolute inset-0 bg-accent-tint/20 flex items-center justify-center">
+                        <div className="bg-accent text-accent-fg rounded-full p-1">
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path
                               fillRule="evenodd"
@@ -264,16 +259,14 @@ export const ScreenCaptureSettingForm: React.FC = () => {
                     )}
 
                     {/* ウィンドウサイズ情報 */}
-                    <div className="absolute top-1 right-1 bg-black/50 text-white text-xs px-1 py-0.5 rounded">
+                    <div className="absolute top-1 right-1 bg-black/50 text-white text-xs px-1 py-0.5 rounded-control">
                       {window.dimensions.width}×{window.dimensions.height}
                     </div>
                   </div>
 
                   {/* ウィンドウ情報 */}
                   <div className="p-3">
-                    <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
-                      {window.name}
-                    </div>
+                    <div className="font-medium text-sm text-ink truncate">{window.name}</div>
                   </div>
                 </div>
               )
@@ -283,15 +276,15 @@ export const ScreenCaptureSettingForm: React.FC = () => {
 
         {/* 許可されたウィンドウの数 */}
         {allowedWindows.length > 0 && (
-          <div className="text-sm text-green-600 dark:text-green-400">
+          <div className="text-sm text-success">
             {t('{{count}} window(s) allowed', { count: allowedWindows.length })}
           </div>
         )}
 
         {/* ヒント */}
-        <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 dark:border dark:border-yellow-700 rounded-md">
-          <h5 className="font-medium mb-2 dark:text-yellow-300">{t('Usage Tips')}</h5>
-          <ul className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
+        <div className="mt-4 p-3 bg-warning-soft border border-warning rounded-control">
+          <h5 className="font-medium mb-2 text-warning">{t('Usage Tips')}</h5>
+          <ul className="text-sm text-ink space-y-1">
             <li>• {t('If no windows are selected, the agent can capture the full screen')}</li>
             <li>• {t('Window permissions are checked each time before capture')}</li>
             <li>• {t('Use the refresh button to update the list of available windows')}</li>

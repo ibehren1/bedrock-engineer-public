@@ -1,5 +1,13 @@
-import { IpcMainInvokeEvent } from 'electron'
-import { resolve } from 'path'
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  IpcMainInvokeEvent,
+  MessageBoxOptions,
+  OpenDialogOptions,
+  SaveDialogOptions
+} from 'electron'
+import { basename, dirname, join, resolve } from 'path'
 import fs from 'fs'
 import yaml from 'js-yaml'
 import { ListObjectsV2Command, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
@@ -11,6 +19,65 @@ import { createS3Client } from '../api/bedrock/client'
 import { validateCustomAgent } from '../../common/validation/agent-validator'
 
 const agentsLogger = createCategoryLogger('agents:ipc')
+
+/** Agent config file formats accepted when reading or importing. */
+const AGENT_FILE_EXTENSIONS = ['yaml', 'yml', 'json']
+
+/**
+ * Fields that describe *this copy* of an agent rather than the agent itself: which list it came
+ * from, what id it was given locally, and the MCP tools discovered at runtime. They are stripped
+ * before an agent is written to a file so the file stays portable.
+ */
+const INSTANCE_ONLY_AGENT_FIELDS = [
+  'id',
+  'isShared',
+  'isCustom',
+  'directoryOnly',
+  'organizationId',
+  'sharedFilePath',
+  'mcpTools'
+] as const
+
+/** Turn an agent name into a filename stem. Matches the naming used for shared agent files. */
+function toAgentFileSlug(name: unknown): string {
+  return (
+    String(name ?? '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || 'custom-agent'
+  )
+}
+
+/** The directory shared agents live in, or null when no project folder is selected. */
+function getSharedAgentsDir(): string | null {
+  const projectPath = store.get('projectPath') as string
+  return projectPath ? resolve(projectPath, '.bedrock-engineer/agents') : null
+}
+
+/**
+ * Dialogs are opened attached to the window that asked for them, so they behave as sheets on macOS
+ * and cannot be lost behind the app. `BrowserWindow.fromWebContents` can return null (the window is
+ * closing), in which case an app-modal dialog is still better than none — hence the paired calls.
+ */
+function showAgentSaveDialog(event: IpcMainInvokeEvent, options: SaveDialogOptions) {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  return window ? dialog.showSaveDialog(window, options) : dialog.showSaveDialog(options)
+}
+
+function showAgentOpenDialog(event: IpcMainInvokeEvent, options: OpenDialogOptions) {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  return window ? dialog.showOpenDialog(window, options) : dialog.showOpenDialog(options)
+}
+
+function showAgentMessageBox(event: IpcMainInvokeEvent, options: MessageBoxOptions) {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  return window ? dialog.showMessageBox(window, options) : dialog.showMessageBox(options)
+}
+
+/** Parse an agent config file. YAML covers both formats, but JSON gets the better error message. */
+function parseAgentFile(content: string, filePath: string): unknown {
+  return filePath.endsWith('.json') ? JSON.parse(content) : yaml.load(content)
+}
 
 /**
  * Load shared agents from the project directory
@@ -67,6 +134,9 @@ async function loadSharedAgents(): Promise<{ agents: CustomAgent[]; error: strin
 
         // Add a flag to indicate this is a shared agent
         agent.isShared = true
+
+        // Remember where this copy came from so the UI can offer to download or delete the file
+        agent.sharedFilePath = filePath
 
         // mcpToolsは自動的に生成されるため、保存対象から除外（後でpreloadで復元される）
         // ここではmcpToolsを削除することでファイルからの読み込み時にも整合性を保つ
@@ -167,6 +237,9 @@ export const agentHandlers = {
       // mcpToolsは保存対象から除外（mcpServersのみを保存）
       delete sharedAgent.mcpTools
 
+      // sharedFilePath describes where a copy was loaded from, so it must never be written out
+      delete sharedAgent.sharedFilePath
+
       // Write the agent to file based on the format
       const filePath = resolve(agentsDir, fileName)
       let fileContent: string
@@ -192,6 +265,172 @@ export const agentHandlers = {
         success: false,
         error: error instanceof Error ? error.message : String(error)
       }
+    }
+  },
+
+  // Delete the shared copy of an agent, i.e. its file under .bedrock-engineer/agents.
+  //
+  // The user's own agent in `customAgents` is a separate record and is left alone; this only
+  // un-shares. The path comes from the renderer, so it is checked against the shared agents
+  // directory before anything is unlinked, and the user confirms against the real path.
+  'delete-shared-agent': async (event: IpcMainInvokeEvent, params: { filePath: string }) => {
+    try {
+      const agentsDir = getSharedAgentsDir()
+      if (!agentsDir) {
+        return { success: false, error: 'No project path selected' }
+      }
+
+      // The path arrives from the renderer, so it is only trusted once it resolves to a file sitting
+      // directly in this project's shared agents directory.
+      const filePath = resolve(params.filePath)
+      if (dirname(filePath) !== agentsDir) {
+        agentsLogger.warn('Refused to delete a file outside the shared agents directory', {
+          filePath,
+          agentsDir
+        })
+        return { success: false, error: 'That file is not a shared agent of this project' }
+      }
+
+      try {
+        await fs.promises.access(filePath)
+      } catch {
+        return { success: false, error: `File no longer exists: ${filePath}` }
+      }
+
+      const { response } = await showAgentMessageBox(event, {
+        type: 'warning',
+        buttons: ['Cancel', 'Delete'],
+        defaultId: 0,
+        cancelId: 0,
+        message: `Delete the shared agent file "${basename(filePath)}"?`,
+        detail: `${filePath}\n\nThe agent stops appearing for anyone who opens this project. Your own copy of the agent is not affected.`
+      })
+
+      if (response !== 1) {
+        return { success: false, canceled: true }
+      }
+
+      await fs.promises.unlink(filePath)
+      agentsLogger.info('Deleted shared agent file', { filePath })
+
+      return { success: true, filePath }
+    } catch (error) {
+      agentsLogger.error('Error deleting shared agent file', {
+        filePath: params?.filePath,
+        error: error instanceof Error ? error.message : String(error)
+      })
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  },
+
+  // Write an agent to a YAML file the user picks, so it can be sent to someone else or kept
+  // outside the app. Instance-only fields are stripped so the file imports cleanly anywhere.
+  'export-agent-yaml': async (event: IpcMainInvokeEvent, params: { agent: any }) => {
+    try {
+      const agent = params?.agent
+      if (!agent?.name) {
+        return { success: false, error: 'No agent to export' }
+      }
+
+      const { canceled, filePath } = await showAgentSaveDialog(event, {
+        title: 'Download agent YAML',
+        defaultPath: join(app.getPath('downloads'), `${toAgentFileSlug(agent.name)}.yaml`),
+        filters: [{ name: 'YAML', extensions: ['yaml', 'yml'] }]
+      })
+
+      if (canceled || !filePath) {
+        return { success: false, canceled: true }
+      }
+
+      const portableAgent = { ...agent }
+      for (const field of INSTANCE_ONLY_AGENT_FIELDS) {
+        delete portableAgent[field]
+      }
+
+      const fileContent = yaml.dump(portableAgent, {
+        indent: 2,
+        lineWidth: 120,
+        noRefs: true,
+        sortKeys: false
+      })
+
+      await fs.promises.writeFile(filePath, fileContent, 'utf-8')
+      agentsLogger.info('Exported agent YAML', { agentName: agent.name, filePath })
+
+      return { success: true, filePath }
+    } catch (error) {
+      agentsLogger.error('Error exporting agent YAML', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  },
+
+  // Read an agent config file the user picks, for the renderer to add as its own custom agent.
+  //
+  // Unlike the shared/organization loaders this validates fail-closed: a file the user just chose
+  // deserves an error message rather than a half-broken agent in their list. The full schema is too
+  // strict for the job, though — exported files carry no `id` and may carry no `scenarios` — so the
+  // schema check stays a warning and only the fields an agent cannot work without are enforced.
+  'import-agent-file': async (event: IpcMainInvokeEvent) => {
+    try {
+      const { canceled, filePaths } = await showAgentOpenDialog(event, {
+        title: 'Import agent',
+        properties: ['openFile'],
+        filters: [{ name: 'Agent', extensions: AGENT_FILE_EXTENSIONS }]
+      })
+
+      if (canceled || filePaths.length === 0) {
+        return { success: false, canceled: true }
+      }
+
+      const filePath = filePaths[0]
+      const content = await fs.promises.readFile(filePath, 'utf-8')
+
+      let parsed: unknown
+      try {
+        parsed = parseAgentFile(content, filePath)
+      } catch (error) {
+        return {
+          success: false,
+          error: `${basename(filePath)} is not valid ${filePath.endsWith('.json') ? 'JSON' : 'YAML'}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        }
+      }
+
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return { success: false, error: `${basename(filePath)} does not contain an agent` }
+      }
+
+      const agent = { ...(parsed as Record<string, any>) } as CustomAgent
+      agent.id = agent.id ?? ''
+      agent.scenarios = agent.scenarios ?? []
+      delete agent.mcpTools
+
+      validateCustomAgent(agent, { source: 'import-agent', filePath })
+
+      const missing = (['name', 'description', 'system'] as const).filter((field) => {
+        const value = agent[field]
+        return typeof value !== 'string' || value.trim() === ''
+      })
+      if (missing.length > 0) {
+        return {
+          success: false,
+          error: `${basename(filePath)} is missing required agent ${
+            missing.length === 1 ? 'field' : 'fields'
+          }: ${missing.join(', ')}`
+        }
+      }
+
+      agentsLogger.info('Imported agent file', { agentName: agent.name, filePath })
+
+      return { success: true, agent, filePath }
+    } catch (error) {
+      agentsLogger.error('Error importing agent file', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
     }
   },
 
@@ -341,6 +580,7 @@ export const agentHandlers = {
 
       // mcpToolsは保存対象から除外
       delete sharedAgent.mcpTools
+      delete sharedAgent.sharedFilePath
 
       // コンテンツを生成
       let fileContent: string

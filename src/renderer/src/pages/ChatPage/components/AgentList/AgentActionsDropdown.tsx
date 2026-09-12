@@ -11,6 +11,8 @@ interface AgentActionsDropdownProps {
   onDuplicate?: (agent: CustomAgent) => void
   onDelete?: (agentId: string) => void
   onSaveAsShared?: (agent: CustomAgent) => void
+  onDeleteSharedFile?: (agent: CustomAgent) => void
+  onDownloadYaml?: (agent: CustomAgent) => void
   onShareToOrganization?: (agent: CustomAgent) => void
   onConvertToStrands?: (agentId: string) => void
 }
@@ -21,6 +23,8 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
   onDuplicate,
   onDelete,
   onSaveAsShared,
+  onDeleteSharedFile,
+  onDownloadYaml,
   onShareToOrganization,
   onConvertToStrands
 }) => {
@@ -34,13 +38,19 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
   const isRemovable =
     !agent.isShared && !!agent.id && !PROTECTED_DEFAULT_AGENT_IDS.includes(agent.id)
 
+  // Only agents loaded from a project file have a file to remove; organization agents are also
+  // flagged as shared but live in S3, so they carry no path.
+  const hasSharedFile = !!agent.isShared && !!agent.sharedFilePath
+
   // メニュー項目が1つもない場合は表示しない
   const hasAnyAction =
     (isEditable && onEdit) ||
     onDuplicate ||
+    onDownloadYaml ||
     onConvertToStrands ||
     (!agent.isShared && onSaveAsShared) ||
     (isEditable && onShareToOrganization) ||
+    (hasSharedFile && onDeleteSharedFile) ||
     (isRemovable && onDelete)
 
   if (!hasAnyAction) {
@@ -53,10 +63,7 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
         label=""
         dismissOnClick={true}
         renderTrigger={() => (
-          <button
-            className="p-1.5 text-gray-600 hover:text-gray-900 dark:text-gray-400
-              dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
+          <button className="p-1 text-ink-muted hover:text-ink rounded-container hover:bg-raised">
             <FiMoreVertical className="w-4 h-4" />
           </button>
         )}
@@ -69,6 +76,11 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
         {onDuplicate && (
           <Dropdown.Item onClick={() => onDuplicate(agent)} className="w-48">
             {t('duplicate')}
+          </Dropdown.Item>
+        )}
+        {onDownloadYaml && (
+          <Dropdown.Item onClick={() => onDownloadYaml(agent)} className="w-48">
+            {t('downloadYaml')}
           </Dropdown.Item>
         )}
         {onConvertToStrands && (
@@ -86,10 +98,15 @@ export const AgentActionsDropdown: React.FC<AgentActionsDropdownProps> = ({
             {t('shareToOrganization')}
           </Dropdown.Item>
         )}
+        {hasSharedFile && onDeleteSharedFile && (
+          <Dropdown.Item onClick={() => onDeleteSharedFile(agent)} className="text-danger w-48">
+            {t('deleteSharedFile')}
+          </Dropdown.Item>
+        )}
         {isRemovable && onDelete && (
           <Dropdown.Item
             onClick={() => onDelete(agent.id!)}
-            className={isCustomAgent ? 'text-red-600 dark:text-red-400 w-48' : 'w-48'}
+            className={isCustomAgent ? 'text-danger w-48' : 'w-48'}
           >
             {isCustomAgent ? t('delete') : t('myAgents.hideDefault')}
           </Dropdown.Item>

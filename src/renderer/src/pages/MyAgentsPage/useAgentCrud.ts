@@ -1,9 +1,23 @@
 import { useCallback } from 'react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
+import { nanoid } from 'nanoid'
 import { CustomAgent } from '@/types/agent-chat'
 import useSetting from '@renderer/hooks/useSetting'
 import { PROTECTED_DEFAULT_AGENT_IDS } from '@renderer/pages/ChatPage/components/AgentList'
+
+/**
+ * Keep an imported agent distinguishable from one of the same name already in the list, so two
+ * copies of "Software Developer" don't look like a duplicated row.
+ */
+function uniqueAgentName(name: string, existing: CustomAgent[]): string {
+  const taken = new Set(existing.map((agent) => agent.name))
+  if (!taken.has(name)) return name
+
+  let suffix = 2
+  while (taken.has(`${name} (${suffix})`)) suffix++
+  return `${name} (${suffix})`
+}
 
 /**
  * Create / update / duplicate / delete (hide, for built-ins) and export
@@ -101,6 +115,84 @@ export const useAgentCrud = () => {
     [loadSharedAgents, t]
   )
 
+  const deleteSharedFile = useCallback(
+    async (agent: CustomAgent) => {
+      if (!agent.sharedFilePath) return
+
+      try {
+        const result = await window.file.deleteSharedAgent(agent.sharedFilePath)
+        if (result.canceled) return
+
+        if (result.success) {
+          // The file is gone; re-read the directory so the shared entry leaves the list
+          await loadSharedAgents()
+          toast.success(t('sharedFileDeleted'), { duration: 5000 })
+        } else {
+          console.error('Failed to delete shared agent file:', result.error)
+          toast.error(result.error || t('failedToDeleteSharedFile'))
+        }
+      } catch (error) {
+        console.error('Error deleting shared agent file:', error)
+        toast.error(t('failedToDeleteSharedFile'))
+      }
+    },
+    [loadSharedAgents, t]
+  )
+
+  const downloadYaml = useCallback(
+    async (agent: CustomAgent) => {
+      try {
+        const result = await window.file.exportAgentYaml(agent)
+        if (result.canceled) return
+
+        if (result.success) {
+          toast.success(t('agentYamlDownloaded', { path: result.filePath }), { duration: 5000 })
+        } else {
+          console.error('Failed to download agent YAML:', result.error)
+          toast.error(result.error || t('failedToDownloadYaml'))
+        }
+      } catch (error) {
+        console.error('Error downloading agent YAML:', error)
+        toast.error(t('failedToDownloadYaml'))
+      }
+    },
+    [t]
+  )
+
+  const importAgent = useCallback(async () => {
+    try {
+      const result = await window.file.importAgentFile()
+      if (result.canceled) return
+
+      if (!result.success || !result.agent) {
+        console.error('Failed to import agent:', result.error)
+        toast.error(result.error || t('failedToImportAgent'))
+        return
+      }
+
+      // An imported agent becomes the user's own: a fresh id, editable, and none of the sharing
+      // flags the source file may have carried.
+      const imported: CustomAgent = {
+        ...result.agent,
+        id: `custom_agent_${nanoid(8)}`,
+        name: uniqueAgentName(result.agent.name, customAgents),
+        isCustom: true,
+        isShared: undefined,
+        directoryOnly: undefined,
+        organizationId: undefined,
+        sharedFilePath: undefined,
+        mcpTools: undefined,
+        mcpServers: result.agent.mcpServers || []
+      }
+
+      saveCustomAgents([...customAgents, imported])
+      toast.success(t('agentImported', { name: imported.name }), { duration: 5000 })
+    } catch (error) {
+      console.error('Error importing agent:', error)
+      toast.error(t('failedToImportAgent'))
+    }
+  }, [customAgents, saveCustomAgents, t])
+
   const convertToStrands = useCallback(async (agentId: string) => {
     try {
       const directory = await window.api.openDirectory()
@@ -124,5 +216,14 @@ export const useAgentCrud = () => {
     }
   }, [])
 
-  return { saveAgent, deleteAgent, duplicateAgent, saveAsShared, convertToStrands }
+  return {
+    saveAgent,
+    deleteAgent,
+    duplicateAgent,
+    saveAsShared,
+    deleteSharedFile,
+    downloadYaml,
+    importAgent,
+    convertToStrands
+  }
 }

@@ -24,15 +24,15 @@ interface TodoModalProps {
 const getStatusIcon = (status: string) => {
   switch (status) {
     case 'pending':
-      return <FaClock className="text-yellow-500 dark:text-yellow-400" />
+      return <FaClock className="text-warning" />
     case 'in_progress':
-      return <FaSpinner className="text-blue-500 dark:text-blue-400 animate-spin" />
+      return <FaSpinner className="text-accent animate-spin" />
     case 'completed':
-      return <FaCheckCircle className="text-green-500 dark:text-green-400" />
+      return <FaCheckCircle className="text-success" />
     case 'cancelled':
-      return <FaTimesCircle className="text-red-500 dark:text-red-400" />
+      return <FaTimesCircle className="text-danger" />
     default:
-      return <FaClock className="text-gray-500 dark:text-gray-400" />
+      return <FaClock className="text-ink-muted" />
   }
 }
 
@@ -49,43 +49,40 @@ export const TodoModal: React.FC<TodoModalProps> = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed top-4 right-4 z-50 w-80 max-h-196 overflow-hidden transform transition-all duration-200 ease-in-out opacity-100">
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
+    <div className="fixed top-4 right-4 z-50 w-80 max-h-[48rem] overflow-hidden transform transition-all duration-200 ease-in-out opacity-100">
+      <div className="bg-surface border border-subtle rounded-container shadow-lg">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
+        <div className="flex items-center justify-between p-2.5 border-b border-subtle">
           <div className="flex items-center gap-3">
-            <FaListCheck className="text-blue-600 dark:text-blue-400" size={16} />
-            <span className="font-semibold text-gray-900 dark:text-white">{t('TODO List')}</span>
+            <FaListCheck className="text-accent" size={16} />
+            <span className="font-semibold text-ink">{t('TODO List')}</span>
           </div>
           <div className="flex items-center gap-2">
             {onRefresh && (
               <button
                 onClick={onRefresh}
                 disabled={loading}
-                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                className="p-1 rounded-full hover:bg-raised transition-colors disabled:opacity-50"
                 title={t('common.refresh')}
               >
-                <FaSync
-                  className={`text-gray-500 dark:text-gray-400 ${loading ? 'animate-spin' : ''}`}
-                  size={12}
-                />
+                <FaSync className={`text-ink-muted ${loading ? 'animate-spin' : ''}`} size={12} />
               </button>
             )}
             <button
               onClick={onClose}
-              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-1 rounded-full hover:bg-raised transition-colors"
             >
-              <FaTimes className="text-gray-500 dark:text-gray-400" size={14} />
+              <FaTimes className="text-ink-muted" size={14} />
             </button>
           </div>
         </div>
 
         {/* Body */}
-        <div className="p-4 max-h-120 overflow-y-auto">
+        <div className="p-2.5 max-h-[30rem] overflow-y-auto">
           {!todoList || !todoList.items.length ? (
             // Empty state
-            <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500 dark:text-gray-400">
-              <FaListCheck className="text-3xl mb-2 text-gray-300 dark:text-gray-600" />
+            <div className="flex flex-col items-center justify-center py-8 text-center text-ink-muted">
+              <FaListCheck className="text-3xl mb-2 text-ink-faint" />
               <h3 className="font-medium mb-1">{t('No TODO List Available')}</h3>
               <p className="text-xs">
                 {t('Create a TODO list using the todoInit tool to see tasks here.')}
@@ -97,12 +94,10 @@ export const TodoModal: React.FC<TodoModalProps> = ({
               {todoList.items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-start gap-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                  className="flex items-start gap-3 p-2 rounded-control hover:bg-surface-2 transition-colors"
                 >
                   <div className="flex-shrink-0">{getStatusIcon(item.status)}</div>
-                  <span className="flex-grow text-sm text-gray-900 dark:text-white">
-                    {item.description}
-                  </span>
+                  <span className="flex-grow text-sm text-ink">{item.description}</span>
                 </div>
               ))}
             </div>

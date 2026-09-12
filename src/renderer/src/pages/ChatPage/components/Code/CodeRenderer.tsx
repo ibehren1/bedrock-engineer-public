@@ -116,7 +116,7 @@ export const CodeRenderer: React.FC<CodeRendererProps> = ({ text = '', className
   }, [])
 
   return (
-    <div className={`w-full dark:text-white ${className}`}>
+    <div className={`w-full text-ink ${className}`}>
       <Markdown
         className={style.reactMarkDown}
         remarkPlugins={[[remarkGfm, { singleTilde: false }], [remarkMath]]}

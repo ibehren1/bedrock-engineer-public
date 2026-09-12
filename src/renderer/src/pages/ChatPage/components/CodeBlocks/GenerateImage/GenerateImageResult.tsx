@@ -20,26 +20,24 @@ export const GenerateImageResult: React.FC<{ response: GenerateImageResult }> = 
   const imageUrl = `${result.imagePath}`
 
   return (
-    <div className="flex gap-4 bg-gray-800 text-white dark:bg-gray-900 dark:text-gray-100 p-4 rounded-lg overflow-hidden shadow-sm border border-gray-700 dark:border-gray-800">
+    <div className="flex gap-3 bg-surface-2 text-ink p-2.5 rounded-container overflow-hidden shadow-raised border border-subtle">
       {/* Image Display */}
 
       <LocalImage src={imageUrl} alt={result.prompt} className="aspect-auto h-[30vh]" />
 
       {/* Image Details */}
-      <div className="space-y-3 text-sm text-gray-300 h-[30vh] overflow-y-scroll">
+      <div className="space-y-3 text-sm text-ink-faint h-[30vh] overflow-y-scroll">
         {/* Prompt Section */}
         <div className="space-y-2">
           <div className="flex flex-col">
             <span className="font-semibold mb-1">Prompt:</span>
-            <span className="font-mono bg-gray-900 dark:bg-gray-800 p-2 rounded-md">
-              {result.prompt}
-            </span>
+            <span className="font-mono bg-sunken p-2 rounded-control">{result.prompt}</span>
           </div>
 
           {result.negativePrompt && (
             <div className="flex flex-col">
               <span className="font-semibold mb-1">Negative Prompt:</span>
-              <span className="font-mono bg-gray-900 dark:bg-gray-800 p-2 rounded-md text-red-400">
+              <span className="font-mono bg-sunken p-2 rounded-control text-danger">
                 {result.negativePrompt}
               </span>
             </div>
@@ -47,7 +45,7 @@ export const GenerateImageResult: React.FC<{ response: GenerateImageResult }> = 
         </div>
 
         {/* Technical Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-gray-900 dark:bg-gray-800 p-3 rounded-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-sunken p-2 rounded-control">
           <div className="flex items-center">
             <span className="font-semibold mr-2">Model:</span>
             <span className="font-mono">{result.modelUsed}</span>

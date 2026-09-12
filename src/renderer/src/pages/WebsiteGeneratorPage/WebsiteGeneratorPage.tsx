@@ -342,9 +342,9 @@ function WebsiteGeneratorPageContents(props: WebsiteGeneratorPageContentsProps) 
       <div className="flex pb-2 justify-between">
         <span className="font-bold flex flex-col gap-2 w-full">
           <div className="flex justify-between">
-            <h1 className="content-center dark:text-white text-lg">Website Generator</h1>
+            <h1 className="content-center text-ink text-title">Website Generator</h1>
             <span
-              className="text-xs text-gray-400 font-thin cursor-pointer hover:text-gray-700"
+              className="text-xs text-ink-faint font-thin cursor-pointer hover:text-ink"
               onClick={handleOpenSystemPromptModal}
             >
               SYSTEM_PROMPT
@@ -370,7 +370,7 @@ function WebsiteGeneratorPageContents(props: WebsiteGeneratorPageContentsProps) 
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 1 }}
                         key={index}
-                        className="p-2 bg-gray-200 rounded text-gray-500 cursor-pointer hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
+                        className="p-2 bg-raised rounded-control text-ink-muted cursor-pointer hover:bg-sunken"
                         onClick={async () => {
                           const code = extractCodeBlock(
                             filterdMessages[index]?.content?.map((i) => i.text).join('') ?? ''
@@ -405,10 +405,10 @@ function WebsiteGeneratorPageContents(props: WebsiteGeneratorPageContentsProps) 
 
               <Tooltip content="re:run" placement="bottom" animation="duration-500">
                 <button
-                  className="cursor-pointer rounded-md py-1.5 px-2 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="cursor-pointer rounded-control py-1.5 px-2 hover:border-strong hover:bg-surface-2"
                   onClick={runSandpack}
                 >
-                  <AiOutlineReload className="text-xl" />
+                  <AiOutlineReload className="text-base" />
                 </button>
               </Tooltip>
             </div>
@@ -449,7 +449,7 @@ function WebsiteGeneratorPageContents(props: WebsiteGeneratorPageContentsProps) 
 
         {loading ? (
           <div
-            className={`flex ${showCode ? 'w-[50%]' : 'w-[100%]'} h-[100%] justify-center items-center content-center align-center`}
+            className={`flex ${showCode ? 'w-[50%]' : 'w-[100%]'} h-[100%] justify-center items-center content-center`}
           >
             {getLoader(executingTools.size > 0 ? Array.from(executingTools)[0] : null)}
           </div>
@@ -497,10 +497,10 @@ function WebsiteGeneratorPageContents(props: WebsiteGeneratorPageContentsProps) 
 
               <Tooltip content="clear" placement="bottom" animation="duration-500">
                 <button
-                  className="cursor-pointer rounded-md py-1.5 px-2 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="cursor-pointer rounded-control py-1.5 px-2 hover:border-strong hover:bg-surface-2"
                   onClick={handleRefresh}
                 >
-                  <GrClearOption className="text-xl" />
+                  <GrClearOption className="text-base" />
                 </button>
               </Tooltip>
             </div>

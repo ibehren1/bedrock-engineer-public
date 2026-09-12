@@ -30,11 +30,11 @@ export const DomainListSection = ({
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-2">
-        <label className="text-xs text-gray-600 dark:text-gray-300">{label}</label>
+        <label className="text-xs text-ink-muted">{label}</label>
         {domains.length > 0 && (
           <button
             onClick={onClearAll}
-            className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:underline cursor-pointer"
+            className="text-xs text-ink-muted hover:text-ink hover:underline cursor-pointer"
           >
             {t('Clear All', 'Clear All')}
           </button>

@@ -105,14 +105,14 @@ export const ToolsSection: React.FC<ToolsSectionProps> = ({
       )}
 
       {/* タブナビゲーション - 固定 */}
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex-shrink-0 border-b border-subtle">
         <ul className="flex flex-wrap -mb-px">
           <li className="mr-2">
             <button
-              className={`inline-block p-4 border-b-2 rounded-t-lg ${
+              className={`inline-block p-2.5 border-b-2 rounded-t-container ${
                 activeTab === 'available-tools'
-                  ? 'text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                  : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300'
+                  ? 'text-accent border-accent'
+                  : 'text-ink-muted border-transparent hover:text-ink-muted hover:border-strong'
               }`}
               onClick={(e) => {
                 preventEventPropagation(e)
@@ -124,10 +124,10 @@ export const ToolsSection: React.FC<ToolsSectionProps> = ({
           </li>
           <li>
             <button
-              className={`inline-block p-4 border-b-2 rounded-t-lg ${
+              className={`inline-block p-2.5 border-b-2 rounded-t-container ${
                 activeTab === 'tool-detail-settings'
-                  ? 'text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                  : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300'
+                  ? 'text-accent border-accent'
+                  : 'text-ink-muted border-transparent hover:text-ink-muted hover:border-strong'
               }`}
               onClick={(e) => {
                 preventEventPropagation(e)
@@ -136,7 +136,7 @@ export const ToolsSection: React.FC<ToolsSectionProps> = ({
             >
               {t('Tool Detail Settings')}
               {needSettingToolsLength > 0 && (
-                <span className="inline-flex items-center justify-center w-4 h-4 ml-2 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full">
+                <span className="inline-flex items-center justify-center w-4 h-4 ml-2 text-xs font-semibold text-accent bg-accent-tint rounded-full">
                   {needSettingToolsLength}
                 </span>
               )}

@@ -48,6 +48,15 @@ own sidebar button. It replaces the "Custom Agents" overlay that upstream opens 
 
 - Create, edit, duplicate, export and remove agents from one place. Clicking an agent opens its
   editor rather than switching the active agent.
+- **Move agents in and out as files.** **Download YAML** in an agent's ⋮ menu writes its
+  configuration to a file you pick, stripped of the internal id and the flags recording where your
+  copy came from so it is portable. **Import Agent**, beside Add New Agent, reads such a file back in
+  as one of _your_ agents — editable, with a fresh id, rather than the read-only kind you get from a
+  project's shared folder.
+- **Un-share an agent.** Once an agent has been written into a project's
+  `.bedrock-engineer/agents/` folder, **Delete Shared File** in its ⋮ menu removes that file after
+  confirming the full path. Your own copy is untouched; only the copy everyone opening the project
+  sees goes away. Upstream has no way to undo sharing from inside the app.
 - **Hide the built-in agents you don't use.** Upstream re-seeds its built-in agents into the store
   on every launch, so deleting one never stuck. **Hide** now persists across restarts, and the
   **Unhide** dropdown lists every hidden agent so you can bring them back one at a time or all at
@@ -167,13 +176,17 @@ support sandboxes and keeps running host commands under the allowlist.
 
 ### Models
 
-- Added Claude Fable 5.1, Fable 5, Opus 5, Sonnet 5 and Opus 4.8, Kimi 2.5, xAI Grok 4.6, and the
-  OpenAI GPT-5.6 (Sol/Terra/Luna) models, all served through the standard Bedrock Converse API.
+- Added Claude Fable 5.1, Fable 5, Opus 5, Sonnet 5 and Opus 4.8, Kimi 2.5, xAI Grok 4.6, OpenAI
+  GPT-6 Astra, and the OpenAI GPT-5.6 (Sol/Terra/Luna) models, all served through the standard
+  Bedrock Converse API.
 - Adaptive thinking for newer Claude models, with the thinking type translated per model so
   switching model generations doesn't 400. On models that expose reasoning-effort levels rather than
-  a thinking budget — Grok 4.6 and the GPT-5.6 models — **Deeper** asks for the highest effort the
-  model offers.
+  a thinking budget — Grok 4.6, GPT-6 Astra and the GPT-5.6 models — **Deeper** asks for the highest
+  effort the model offers.
 - Model pricing kept current, and per-model input/output pricing shown in the model dropdown.
+- **Max Tokens is capped per model.** Every request sends the lesser of your Max Tokens setting and
+  the model's own output ceiling, so one high setting works across models instead of being rejected
+  by the smaller ones.
 - **Model allowlist** in settings, so the dropdown can be trimmed to the handful of models a given
   user should see.
 
@@ -184,7 +197,18 @@ support sandboxes and keeps running host commands under the allowlist.
 - **Settings are grouped into five tabs** — General, AWS, Models, Chat and Workspace — with a
   sidebar down the left, rather than one long column. Each tab has its own address
   (`#/setting/aws`), so links into settings open the relevant tab.
-- Dim (default) and Dark themes alongside Light, with accent colors derived from the app icon.
+- **Five appearances**, lightest to darkest — Light, **Newspaper**, Dim (default), **Charcoal** and
+  Dark. Newspaper is a flat, monochrome, black-on-white view in the spirit of a printed page or an
+  e-ink reader: square corners, hairline rules, no shadows, and colour reserved for success and error
+  states. Charcoal is a warm grey with an amber accent.
+- **The app has its own typeface, and you can choose it.** Text is set in Inter and code in JetBrains
+  Mono by default, both bundled so they render identically on every platform with no network. Settings
+  → Appearance offers Inter or Geist for interface text and JetBrains Mono or Geist Mono for code as
+  two separate settings, because JetBrains Mono makes `1`, `l`, `I` and `0`, `O` easier to tell apart
+  when you're reading a tool-use ID or a file path.
+- Every text size carries a line height and letter spacing chosen for it, figures are fixed-width so
+  live token counts and costs don't shift as digits change, and one set of corner radii applies
+  throughout: 6px on controls, 8px on containers, fully round only for avatars and count badges.
 - **Sidebar Settings** hides any navigation icon you don't use.
 - Pick an emoji avatar and a display name for yourself in the chat.
 - App name comes from `productName` in `package.json`, with a reworked app icon.
@@ -472,7 +496,7 @@ For detailed setup instructions, see the [Organization Sharing Guide](./docs/age
 
 Become a contributor and share your custom agents with the community:
 
-1. Export your custom agent as a shared file
+1. Download your custom agent's YAML from its ⋮ menu on the My Agents page
 2. Add your GitHub username as the author
 3. Submit your agent via Pull Request or GitHub Issue
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { FiLoader } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
 import { FiMoreHorizontal, FiEdit2, FiTrash2, FiZap, FiCheckSquare, FiX } from 'react-icons/fi'
 import { RiArchiveStackLine } from 'react-icons/ri'
@@ -233,13 +234,11 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
   }
 
   if (sessions.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500 dark:text-gray-400">{t('No chat history')}</div>
-    )
+    return <div className="p-2.5 text-center text-ink-muted">{t('No chat history')}</div>
   }
 
   const menuButtonClasses =
-    'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 h-8 w-8 flex items-center justify-center'
+    'text-ink-faint hover:text-ink-muted p-1 rounded-control hover:bg-raised h-8 w-8 flex items-center justify-center'
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString()
@@ -248,7 +247,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
   return (
     <div className="chat-history p-3">
       <h2
-        className="text-sm font-semibold mb-4 text-gray-800 dark:text-gray-200 flex items-center justify-between hover:cursor-pointer hover:text-gray-600 dark:hover:text-gray-300"
+        className="text-sm font-semibold mb-4 text-ink flex items-center justify-between hover:cursor-pointer hover:text-ink-muted"
         onClick={toggleGlobalMenu}
       >
         <div className="flex items-center">
@@ -258,17 +257,17 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
         <div className="relative">
           {isGlobalMenuOpen && (
             <div
-              className="global-menu absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10"
+              className="global-menu absolute right-0 mt-1 w-48 bg-surface rounded-control shadow-lg border border-subtle z-10"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="py-1">
                 <button
                   onClick={generateAITitleForAllSession}
                   disabled={isGenerating}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                  className="w-full text-left px-2.5 py-1 text-sm text-ink hover:bg-raised flex items-center gap-2"
                 >
                   {isGenerating ? (
-                    <span className="animate-spin w-4 h-4">⌛</span>
+                    <FiLoader className="animate-spin w-4 h-4" />
                   ) : (
                     <FiZap className="w-4 h-4" />
                   )}
@@ -279,14 +278,14 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
                     e.stopPropagation()
                     enterSelectionMode()
                   }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
+                  className="w-full text-left px-2.5 py-1 text-sm text-ink hover:bg-raised flex items-center gap-2 border-t border-faint"
                 >
                   <FiCheckSquare className="w-4 h-4" />
                   {t('Select')}
                 </button>
                 <button
                   onClick={handleDeleteAllSessions}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
+                  className="w-full text-left px-2.5 py-1 text-sm text-danger hover:bg-raised flex items-center gap-2 border-t border-faint"
                 >
                   <FiTrash2 className="w-4 h-4" />
                   {t('Delete All')}
@@ -301,13 +300,10 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
       {selectionMode && (
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-600 dark:text-gray-300">
+            <span className="text-xs text-ink-muted">
               {t('{{count}} selected', { count: selectedSessionIds.size })}
             </span>
-            <button
-              onClick={toggleSelectAll}
-              className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-            >
+            <button onClick={toggleSelectAll} className="text-xs text-accent hover:text-accent">
               {allSelected ? t('Clear selection') : t('Select all')}
             </button>
           </div>
@@ -316,14 +312,14 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
               onClick={handleDeleteSelected}
               disabled={selectedSessionIds.size === 0}
               title={t('Delete selected')}
-              className="p-1.5 rounded-md text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+              className="p-1.5 rounded-control text-danger hover:bg-raised disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
             >
               <FiTrash2 className="w-4 h-4" />
             </button>
             <button
               onClick={exitSelectionMode}
               title={t('Cancel selection')}
-              className="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="p-1.5 rounded-control text-ink-muted hover:bg-raised"
             >
               <FiX className="w-4 h-4" />
             </button>
@@ -336,12 +332,12 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
           <div
             key={session.id}
             onClick={() => handleSessionClick(session.id)}
-            className={`session-item p-3 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200
+            className={`session-item p-3 rounded-container cursor-pointer hover:bg-sunken transition-colors duration-200
               ${
                 selectionMode && selectedSessionIds.has(session.id)
-                  ? 'bg-blue-50 dark:bg-blue-900/30 ring-1 ring-blue-400 dark:ring-blue-500'
+                  ? 'bg-accent-tint ring-1 ring-accent'
                   : currentSessionId === session.id
-                    ? 'bg-gray-200 dark:bg-gray-700'
+                    ? 'bg-raised'
                     : ''
               }`}
           >
@@ -352,7 +348,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
                   checked={selectedSessionIds.has(session.id)}
                   onChange={() => toggleSessionSelection(session.id)}
                   onClick={(e) => e.stopPropagation()}
-                  className="h-4 w-4 flex-shrink-0 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                  className="h-4 w-4 flex-shrink-0 text-accent focus:ring-accent border-strong rounded-control cursor-pointer"
                 />
               )}
               {editingSessionId === session.id ? (
@@ -364,7 +360,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-800 dark:border-gray-600 min-w-0"
+                    className="flex-1 px-2 py-1 text-sm border rounded-control bg-surface border-subtle min-w-0"
                     autoFocus
                     onKeyDown={(e) => handleKeyDown(e, session.id)}
                     onCompositionStart={handleCompositionStart}
@@ -374,22 +370,19 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
               ) : (
                 <div className="flex items-center justify-between w-full">
                   <div className="relative flex-1 min-w-0 pr-2">
-                    <h3
-                      className="font-medium text-gray-800 dark:text-gray-200 text-sm truncate"
-                      title={session.title}
-                    >
+                    <h3 className="font-medium text-ink text-sm truncate" title={session.title}>
                       {session.title}
                     </h3>
                     {runningSessionIds.includes(session.id) ? (
-                      <p className="text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap flex items-center gap-1.5">
+                      <p className="text-xs text-accent whitespace-nowrap flex items-center gap-1.5">
                         <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500" />
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-tint opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent-tint" />
                         </span>
                         {t('Still responding')}
                       </p>
                     ) : (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                      <p className="text-xs text-ink-muted whitespace-nowrap">
                         {formatDate(session.updatedAt)} · {session.messageCount} messages
                       </p>
                     )}
@@ -403,13 +396,13 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
                     </button>
                     {menuOpenSessionId === session.id && (
                       <div
-                        className="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10"
+                        className="absolute right-0 mt-1 w-48 bg-surface rounded-control shadow-lg border border-subtle z-10"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="py-1">
                           <button
                             onClick={(e) => startEditing(session.id, session.title, e)}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                            className="w-full text-left px-2.5 py-1 text-sm text-ink hover:bg-raised flex items-center gap-2"
                           >
                             <FiEdit2 className="w-4 h-4" />
                             {t('Edit title')}
@@ -417,10 +410,10 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
                           <button
                             onClick={(e) => generateAITitle(session, e)}
                             disabled={isGenerating}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full text-left px-2.5 py-1 text-sm text-ink hover:bg-raised flex items-center gap-2 border-t border-faint disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isGenerating ? (
-                              <span className="animate-spin w-4 h-4">⌛</span>
+                              <FiLoader className="animate-spin w-4 h-4" />
                             ) : (
                               <FiZap className="w-4 h-4" />
                             )}
@@ -428,7 +421,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
                           </button>
                           <button
                             onClick={(e) => handleDeleteSession(session.id, e)}
-                            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700"
+                            className="w-full text-left px-2.5 py-1 text-sm text-danger hover:bg-raised flex items-center gap-2 border-t border-faint"
                           >
                             <FiTrash2 className="w-4 h-4" />
                             {t('Delete')}

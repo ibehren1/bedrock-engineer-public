@@ -30,10 +30,10 @@ export const AgentDetailModal: React.FC<AgentDetailModalProps> = ({
   })
 
   return (
-    <Modal dismissible show={true} onClose={onClose} size="7xl" className="dark:bg-gray-900">
-      <div className="border-[0.5px] border-white dark:border-gray-100 rounded-lg shadow-xl dark:shadow-gray-900/80">
+    <Modal dismissible show={true} onClose={onClose} size="7xl" className="bg-canvas">
+      <div className="border-[0.5px] border-surface rounded-container shadow-xl">
         {/* Header */}
-        <Modal.Header className="border-b border-gray-200 dark:border-gray-700/50 dark:bg-gray-800 rounded-t-lg p-6">
+        <Modal.Header className="border-b border-subtle bg-surface rounded-t-container p-3">
           <AgentHeader
             name={agent.name}
             description={agent.description}
@@ -43,17 +43,17 @@ export const AgentDetailModal: React.FC<AgentDetailModalProps> = ({
         </Modal.Header>
 
         {/* Body - Two Column Layout */}
-        <Modal.Body className="p-0 bg-white dark:bg-gray-800 max-h-[calc(85vh-200px)]">
+        <Modal.Body className="p-0 bg-surface max-h-[calc(85vh-200px)]">
           <div className="px-6 py-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {/* Left Column */}
-              <div className="space-y-6">
+              <div className="space-y-3">
                 <SystemPromptSection systemPrompt={agent.system} />
                 <AgentMetadata author={agent.author} tags={agent.tags} />
               </div>
 
               {/* Right Column */}
-              <div className="space-y-6 lg:max-h-[calc(85vh-200px)] lg:overflow-y-auto lg:pr-2">
+              <div className="space-y-3 lg:max-h-[calc(85vh-200px)] lg:overflow-y-auto lg:pr-2">
                 <MCPServersList servers={agent.mcpServers || []} />
                 <ToolsList tools={agent.tools || []} />
                 <ScenariosList scenarios={agent.scenarios || []} />
@@ -63,7 +63,7 @@ export const AgentDetailModal: React.FC<AgentDetailModalProps> = ({
         </Modal.Body>
 
         {/* Footer */}
-        <Modal.Footer className="border-t border-gray-200 dark:border-gray-700/50 dark:bg-gray-800 rounded-b-lg">
+        <Modal.Footer className="border-t border-subtle bg-surface rounded-b-container">
           <div className="flex justify-end gap-3 w-full">
             <Button color="gray" onClick={onClose}>
               {t('close')}

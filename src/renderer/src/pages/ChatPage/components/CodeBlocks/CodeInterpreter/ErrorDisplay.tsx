@@ -40,7 +40,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, stderr, exitC
       // Traceback行の判定
       if (line.trim().startsWith('Traceback')) {
         return (
-          <div key={index} className="text-red-400 font-semibold">
+          <div key={index} className="text-danger font-semibold">
             {line}
           </div>
         )
@@ -49,7 +49,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, stderr, exitC
       // ファイル行の判定
       if (line.trim().startsWith('File ')) {
         return (
-          <div key={index} className="text-blue-400">
+          <div key={index} className="text-accent">
             {line}
           </div>
         )
@@ -58,7 +58,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, stderr, exitC
       // エラータイプ行の判定（例: ValueError:, TypeError: など）
       if (line.match(/^\w+Error:/)) {
         return (
-          <div key={index} className="text-red-300 font-medium">
+          <div key={index} className="text-danger font-medium">
             {line}
           </div>
         )
@@ -66,7 +66,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, stderr, exitC
 
       // その他の行
       return (
-        <div key={index} className="text-gray-300">
+        <div key={index} className="text-ink-faint">
           {line}
         </div>
       )
@@ -78,16 +78,16 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, stderr, exitC
   }
 
   return (
-    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg overflow-hidden">
+    <div className="bg-danger-soft border border-danger rounded-container overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-red-100 dark:bg-red-900/30 border-b border-red-200 dark:border-red-800">
+      <div className="flex items-center justify-between px-2.5 py-1.5 bg-danger-soft border-b border-danger">
         <div className="flex items-center gap-2">
-          <FiAlertTriangle className="text-red-600 dark:text-red-400" />
-          <span className="text-sm font-medium text-red-800 dark:text-red-200">
+          <FiAlertTriangle className="text-danger" />
+          <span className="text-sm font-medium text-danger">
             {t('code interpreter display.Execution Error', 'Execution Error')}
           </span>
           {exitCode !== undefined && exitCode !== 0 && (
-            <span className="text-xs bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200 px-2 py-1 rounded">
+            <span className="text-xs bg-danger-soft text-danger px-2 py-1 rounded-control">
               {t('code interpreter display.Exit Code', 'Exit Code')}: {exitCode}
             </span>
           )}
@@ -96,7 +96,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, stderr, exitC
         {errorContent && (
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 hover:bg-red-200 dark:hover:bg-red-800 rounded transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-xs text-danger hover:text-danger-strong hover:bg-danger-soft rounded-control transition-colors"
             title={t('code interpreter display.Copy error', 'Copy error')}
           >
             {copied ? (
@@ -116,16 +116,16 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, stderr, exitC
 
       {/* Error content */}
       {errorContent && (
-        <div className="p-4 max-h-[30vh] overflow-auto">
-          <div className="bg-gray-900 text-gray-100 p-4 rounded font-mono text-sm leading-relaxed">
+        <div className="p-2.5 max-h-[30vh] overflow-auto">
+          <div className="bg-sunken text-ink p-2.5 rounded-control font-mono text-sm leading-relaxed">
             {formatPythonError(errorContent)}
           </div>
         </div>
       )}
 
       {/* Error hints */}
-      <div className="px-4 py-3 bg-red-50 dark:bg-red-900/10 border-t border-red-200 dark:border-red-800">
-        <div className="text-xs text-red-700 dark:text-red-300">
+      <div className="px-2.5 py-1.5 bg-danger-soft border-t border-danger">
+        <div className="text-xs text-danger">
           <span className="font-medium">{t('code interpreter display.Hint', 'Hint')}:</span>
           <span className="ml-1">
             {t(

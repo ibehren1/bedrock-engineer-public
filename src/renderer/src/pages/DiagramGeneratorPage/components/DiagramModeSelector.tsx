@@ -61,16 +61,16 @@ export function DiagramModeSelector({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
           className={`
-            text-gray-900
-            ${selectedMode === mode.id ? 'bg-green-50' : 'bg-white'}
-            hover:bg-green-50
+            text-ink
+            ${selectedMode === mode.id ? 'bg-success-soft' : 'bg-surface'}
+            hover:bg-success-soft-strong
             border
-            ${selectedMode === mode.id ? 'border-green-600' : 'border-gray-200'}
+            ${selectedMode === mode.id ? 'border-success' : 'border-subtle'}
             focus:ring-4
             focus:outline-none
-            focus:ring-gray-100
+            focus:ring-accent
             font-medium
-            rounded-[1rem]
+            rounded-full
             text-xs
             px-3
             py-1.5
@@ -78,10 +78,10 @@ export function DiagramModeSelector({
             items-center
             flex
             gap-2
-            dark:bg-gray-800
-            dark:text-white
-            dark:border-gray-600
-            dark:hover:bg-gray-700
+            bg-surface
+            text-ink
+            border-subtle
+            hover:bg-raised
           `}
           onClick={() => handleModeChange(mode.id)}
         >

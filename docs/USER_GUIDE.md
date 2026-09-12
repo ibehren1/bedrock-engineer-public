@@ -555,13 +555,15 @@ link can point at one directly (for example `#/setting/aws`).
 
 ### 5.1 General tab
 
-| Setting                   | What it does                                                                                                                                                                     |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Language**              | Switches the app's own text between English and Japanese. It does not change what language the AI replies in — for that, just ask the agent, or say so in its system prompt.     |
-| **Appearance → Theme**    | **Light**, **Dim**, **Dark**, or **System** (follow your operating system). Dim is the default: dark, but softer than full black.                                                |
-| **User Avatar / Name**    | Pick an emoji and a display name for yourself. These appear on your messages in chat and in exported documents.                                                                  |
-| **Sidebar Settings**      | Show or hide each navigation icon.                                                                                                                                               |
-| **Notification Settings** | Turn on desktop notifications so you get a pop-up when a long answer finishes or a scheduled background task completes. Useful if you switch to other work while the agent runs. |
+| Setting                         | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Language**                    | Switches the app's own text between English and Japanese. It does not change what language the AI replies in — for that, just ask the agent, or say so in its system prompt.                                                                                                                                                                                                                                                                                                                          |
+| **Appearance → Theme**          | **Light**, **Newspaper**, **Dim**, **Charcoal**, **Dark**, or **System** (follow your operating system) — listed from lightest to darkest. Dim is the default: dark, but softer than full black. **Newspaper** is flat black-on-white like a printed page or an e-ink reader — square corners, no shadows, and colour used only for success and error. **Charcoal** is a warm grey with an amber accent; because amber is the accent there, warnings use a different colour and always carry an icon. |
+| **Appearance → Interface font** | The typeface used for labels, menus and body text: **Inter** (default), **Geist**, or your **system font**. All are bundled with the app, so any choice works offline and looks the same on macOS, Windows and Linux.                                                                                                                                                                                                                                                                                 |
+| **Appearance → Code font**      | The typeface used for code, JSON, file paths and identifiers: **JetBrains Mono** (default), **Geist Mono**, or your **system font**. This is deliberately separate from the interface font — JetBrains Mono makes `1`, `l` and `I`, and `0` and `O`, much easier to tell apart, which matters when you're reading a tool-use ID or an ARN. Your font choices apply to every appearance.                                                                                                               |
+| **User Avatar / Name**          | Pick an emoji and a display name for yourself. These appear on your messages in chat and in exported documents.                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Sidebar Settings**            | Show or hide each navigation icon.                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Notification Settings**       | Turn on desktop notifications so you get a pop-up when a long answer finishes or a scheduled background task completes. Useful if you switch to other work while the agent runs.                                                                                                                                                                                                                                                                                                                      |
 
 ### 5.2 AWS tab
 
@@ -583,7 +585,11 @@ and voice chat availability.
 **Inference parameters, in plain terms:**
 
 - **Max Tokens** — the longest reply the model is allowed to produce. A "token" is roughly ¾ of a
-  word. Raise it if answers get cut off mid-sentence; lower it to keep replies short and cheap.
+  word. Raise it if answers get cut off mid-sentence; lower it to keep replies short and cheap. Each
+  model has its own ceiling — 128,000 tokens on Claude Opus 5, 64,000 on Haiku 4.5, 5,120 on the
+  first-generation Nova models — and requests are capped at whichever is lower, this setting or the
+  ceiling of the model you are using. So you can leave it high without a smaller model refusing the
+  request; that model simply uses as much of it as it can.
 - **Temperature** — how much randomness. `0` is focused and repetitive; higher values are more
   creative and more unpredictable. For code and factual work, keep it low.
 - **topP** — another randomness dial that limits the model to its most likely word choices. Most
@@ -652,14 +658,14 @@ you can see what you are spending before you spend it.
 **Thinking** — how much the model is allowed to reason privately before it answers. More thinking
 gives better answers on hard problems, but costs more and takes longer.
 
-| Thinking setting | When to use it                                                                                                                                              |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **None**         | Simple questions, quick lookups, chatting.                                                                                                                  |
-| **Adaptive**     | Let the model decide how hard to think. A good default on newer models.                                                                                     |
-| **Quick** (1K)   | A little planning.                                                                                                                                          |
-| **Normal** (4K)  | Everyday multi-step work.                                                                                                                                   |
-| **Deep** (16K)   | Hard debugging, tricky analysis, long plans.                                                                                                                |
-| **Deeper** (32K) | The hardest problems. On models that use effort levels instead of a thinking budget (Grok 4.6, GPT-5.6), this asks for the highest effort the model offers. |
+| Thinking setting | When to use it                                                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **None**         | Simple questions, quick lookups, chatting.                                                                                                                               |
+| **Adaptive**     | Let the model decide how hard to think. A good default on newer models.                                                                                                  |
+| **Quick** (1K)   | A little planning.                                                                                                                                                       |
+| **Normal** (4K)  | Everyday multi-step work.                                                                                                                                                |
+| **Deep** (16K)   | Hard debugging, tricky analysis, long plans.                                                                                                                             |
+| **Deeper** (32K) | The hardest problems. On models that use effort levels instead of a thinking budget (Grok 4.6, GPT-6 Astra, GPT-5.6), this asks for the highest effort the model offers. |
 
 Some models always think and cannot be turned down; the control will tell you when that is the case.
 
@@ -715,7 +721,7 @@ Three buttons above the input box export the current conversation:
 | Format               | Best for                                 | Notes                                                                                                                                                                                                 |
 | -------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Markdown** (`.md`) | Keeping notes, putting in a repo, GitHub | Mermaid diagrams stay as editable `mermaid` code blocks, so GitHub, VS Code and Obsidian draw them for you. Draw.io diagrams and pasted images are written into an `images/` folder next to the file. |
-| **Word** (`.docx`)   | Sharing with colleagues, editing further | Every diagram is rendered as a picture.                                                                                                                                                               |
+| **Word** (`.docx`)   | Sharing with colleagues, editing further | Every diagram is rendered as a picture, in the same greyscale used on screen.                                                                                                                         |
 | **PDF**              | Sending something that will not change   | Every diagram is rendered as a picture.                                                                                                                                                               |
 
 All three exports leave out tool calls and tool results, so you get the readable conversation rather
@@ -738,7 +744,10 @@ You can select several at once and delete them together. Deleting a chat also de
 [Docker sandbox container](#10-the-docker-sandbox).
 
 Chat titles are generated for you from the first thing you say, using the
-[Light Processing Model](#53-models-tab).
+[Light Processing Model](#53-models-tab). A title is always short plain text — a handful of words, no
+formatting — and is trimmed to fit the sidebar. In the history panel, a chat's ⋮ menu offers **Edit
+title** to type your own and **Generate title** to ask for a new one; **Generate All Titles** at the top
+of the panel redoes every chat in the list.
 
 ### 6.10 The folder button
 
@@ -836,8 +845,11 @@ same Claude model.
 
 Open **My Agents** from the sidebar. This is home base for agents.
 
-- **Create** a new agent, **edit** an existing one, **duplicate** one as a starting point,
-  **export** one to a file, or **remove** one.
+- **Create** a new agent, **edit** an existing one, **duplicate** one as a starting point, or
+  **remove** one.
+- **Move agents in and out as files.** **Import Agent**, at the top next to Add New Agent, reads an
+  agent file someone sent you. **Download YAML**, in each agent's **⋮** menu, writes an agent out to
+  a file. See [8.5](#85-sharing-an-agent) and [8.6](#86-importing-an-agent).
 - **Card view or table view** — toggle with the button at the top. Table view is easier for sorting
   and scanning when you have a lot of agents.
 
@@ -950,15 +962,42 @@ covers:
 
 ### 8.5 Sharing an agent
 
-Two ways:
+Open the **⋮** menu on any agent on the My Agents page. Two ways to send an agent elsewhere:
 
-- **Save as Shared File** writes the agent to `.bedrock-engineer/agents/` inside your project folder.
+- **Save as File** writes the agent to `.bedrock-engineer/agents/` inside your project folder.
   Anyone who opens that project in this app gets the agent automatically. This is the way to put an
   agent under version control alongside the code it works on.
-- **Export** writes it to a file you can send to someone.
+- **Download YAML** saves the agent to a file you choose, so you can email it, put it in a Git
+  repository, or keep a backup. The save box opens on your Downloads folder with the agent's name
+  filled in. The file is deliberately plain: it holds the agent's configuration but not its internal
+  id or any record of where your copy came from, so it can be given to anyone.
 
 A shared agent loaded from a project file is edited by editing that file. If you want to change it
-just for yourself, **duplicate** it first.
+just for yourself, **duplicate** it first, or use **Import Agent** on the copy you downloaded.
+
+**Un-sharing.** On an agent that came from a project file, the **⋮** menu also has **Delete Shared
+File**. It shows you the full path and asks before deleting anything. This removes only the file, so
+the agent stops appearing for everyone who opens that project — your own copy in My Agents is left
+exactly as it was. Agents shared to an organization's S3 bucket live in the cloud rather than in a
+file, so they do not offer this.
+
+### 8.6 Importing an agent
+
+**Import Agent**, next to **Add New Agent** at the top of the My Agents page, reads an agent file
+someone sent you. It accepts `.yaml`, `.yml` and `.json`.
+
+What you get is **your own agent**: editable, deletable, and listed alongside the ones you built —
+not the read-only kind you get from a project's shared folder. Details worth knowing:
+
+- The imported agent gets a new id, so importing the same file twice gives you two independent
+  agents and never overwrites one you already have.
+- If the name is already taken, a number is added, so you can tell the two apart.
+- A file that is missing a name, a description or a system prompt is refused, and the message tells
+  you which of the three is absent. Nothing half-built lands in your list.
+- MCP servers listed in the file come across as configuration. The tools each server provides are
+  discovered when the agent runs, so they are not stored in the file.
+
+To hand an agent to someone else, **Download YAML** and send them the file.
 
 ---
 
@@ -1329,8 +1368,9 @@ app at that bucket and see your agents alongside the public ones. Setup instruct
 
 ### 13.2 Contributing
 
-To share an agent publicly: export it as a shared file, add your GitHub username as the author, and
-submit it as a pull request or issue to the upstream project.
+To share an agent publicly: add your GitHub username as the author, use **Download YAML** from the
+agent's **⋮** menu to get the file, and submit that file as a pull request or issue to the upstream
+project.
 
 ---
 
@@ -1484,6 +1524,7 @@ Useful when you know what the steps are but not the exact JSON syntax for expres
 | Speed and low cost for simple work                       | **Claude Haiku 4.5** or **Amazon Nova Lite**            |
 | The cheapest option for background tasks and chat titles | **Amazon Nova Micro** or **Nova Lite**                  |
 | A very large context window for huge documents           | **Claude Fable 5.1** (1M tokens) or **Grok 4.6** (500K) |
+| OpenAI's most capable model, cost no object              | **GPT-6 Astra** (1.05M tokens, $11/$55 per 1M)          |
 
 The model dropdown shows the price per million tokens in and out for each model, so you can compare
 before you commit.
@@ -1497,7 +1538,7 @@ Opus 4.6, Opus 4.7, Opus 4.8, Opus 5, Fable 5, Fable 5.1
 
 **Amazon (Nova):** Nova Micro, Nova Lite, Nova 2 Lite, Nova Pro, Nova Premier
 
-**OpenAI:** GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, GPT-OSS 20B, GPT-OSS 120B
+**OpenAI:** GPT-6 Astra, GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, GPT-OSS 20B, GPT-OSS 120B
 
 **Others:** DeepSeek R1, Kimi K2.5, Grok 4.6
 
@@ -1653,6 +1694,9 @@ the conversation.
 - _…bring back an agent I hid?_ → The Unhide dropdown, [Section 8.2](#82-the-my-agents-page)
 - _…change an agent's icon?_ → [Section 8.3](#83-the-agent-editor)
 - _…share an agent with my team?_ → [Section 8.5](#85-sharing-an-agent)
+- _…send an agent to someone as a file?_ → [Section 8.5](#85-sharing-an-agent)
+- _…use an agent file someone sent me?_ → [Section 8.6](#86-importing-an-agent)
+- _…stop sharing an agent I shared into a project?_ → [Section 8.5](#85-sharing-an-agent)
 - _…reorder my agents?_ → Drag them, [Section 8.2](#82-the-my-agents-page)
 - _…use someone else's agent?_ → [Section 13](#13-agent-directory)
 - _…have one agent ask another for help?_ → [Section 12](#12-handing-work-to-another-agent-with-)
@@ -1697,9 +1741,16 @@ the conversation.
 **Appearance**
 
 - _…switch to dark mode?_ → [Section 5.1](#51-general-tab)
+- _…get a flat, paper-like or e-ink look?_ → the **Newspaper** appearance, [Section 5.1](#51-general-tab)
+- _…why are my diagrams grey?_ → Mermaid diagrams are drawn in shades of the current appearance's own
+  grey so they match the app rather than the diagram library's default palette. They redraw when you
+  switch appearance.
+- _…change the font?_ → **Interface font** and **Code font**, [Section 5.1](#51-general-tab)
 - _…hide sidebar icons?_ → [Section 5.1](#51-general-tab)
 - _…set my name and avatar?_ → [Section 5.1](#51-general-tab)
 - _…make the text bigger?_ → `Cmd`/`Ctrl` + `+`, [Section 3.2](#32-keyboard-shortcuts)
+- _…stop the interface animating?_ → turn on "Reduce motion" in your operating system's accessibility
+  settings; the app follows it.
 
 ---
 
@@ -1830,6 +1881,11 @@ AWS is busy. Fixes, easiest first:
 ### The answer got cut off mid-sentence
 
 Raise **Max Tokens** in **Settings → Models → Inference Parameters**.
+
+If it is already at the maximum, you have hit the ceiling of the model itself rather than the
+setting — every model has its own output limit and requests are capped at it. Switch to a model with
+a higher ceiling (Claude Opus 5, Sonnet 5 and GPT-6 Astra all reach 128,000 tokens) or ask for the
+answer in smaller pieces.
 
 ### The agent keeps forgetting what I told it earlier
 

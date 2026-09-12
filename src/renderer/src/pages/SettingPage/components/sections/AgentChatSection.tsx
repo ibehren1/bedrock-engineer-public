@@ -33,7 +33,7 @@ export const AgentChatSection: React.FC = () => {
 
   return (
     <SettingSection title={t('Agent Chat')}>
-      <div className="space-y-4">
+      <div className="space-y-2">
         <SettingInput
           label={t('Tavily Search API Key')}
           type="password"
@@ -41,11 +41,11 @@ export const AgentChatSection: React.FC = () => {
           value={tavilySearchApiKey}
           onChange={(e) => setTavilySearchApiKey(e.target.value)}
         />
-        <div className="flex gap-1 text-xs text-gray-800 dark:text-gray-200">
+        <div className="flex gap-1 text-xs text-ink">
           <span>{t('Learn more about Tavily Search, go to')}</span>
           <button
             onClick={() => window.open(t('tavilySearchUrl', 'https://tavily.com/'))}
-            className="text-blue-600 dark:text-blue-400 hover:underline"
+            className="text-accent hover:underline"
           >
             {t('tavilySearchUrl', 'https://tavily.com/')}
           </button>
@@ -60,7 +60,7 @@ export const AgentChatSection: React.FC = () => {
             value={contextLength.toString()}
             onChange={handleContextLengthChange}
           />
-          <div className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+          <div className="mt-1 text-xs text-ink-muted">
             {t(
               'Limiting context length reduces token usage but may affect conversation continuity'
             )}
@@ -76,7 +76,7 @@ export const AgentChatSection: React.FC = () => {
             value={requestTimeout.toString()}
             onChange={handleRequestTimeoutChange}
           />
-          <div className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+          <div className="mt-1 text-xs text-ink-muted">
             {t('Maximum time to wait for agent responses before timing out')}
           </div>
         </div>
@@ -86,18 +86,18 @@ export const AgentChatSection: React.FC = () => {
             <input
               type="checkbox"
               id="enable-prompt-cache"
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
+              className="h-4 w-4 rounded-control border-strong text-accent focus:ring-accent bg-raised ring-offset-surface"
               checked={enablePromptCache}
               onChange={(e) => setEnablePromptCache(e.target.checked)}
             />
             <label
               htmlFor="enable-prompt-cache"
-              className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="ml-2 block text-sm font-medium text-ink"
             >
               {t('Enable Prompt Cache')}
             </label>
           </div>
-          <div className="mt-1 text-xs text-gray-600 dark:text-gray-400 ml-6">
+          <div className="mt-1 text-xs text-ink-muted ml-6">
             {t('Prompt Cache reduces token usage by caching parts of the conversation')}
           </div>
         </div>

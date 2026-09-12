@@ -29,41 +29,41 @@ export const HostCommandApprovalModal: React.FC = () => {
     >
       <Modal.Header>
         <div className="flex items-center gap-2">
-          <FiAlertTriangle className="text-amber-500" />
+          <FiAlertTriangle className="text-warning" />
           {t('hostCommand.title')}
         </div>
       </Modal.Header>
       <Modal.Body>
-        <div className="space-y-4">
-          <p className="text-sm text-gray-700 dark:text-gray-300">{t('hostCommand.body')}</p>
+        <div className="space-y-2">
+          <p className="text-sm text-ink">{t('hostCommand.body')}</p>
 
-          <div className="rounded-md bg-gray-100 dark:bg-gray-900 p-3 font-mono text-sm break-all">
-            <div className="text-gray-900 dark:text-gray-100">{request?.command}</div>
-            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="rounded-control bg-canvas p-3 font-mono text-sm break-all">
+            <div className="text-ink">{request?.command}</div>
+            <div className="mt-2 text-xs text-ink-muted">
               {t('hostCommand.workingDirectory')}: {request?.cwd}
             </div>
           </div>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('hostCommand.note')}</p>
+          <p className="text-xs text-ink-muted">{t('hostCommand.note')}</p>
         </div>
       </Modal.Body>
       <Modal.Footer>
         <div className="flex w-full justify-end gap-2">
           <button
             onClick={() => resolveHostApproval('deny')}
-            className="px-4 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="px-2.5 py-1 text-sm rounded-control border border-strong text-ink hover:bg-raised"
           >
             {t('hostCommand.deny')}
           </button>
           <button
             onClick={() => resolveHostApproval('once')}
-            className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
+            className="px-2.5 py-1 text-sm rounded-control bg-accent text-accent-fg hover:bg-accent-strong"
           >
             {t('hostCommand.allowOnce')}
           </button>
           <button
             onClick={() => resolveHostApproval('chat')}
-            className="px-4 py-2 text-sm rounded-md bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800"
+            className="px-2.5 py-1 text-sm rounded-control bg-accent-tint text-accent hover:bg-accent-tint-strong"
           >
             {t('hostCommand.allowForChat')}
           </button>

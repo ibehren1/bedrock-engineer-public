@@ -59,24 +59,22 @@ export const ThinkingModeSelector: React.FC<ThinkingModeSelectorProps> = ({ clas
 
   return (
     <div className={`relative flex items-center gap-1.5 ${className || ''}`} ref={dropdownRef}>
-      {label && <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>}
+      {label && <span className="text-xs text-ink-muted">{label}</span>}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-100 rounded-md transition-colors"
+        className="flex items-center gap-1 text-sm text-ink-muted rounded-control transition-colors"
         title={t('thinkingMode.title')}
       >
-        <LuBrain className="size-4 text-purple-600 dark:text-purple-400" />
-        <span className="whitespace-nowrap text-gray-600 dark:text-gray-300">
-          {getSelectedLabel()}
-        </span>
-        <FiChevronDown className="text-gray-400 dark:text-gray-500" size={16} />
+        <LuBrain className="size-4 text-accent" />
+        <span className="whitespace-nowrap text-ink-muted">{getSelectedLabel()}</span>
+        <FiChevronDown className="text-ink-faint" size={16} />
       </button>
 
       {isOpen && (
         <div
-          className="absolute z-20 w-72 bottom-full mb-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg
-          border border-gray-200 dark:border-gray-700 py-1"
+          className="absolute z-20 w-72 bottom-full mb-1 bg-surface rounded-container shadow-lg
+          border border-subtle py-1"
         >
           {options.map((option) => (
             <div
@@ -98,14 +96,12 @@ export const ThinkingModeSelector: React.FC<ThinkingModeSelectorProps> = ({ clas
               }}
               className={`
                 flex items-center gap-3 px-3 py-2 cursor-pointer
-                ${thinkingMode?.budget_tokens === option.value ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}
-                hover:bg-gray-50 dark:hover:bg-gray-800
+                ${thinkingMode?.budget_tokens === option.value ? 'bg-surface-2' : 'bg-surface'}
+                hover:bg-raised
                 transition-colors
               `}
             >
-              <span className="text-sm whitespace-nowrap text-gray-800 dark:text-gray-100">
-                {option.label}
-              </span>
+              <span className="text-sm whitespace-nowrap text-ink">{option.label}</span>
             </div>
           ))}
         </div>

@@ -1,3 +1,4 @@
+import { FiTool } from 'react-icons/fi'
 import { useSettings } from '@renderer/contexts/SettingsContext'
 import toast from 'react-hot-toast'
 import { ToolName, isMcpTool } from '@/types/tools'
@@ -84,10 +85,10 @@ const ToolItem: React.FC<ToolItemProps> = ({
   return (
     <li
       className={`
-        border-b border-gray-100 dark:border-gray-600 transition-colors duration-150
-        ${isSelected ? 'bg-blue-50 dark:bg-blue-900/30 border-l-2 !border-l-blue-500 dark:!border-l-blue-400' : 'border-l-2 border-l-transparent'}
-        ${isMcp ? 'bg-cyan-50 dark:bg-cyan-900/20' : ''}
-        cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/70 w-full
+        border-b border-faint transition-colors duration-150
+        ${isSelected ? 'bg-accent-tint border-l-2 !border-l-accent' : 'border-l-2 border-l-transparent'}
+        ${isMcp ? 'bg-accent-tint' : ''}
+        cursor-pointer hover:bg-surface-2 w-full
       `}
       onClick={() => onSelect()}
     >
@@ -95,7 +96,7 @@ const ToolItem: React.FC<ToolItemProps> = ({
         <div className="flex items-center lg:gap-2.5 w-full justify-center lg:justify-start">
           <div
             className={`flex-shrink-0 w-7 h-7 flex items-center justify-center
-                        ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-300'}`}
+                        ${isSelected ? 'text-accent' : 'text-ink-muted'}`}
             title={toolName}
           >
             {toolIcons[toolName as ToolName]}
@@ -103,18 +104,18 @@ const ToolItem: React.FC<ToolItemProps> = ({
           <div className="lg:block hidden">
             <div className="flex items-center gap-2">
               <span
-                className={`text-sm font-medium text-gray-700 dark:text-gray-100
-                              ${isSelected ? 'text-blue-700 dark:text-blue-300' : ''}`}
+                className={`text-sm font-medium text-ink
+                              ${isSelected ? 'text-accent' : ''}`}
               >
                 {toolName}
               </span>
               {isMcp && (
-                <span className="bg-cyan-100 text-cyan-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-cyan-800/50 dark:text-cyan-200">
+                <span className="bg-accent-tint text-accent text-xs font-medium px-2 py-0.5 rounded-control">
                   MCP
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-300 mt-0.5 line-clamp-1">
+            <p className="text-xs text-ink-muted mt-0.5 line-clamp-1">
               {t(`tool descriptions.${toolName}`, isMcp ? 'MCP Tool' : '')}
             </p>
           </div>
@@ -125,7 +126,7 @@ const ToolItem: React.FC<ToolItemProps> = ({
         >
           {isMcp ? (
             <div className="flex items-center">
-              <span className="text-xs text-cyan-600 dark:text-cyan-300 mr-2">Always enabled</span>
+              <span className="text-xs text-accent mr-2">Always enabled</span>
               <ToggleSwitch checked={true} onChange={() => {}} disabled={true} label="" />
             </div>
           ) : (
@@ -531,8 +532,8 @@ const ToolSettingModal = memo(({ isOpen, onClose }: ToolSettingModalProps) => {
 
   return (
     <Modal dismissible size="7xl" show={isOpen} onClose={onClose}>
-      <div className="border-[0.5px] border-white dark:border-gray-100 rounded-lg shadow-xl dark:shadow-gray-900/80">
-        <Modal.Header className="border-b border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white rounded-t-lg">
+      <div className="border-[0.5px] border-surface rounded-container shadow-xl">
+        <Modal.Header className="border-b border-subtle bg-canvas text-ink rounded-t-container">
           {hasSelectedAgent ? (
             <div className="flex items-center">
               <span>Agent Tools: </span>
@@ -541,33 +542,33 @@ const ToolSettingModal = memo(({ isOpen, onClose }: ToolSettingModalProps) => {
           ) : (
             <div>
               Agent Tools
-              <div className="text-sm font-normal text-gray-500 dark:text-gray-300 mt-1">
+              <div className="text-sm font-normal text-ink-muted mt-1">
                 {t('Select an agent first to edit tool settings')}
               </div>
             </div>
           )}
         </Modal.Header>
 
-        <Modal.Body className="p-0 h-[80vh] bg-white dark:bg-gray-900 rounded-lg">
-          <div className="flex h-full w-full rounded-lg bg-white dark:bg-gray-900">
+        <Modal.Body className="p-0 h-[80vh] bg-surface rounded-container">
+          <div className="flex h-full w-full rounded-container bg-surface">
             {/* 左側サイドバー：ツールリスト - fixed height with own scrollbar */}
-            <div className="lg:w-1/3 w-[60px] border-r border-gray-200 dark:border-gray-600 overflow-y-auto h-full max-h-full flex-shrink-0 dark:bg-gray-900 rounded-bl-lg">
+            <div className="lg:w-1/3 w-[60px] border-r border-subtle overflow-y-auto h-full max-h-full flex-shrink-0 bg-canvas rounded-bl-lg">
               <div className="h-full">
                 {/* カテゴリごとのセクション */}
                 {categorizedTools.map((category) => (
                   <div key={category.id} className="mb-4">
                     {/* カテゴリヘッダー - 背景色と影を追加して重なり防止 */}
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 font-medium sticky top-0 z-20 shadow-sm lg:block hidden">
-                      <div className="text-sm text-gray-700 dark:text-gray-100 font-semibold">
+                    <div className="p-3 bg-surface-2 font-medium sticky top-0 z-20 shadow-sm lg:block hidden">
+                      <div className="text-sm text-ink font-semibold">
                         {t(`Tool Categories.${category.name}`)}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-300 mt-1">
+                      <div className="text-xs text-ink-muted mt-1">
                         {t(`Tool Categories.${category.name} Description`)}
                       </div>
                     </div>
 
                     {/* ツールリスト */}
-                    <ul className="divide-y divide-gray-100 dark:divide-gray-600">
+                    <ul className="divide-y divide-faint">
                       {category.toolsData.map((tool) => {
                         const toolName = tool.toolSpec?.name
                         if (!toolName) return null
@@ -592,43 +593,39 @@ const ToolSettingModal = memo(({ isOpen, onClose }: ToolSettingModalProps) => {
             </div>
 
             {/* 右側: 設定コンテンツエリア - separate scrollable area */}
-            <div className="lg:w-2/3 flex-1 overflow-y-auto h-full max-h-full dark:bg-gray-900 rounded-br-lg">
+            <div className="lg:w-2/3 flex-1 overflow-y-auto h-full max-h-full bg-canvas rounded-br-lg">
               {selectedTool ? (
-                <div className="p-4">
-                  <div className="sticky top-0 pt-1 pb-3 bg-white dark:bg-gray-900 z-20 mb-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="p-2.5">
+                  <div className="sticky top-0 pt-1 pb-3 bg-surface z-20 mb-4 border-b border-subtle">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-medium dark:text-white pb-3">{selectedTool}</h3>
+                      <h3 className="text-heading font-medium text-ink pb-3">{selectedTool}</h3>
                       <button
                         onClick={() => setShowJsonModal(true)}
-                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="p-2 rounded-container hover:bg-raised transition-colors"
                         title={t('View JSON Spec')}
                       >
-                        <CodeBracketIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        <CodeBracketIcon className="w-4 h-4 text-ink-muted" />
                       </button>
                     </div>
                   </div>
 
                   {isMcpTool(selectedTool) ? (
                     // MCP ツールの詳細表示
-                    <div className="prose dark:prose-invert max-w-none">
+                    <div className="max-w-none">
                       <div className="flex items-center gap-2 mb-4">
-                        <p className="text-gray-700 dark:text-gray-100 font-bold mb-0">
-                          {selectedTool}
-                        </p>
-                        <span className="bg-cyan-100 text-cyan-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-cyan-800/50 dark:text-cyan-200">
+                        <p className="text-ink font-bold mb-0">{selectedTool}</p>
+                        <span className="bg-accent-tint text-accent text-xs font-medium px-2 py-0.5 rounded-control">
                           MCP
                         </span>
                       </div>
 
-                      <p className="mb-4 text-gray-700 dark:text-gray-200">
+                      <p className="mb-4 text-ink">
                         {selectedToolBody?.toolSpec?.description ?? ''}
                       </p>
 
-                      <div className="bg-cyan-50 dark:bg-gray-800/80 dark:border dark:border-cyan-700 p-4 rounded-md mt-4">
-                        <h5 className="font-medium mb-2 dark:text-cyan-300">
-                          {t('MCP Tool Info')}
-                        </h5>
-                        <p className="text-sm text-gray-700 dark:text-gray-200">
+                      <div className="bg-accent-tint border border-accent p-2.5 rounded-control mt-4">
+                        <h5 className="font-medium mb-2 text-accent">{t('MCP Tool Info')}</h5>
+                        <p className="text-sm text-ink">
                           {t(
                             'MCP tools are provided by Model Context Protocol servers. Click the JSON button above to view the full tool specification.'
                           )}
@@ -637,22 +634,18 @@ const ToolSettingModal = memo(({ isOpen, onClose }: ToolSettingModalProps) => {
                     </div>
                   ) : selectedTool === 'todo' ? (
                     // Todo 仮想ツールの詳細表示
-                    <div className="prose dark:prose-invert max-w-none">
+                    <div className="max-w-none">
                       <div className="flex items-center gap-2 mb-4">
-                        <p className="text-gray-700 dark:text-gray-100 font-bold mb-0">Todo</p>
+                        <p className="text-ink font-bold mb-0">Todo</p>
                         <PlanModeCompatibilityBadge toolName="todoInit" />
                       </div>
 
-                      <p className="mb-4 text-gray-700 dark:text-gray-200">
-                        {t('tool info.todo.description')}
-                      </p>
+                      <p className="mb-4 text-ink">{t('tool info.todo.description')}</p>
 
-                      <div className="bg-blue-50 dark:bg-gray-800/80 dark:border dark:border-blue-700 p-4 rounded-md mt-4">
-                        <h5 className="font-medium mb-2 dark:text-blue-300">{t('Tool Group')}</h5>
-                        <p className="text-sm text-gray-700 dark:text-gray-200 mb-3">
-                          {t('tool info.todo.functions')}
-                        </p>
-                        <ul className="text-sm text-gray-700 dark:text-gray-200 space-y-2">
+                      <div className="bg-accent-tint border border-accent p-2.5 rounded-control mt-4">
+                        <h5 className="font-medium mb-2 text-accent">{t('Tool Group')}</h5>
+                        <p className="text-sm text-ink mb-3">{t('tool info.todo.functions')}</p>
+                        <ul className="text-sm text-ink space-y-2">
                           <li>
                             • <strong>todoInit</strong>: {t('tool info.todo.todoInit')}
                           </li>
@@ -662,18 +655,16 @@ const ToolSettingModal = memo(({ isOpen, onClose }: ToolSettingModalProps) => {
                         </ul>
                       </div>
 
-                      <div className="bg-green-50 dark:bg-gray-800/80 dark:border dark:border-green-700 p-4 rounded-md mt-4">
-                        <h5 className="font-medium mb-2 dark:text-green-300">{t('Usage')}</h5>
-                        <p className="text-sm text-gray-700 dark:text-gray-200">
-                          {t('tool info.todo.usage')}
-                        </p>
+                      <div className="bg-success-soft border border-success p-2.5 rounded-control mt-4">
+                        <h5 className="font-medium mb-2 text-success">{t('Usage')}</h5>
+                        <p className="text-sm text-ink">{t('tool info.todo.usage')}</p>
                       </div>
                     </div>
                   ) : TOOLS_WITH_SETTINGS.includes(selectedTool) ? (
                     <div className="w-full">
-                      <div className="prose dark:prose-invert max-w-none mb-4">
+                      <div className="max-w-none mb-4">
                         <div className="flex items-center gap-2 mb-4">
-                          <p className="text-gray-700 dark:text-gray-100 font-bold mb-0">
+                          <p className="text-ink font-bold mb-0">
                             {t(`tool descriptions.${selectedTool}`, '')}
                           </p>
                           <PlanModeCompatibilityBadge toolName={selectedTool} />
@@ -739,24 +730,24 @@ const ToolSettingModal = memo(({ isOpen, onClose }: ToolSettingModalProps) => {
                       {selectedTool === 'cameraCapture' && <CameraCaptureSettingForm />}
                     </div>
                   ) : (
-                    <div className="prose dark:prose-invert max-w-none">
+                    <div className="max-w-none">
                       <div className="flex items-center gap-2 mb-4">
-                        <p className="text-gray-700 dark:text-gray-100 font-bold mb-0">
+                        <p className="text-ink font-bold mb-0">
                           {t(`tool descriptions.${selectedTool}`, '')}
                         </p>
                         <PlanModeCompatibilityBadge toolName={selectedTool} />
                       </div>
 
-                      <p className="mb-2 text-gray-700 dark:text-gray-200">
+                      <p className="mb-2 text-ink">
                         {t(
                           `tool usage.${selectedTool}.description`,
                           `This tool can be used by the AI assistant when enabled.`
                         )}
                       </p>
 
-                      <div className="bg-blue-50 dark:bg-gray-800/80 dark:border dark:border-blue-700 p-4 rounded-md mt-4">
-                        <h5 className="font-medium mb-2 dark:text-blue-300">{t('Tip')}</h5>
-                        <p className="text-sm text-gray-700 dark:text-gray-200">
+                      <div className="bg-accent-tint border border-accent p-2.5 rounded-control mt-4">
+                        <h5 className="font-medium mb-2 text-accent">{t('Tip')}</h5>
+                        <p className="text-sm text-ink">
                           {t(
                             `tool usage.${selectedTool}.tip`,
                             `Toggle the switch to enable or disable this tool.`
@@ -767,9 +758,9 @@ const ToolSettingModal = memo(({ isOpen, onClose }: ToolSettingModalProps) => {
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-200 p-4">
-                  <div className="text-5xl mb-4">🛠️</div>
-                  <p className="text-base">{t('Select a tool from the list')}</p>
+                <div className="flex flex-col items-center justify-center h-full text-center text-ink-muted p-2.5">
+                  <FiTool className="w-4 h-4 mb-3 text-ink-faint" />
+                  <p className="text-subheading text-ink">{t('Select a tool from the list')}</p>
                   <p className="text-sm mt-2">
                     {t('Click on any tool to view details and configuration options')}
                   </p>

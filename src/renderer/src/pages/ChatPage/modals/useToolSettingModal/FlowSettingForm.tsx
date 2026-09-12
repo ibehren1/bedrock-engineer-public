@@ -4,6 +4,7 @@ import { FlowConfig, InputType } from '@/types/agent-chat'
 import JSONEditor from '@renderer/components/JSONViewer/JSONEditor'
 import JSONViewer from '@renderer/components/JSONViewer'
 import { EditIcon, RemoveIcon } from '@renderer/components/icons/ToolIcons'
+import { Button, Input, Label, Select, Textarea } from '@renderer/components/ui'
 
 // オブジェクト型のサンプルスキーマ
 const OBJECT_SAMPLES = {
@@ -196,7 +197,7 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
     setSchema(flow.schema || {})
     setEditingIndex(index)
     // フォームまでスクロール
-    document.querySelector('.flex-col.gap-2.p-4.border')?.scrollIntoView({ behavior: 'smooth' })
+    document.querySelector('.flex-col.gap-2.p-2\\.5.border')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   // 編集をキャンセルする関数
@@ -263,19 +264,19 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
   return (
     <div>
       {/* ツールの説明 */}
-      <div className="prose dark:prose-invert max-w-none">
-        <p className="mb-4 text-gray-700 dark:text-gray-300">
+      <div className="max-w-none">
+        <p className="mb-4 text-ink">
           {t(
             'tool info.invokeFlow.description',
             'Invoke AWS Bedrock Flow to execute the specified flow. Flows can be used to automate workflows consisting of multiple steps.'
           )}
         </p>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md mb-5">
-          <h5 className="font-medium mb-2 dark:text-gray-200">
+        <div className="bg-accent-tint p-2.5 rounded-control mb-5">
+          <h5 className="font-medium mb-2 text-ink">
             {t('tool info.invokeFlow.about title', 'About AWS Bedrock Flow')}
           </h5>
-          <p className="text-sm text-gray-700 dark:text-gray-300">
+          <p className="text-sm text-ink">
             {t(
               'tool info.invokeFlow.about description',
               'AWS Bedrock Flow allows you to create and execute workflows that can process data, make decisions, and take actions based on AI model outputs. By configuring flows for your agent, you can enable it to perform complex operations that may involve multiple steps or services.'
@@ -285,78 +286,61 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
       </div>
 
       {/* 新しい Flow を登録するフォーム */}
-      <div className="flex flex-col gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-md">
-        <h4 className="font-medium text-sm mb-2 dark:text-gray-200">
+      <div className="flex flex-col gap-2 p-2.5 border border-subtle rounded-control">
+        <h4 className="font-medium text-sm mb-2 text-ink">
           {editingIndex !== null ? t('Edit Bedrock Flow') : t('Add New Bedrock Flow')}
         </h4>
 
         <div className="flex-grow">
-          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-            {t('Flow Identifier')}
-          </label>
-          <input
+          <Label>{t('Flow Identifier')}</Label>
+          <Input
             type="text"
             value={flowIdentifier}
             onChange={(e) => setFlowIdentifier(e.target.value)}
             placeholder="e.g., FLOW123456"
-            className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
           />
         </div>
 
         <div className="flex-grow">
-          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-            {t('Flow Alias Identifier')}
-          </label>
-          <input
+          <Label>{t('Flow Alias Identifier')}</Label>
+          <Input
             type="text"
             value={flowAliasIdentifier}
             onChange={(e) => setFlowAliasIdentifier(e.target.value)}
             placeholder="e.g., ALIAS123456"
-            className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
           />
         </div>
 
         <div className="flex-grow">
-          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-            {t('Description')}
-          </label>
-          <textarea
+          <Label>{t('Description')}</Label>
+          <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="e.g., Data processing workflow"
             rows={3}
-            className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 resize-vertical"
           />
         </div>
 
         {/* 新規: 入力型の選択 */}
         <div className="flex-grow">
-          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-            {t('Input Type')}
-          </label>
-          <select
-            value={inputType}
-            onChange={(e) => setInputType(e.target.value as InputType)}
-            className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
-          >
+          <Label>{t('Input Type')}</Label>
+          <Select value={inputType} onChange={(e) => setInputType(e.target.value as InputType)}>
             <option value="string">{t('String')}</option>
             <option value="number">{t('Number')}</option>
             <option value="boolean">{t('Boolean')}</option>
             <option value="object">{t('Object')}</option>
             <option value="array">{t('Array')}</option>
-          </select>
+          </Select>
         </div>
 
         {/* 新規: オブジェクトまたは配列の場合はJSONスキーマエディタを表示 */}
         {(inputType === 'object' || inputType === 'array') && (
           <div className="flex-grow">
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-              {t('JSON Schema')}
-            </label>
+            <Label>{t('JSON Schema')}</Label>
 
-            <div className="border border-gray-200 dark:border-gray-700 rounded-md p-4 bg-gray-50 dark:bg-gray-800/50">
+            <div className="border border-subtle rounded-control p-2.5 bg-surface-2">
               <div className="mb-3">
-                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                <p className="text-xs text-ink-muted mb-2">
                   {inputType === 'object'
                     ? t('Define the structure of the object that will be sent to the Flow.')
                     : t('Define the structure of the array that will be sent to the Flow.')}
@@ -365,14 +349,14 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
 
               {/* サンプルリンク部分を改善 */}
               <div className="mb-3">
-                <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <p className="text-xs font-medium text-ink mb-1">
                   {t('flow.sample.title', 'サンプルテンプレート')}:
                 </p>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {inputType === 'object' ? (
                     <>
                       <button
-                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-800/60"
+                        className="text-xs px-2 py-1 bg-accent-tint text-accent rounded-control hover:bg-accent-tint-strong"
                         onClick={() => setSchema(OBJECT_SAMPLES.simple)}
                         title={t(
                           'flow.sample.object.simple.tooltip',
@@ -382,7 +366,7 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
                         {t('flow.sample.object.simple', 'シンプル')}
                       </button>
                       <button
-                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-800/60"
+                        className="text-xs px-2 py-1 bg-accent-tint text-accent rounded-control hover:bg-accent-tint-strong"
                         onClick={() => setSchema(OBJECT_SAMPLES.nested)}
                         title={t(
                           'flow.sample.object.nested.tooltip',
@@ -392,7 +376,7 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
                         {t('flow.sample.object.nested', 'ネスト')}
                       </button>
                       <button
-                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-800/60"
+                        className="text-xs px-2 py-1 bg-accent-tint text-accent rounded-control hover:bg-accent-tint-strong"
                         onClick={() => setSchema(OBJECT_SAMPLES.complex)}
                         title={t(
                           'flow.sample.object.complex.tooltip',
@@ -405,14 +389,14 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
                   ) : (
                     <>
                       <button
-                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-800/60"
+                        className="text-xs px-2 py-1 bg-accent-tint text-accent rounded-control hover:bg-accent-tint-strong"
                         onClick={() => setSchema(ARRAY_SAMPLES.simple)}
                         title={t('flow.sample.array.simple.tooltip', '文字列の配列')}
                       >
                         {t('flow.sample.array.simple', 'シンプル')}
                       </button>
                       <button
-                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-800/60"
+                        className="text-xs px-2 py-1 bg-accent-tint text-accent rounded-control hover:bg-accent-tint-strong"
                         onClick={() => setSchema(ARRAY_SAMPLES.objects)}
                         title={t(
                           'flow.sample.array.objects.tooltip',
@@ -422,7 +406,7 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
                         {t('flow.sample.array.objects', 'オブジェクト')}
                       </button>
                       <button
-                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-800/60"
+                        className="text-xs px-2 py-1 bg-accent-tint text-accent rounded-control hover:bg-accent-tint-strong"
                         onClick={() => setSchema(ARRAY_SAMPLES.complex)}
                         title={t(
                           'flow.sample.array.complex.tooltip',
@@ -437,7 +421,7 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
               </div>
 
               <div className="mb-1">
-                <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <p className="text-xs font-medium text-ink mb-1">
                   {t('flow.editor.title', 'スキーマエディタ')}:
                 </p>
               </div>
@@ -464,12 +448,10 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
                       }
                 }
               />
-              {schemaError && <p className="text-xs text-red-500 mt-1">{schemaError}</p>}
+              {schemaError && <p className="text-xs text-danger mt-1">{schemaError}</p>}
 
-              <div className="mt-3 bg-blue-50 dark:bg-blue-900/20 p-2 rounded text-xs text-gray-600 dark:text-gray-300">
-                <p className="font-medium text-blue-700 dark:text-blue-300 mb-1">
-                  {t('flow.hint.title', 'ヒント')}:
-                </p>
+              <div className="mt-3 bg-accent-tint p-2 rounded-control text-xs text-ink-muted">
+                <p className="font-medium text-accent mb-1">{t('flow.hint.title', 'ヒント')}:</p>
                 <p>
                   {t(
                     'flow.hint.description',
@@ -482,17 +464,17 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
         )}
 
         <div className="flex gap-2">
-          <button
+          <Button
             onClick={saveFlow}
             disabled={!flowIdentifier || !flowAliasIdentifier}
-            className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            variant="primary"
           >
             {editingIndex !== null ? t('Update Flow') : t('Add Flow')}
-          </button>
+          </Button>
           {editingIndex !== null && (
             <button
               onClick={cancelEditing}
-              className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              className="px-2.5 py-1 text-sm text-ink bg-raised rounded-control hover:bg-sunken"
             >
               {t('Cancel')}
             </button>
@@ -501,18 +483,16 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
       </div>
 
       {/* 登録済みの Flow 一覧 */}
-      <div className="space-y-3 mt-6">
-        <h4 className="font-medium text-sm dark:text-gray-200">{t('Registered Bedrock Flows')}</h4>
+      <div className="space-y-3 mt-3">
+        <h4 className="font-medium text-sm text-ink">{t('Registered Bedrock Flows')}</h4>
 
         {flows.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-            {t('No Bedrock Flows registered yet')}
-          </p>
+          <p className="text-sm text-ink-muted italic">{t('No Bedrock Flows registered yet')}</p>
         ) : (
           flows.map((flow, index) => (
             <div
               key={index}
-              className="flex flex-col p-3 text-sm bg-gray-100 dark:bg-gray-900 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-700"
+              className="flex flex-col p-3 text-sm bg-canvas text-ink rounded-control border border-subtle"
             >
               <div className="flex items-center justify-between">
                 <span className="font-mono">
@@ -521,7 +501,7 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
                 <div className="flex gap-2">
                   <button
                     onClick={() => startEditing(index)}
-                    className="text-blue-500 hover:text-blue-600 p-1"
+                    className="text-accent hover:text-accent p-1"
                     title="Edit"
                     aria-label="Edit flow"
                   >
@@ -529,7 +509,7 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
                   </button>
                   <button
                     onClick={() => removeFlow(index)}
-                    className="text-red-500 hover:text-red-600 p-1"
+                    className="text-danger hover:text-danger-strong p-1"
                     title="Remove"
                     aria-label="Remove flow"
                   >
@@ -537,14 +517,12 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
                   </button>
                 </div>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 whitespace-pre-line">
-                {flow.description}
-              </p>
+              <p className="text-xs text-ink-muted mt-1 whitespace-pre-line">{flow.description}</p>
               {/* 情報を横並びにする新しいレイアウト */}
               <div className="flex gap-4 mt-1">
                 <div className="w-[15rem]">
                   <div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                    <span className="text-xs text-ink-muted">
                       {t('Flow Alias Identifier')}:{' '}
                       <span className="font-mono">{flow.flowAliasIdentifier}</span>
                     </span>
@@ -552,7 +530,7 @@ export const FlowSettingForm: React.FC<FlowSettingFormProps> = ({ flows, setFlow
 
                   {flow.inputType && (
                     <div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
+                      <span className="text-xs text-ink-muted">
                         {t('Input Type')}: <span className="font-mono">{flow.inputType}</span>
                       </span>
                     </div>

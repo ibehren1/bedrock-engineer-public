@@ -15,22 +15,20 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({ name, description, ico
 
   return (
     <div className="flex items-start">
-      <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4 bg-blue-100 dark:bg-blue-900/40 flex-shrink-0">
+      <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 bg-raised flex-shrink-0">
         {icon ? (
           <AgentIconView
             icon={icon}
             iconColor={iconColor || defaultColor}
-            fallback={<TbRobot className="w-6 h-6" style={{ color: iconColor || defaultColor }} />}
+            fallback={<TbRobot className="w-4 h-4" style={{ color: iconColor || defaultColor }} />}
           />
         ) : (
-          <span className="text-2xl" style={{ color: iconColor || defaultColor }}>
-            👤
-          </span>
+          <TbRobot className="w-4 h-4" style={{ color: iconColor || defaultColor }} />
         )}
       </div>
       <div>
-        <h2 className="text-2xl font-bold dark:text-white">{name}</h2>
-        {description && <p className="text-gray-500 dark:text-gray-400">{description}</p>}
+        <h2 className="text-title text-ink">{name}</h2>
+        {description && <p className="text-ink-muted">{description}</p>}
       </div>
     </div>
   )

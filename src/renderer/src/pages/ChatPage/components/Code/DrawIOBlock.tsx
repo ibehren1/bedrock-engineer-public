@@ -75,59 +75,55 @@ export const DrawIOBlock: React.FC<DrawIOBlockProps> = ({ xml, className = '' })
   }, [xml])
 
   return (
-    <div
-      className={`my-4 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden ${className}`}
-    >
+    <div className={`my-4 border border-strong rounded-container overflow-hidden ${className}`}>
       {/* Header with toggle buttons */}
-      <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-4 py-2 border-b border-gray-300 dark:border-gray-600">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">DrawIO</span>
+      <div className="flex items-center justify-between bg-raised px-2.5 py-1 border-b border-strong">
+        <span className="text-sm font-medium text-ink">DrawIO</span>
         <div className="flex items-center space-x-2">
           {/* Zoom controls and download button - only show in preview mode */}
           {isPreviewMode && (
             <>
               <button
                 onClick={downloadAsPNG}
-                className="p-1 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                className="p-1 rounded-control text-ink hover:bg-sunken"
                 title="Download as PNG"
               >
                 <VscCloudDownload size={14} />
               </button>
-              <div className="w-px h-4 bg-gray-300 dark:bg-gray-600" />
+              <div className="w-px h-4 bg-sunken" />
               <button
                 onClick={zoomOut}
                 disabled={zoomLevel <= 0.5}
-                className="p-1 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1 rounded-control text-ink hover:bg-sunken disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Zoom Out"
               >
                 <VscZoomOut size={14} />
               </button>
-              <span className="text-xs text-gray-600 dark:text-gray-400 min-w-[3rem] text-center">
+              <span className="text-xs text-ink-muted min-w-[3rem] text-center">
                 {Math.round(zoomLevel * 100)}%
               </span>
               <button
                 onClick={zoomIn}
                 disabled={zoomLevel >= 3}
-                className="p-1 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1 rounded-control text-ink hover:bg-sunken disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Zoom In"
               >
                 <VscZoomIn size={14} />
               </button>
               <button
                 onClick={resetZoom}
-                className="p-1 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                className="p-1 rounded-control text-ink hover:bg-sunken"
                 title="Reset Zoom"
               >
                 <VscScreenFull size={14} />
               </button>
             </>
           )}
-          <div className="w-px h-4 bg-gray-300 dark:bg-gray-600" />
+          <div className="w-px h-4 bg-sunken" />
           <button
             onClick={toggleMode}
-            className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${
-              !isPreviewMode
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            className={`flex items-center space-x-1 px-3 py-1 rounded-control text-xs font-medium transition-colors ${
+              !isPreviewMode ? 'bg-accent text-accent-fg' : 'bg-raised text-ink hover:bg-sunken'
             }`}
           >
             <VscCode size={12} />
@@ -135,10 +131,8 @@ export const DrawIOBlock: React.FC<DrawIOBlockProps> = ({ xml, className = '' })
           </button>
           <button
             onClick={toggleMode}
-            className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${
-              isPreviewMode
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            className={`flex items-center space-x-1 px-3 py-1 rounded-control text-xs font-medium transition-colors ${
+              isPreviewMode ? 'bg-accent text-accent-fg' : 'bg-raised text-ink hover:bg-sunken'
             }`}
           >
             <VscEye size={12} />
@@ -151,7 +145,7 @@ export const DrawIOBlock: React.FC<DrawIOBlockProps> = ({ xml, className = '' })
       <ResizableContainer initialHeight={600} minHeight={200} maxHeight={800}>
         {/* Preview mode - always rendered but hidden when not in preview mode */}
         <div
-          className={`h-full bg-white dark:bg-gray-900 overflow-hidden border-0 ${
+          className={`h-full bg-surface overflow-hidden border-0 ${
             isPreviewMode ? 'block' : 'hidden'
           }`}
         >
@@ -186,7 +180,7 @@ export const DrawIOBlock: React.FC<DrawIOBlockProps> = ({ xml, className = '' })
 
         {/* Source mode - always rendered but hidden when in preview mode */}
         <div
-          className={`max-w-[88vw] h-full overflow-y-scroll bg-gray-50 dark:bg-gray-900 ${isPreviewMode ? 'hidden' : 'block'}`}
+          className={`max-w-[88vw] h-full overflow-y-scroll bg-surface-2 ${isPreviewMode ? 'hidden' : 'block'}`}
         >
           <SyntaxHighlighter
             language="xml"

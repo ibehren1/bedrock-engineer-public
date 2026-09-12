@@ -82,7 +82,7 @@ export const BedrockModelsSection: React.FC = () => {
 
   return (
     <SettingSection title={t('Amazon Bedrock')} icon={FcElectronics}>
-      <div className="space-y-4">
+      <div className="space-y-2">
         <SettingSelect
           label={t('LLM (Large Language Model)')}
           value={currentLLM?.modelId}
@@ -91,10 +91,8 @@ export const BedrockModelsSection: React.FC = () => {
         />
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('Visible Models')}
-          </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-ink">{t('Visible Models')}</label>
+          <p className="text-xs text-ink-muted mb-2">
             {t(
               'Select which models appear in the chat model selector. Leave empty to show all models.'
             )}
@@ -105,15 +103,15 @@ export const BedrockModelsSection: React.FC = () => {
               return (
                 <div
                   key={modelId}
-                  className="inline-flex items-center px-2.5 py-1.5 rounded-md text-sm
-                    bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                  className="inline-flex items-center px-2.5 py-1.5 rounded-control text-sm
+                    bg-accent-tint text-accent"
                 >
                   <span>{model ? model.modelName : modelId}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveVisibleModel(modelId)}
-                    className="ml-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-800
-                      dark:hover:text-blue-200"
+                    className="ml-1.5 text-accent hover:text-accent
+                      hover:text-accent"
                   >
                     <IoMdClose className="w-4 h-4" />
                   </button>
@@ -122,9 +120,9 @@ export const BedrockModelsSection: React.FC = () => {
             })}
           </div>
           <select
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600
-              focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-600
-              sm:text-sm rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-strong
+              focus:outline-none focus:ring-accent focus:border-accent
+              sm:text-sm rounded-control bg-surface text-ink"
             value=""
             onChange={handleVisibleModelSelect}
           >
@@ -140,46 +138,46 @@ export const BedrockModelsSection: React.FC = () => {
         </div>
 
         <div className="space-y-2">
-          <div className="space-y-4">
+          <div className="space-y-2">
             <label className="inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300
-                  focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800
-                  focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                className="form-checkbox h-4 w-4 text-accent rounded-control border-strong
+                  focus:ring-accent ring-offset-surface
+                  focus:ring-2 bg-raised border-subtle"
                 checked={bedrockSettings.enableInferenceProfiles}
                 onChange={(e) =>
                   updateBedrockSettings({ enableInferenceProfiles: e.target.checked })
                 }
               />
-              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+              <span className="ml-2 text-sm text-ink">
                 {t('Enable Application Inference Profiles')}
               </span>
             </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 ml-7">
+            <p className="text-xs text-ink-muted ml-7">
               {t('Use Application Inference Profiles for cost allocation and tracking')}
             </p>
 
             <label className="inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300
-                  focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800
-                  focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                className="form-checkbox h-4 w-4 text-accent rounded-control border-strong
+                  focus:ring-accent ring-offset-surface
+                  focus:ring-2 bg-raised border-subtle"
                 checked={bedrockSettings.enableRegionFailover}
                 onChange={(e) => handleFailoverToggle(e.target.checked)}
               />
-              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+              <span className="ml-2 text-sm text-ink">
                 {t('Enable Region Failover on ThrottlingException')}
               </span>
             </label>
 
             {bedrockSettings.enableRegionFailover && (
               <div className="ml-7 space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-ink">
                   {t('Failover Regions')}
                 </label>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                <p className="text-xs text-ink-muted mb-2">
                   {t(
                     'Select regions to be used as failover targets when ThrottlingException occurs'
                   )}
@@ -190,15 +188,15 @@ export const BedrockModelsSection: React.FC = () => {
                     return (
                       <div
                         key={region}
-                        className="inline-flex items-center px-2.5 py-1.5 rounded-md text-sm
-                          bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                        className="inline-flex items-center px-2.5 py-1.5 rounded-control text-sm
+                          bg-accent-tint text-accent"
                       >
                         <span>{regionInfo ? `${regionInfo.name} (${region})` : region}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveRegion(region)}
-                          className="ml-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-800
-                            dark:hover:text-blue-200"
+                          className="ml-1.5 text-accent hover:text-accent
+                            hover:text-accent"
                         >
                           <IoMdClose className="w-4 h-4" />
                         </button>
@@ -207,9 +205,9 @@ export const BedrockModelsSection: React.FC = () => {
                   })}
                 </div>
                 <select
-                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600
-                    focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-600
-                    sm:text-sm rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-strong
+                    focus:outline-none focus:ring-accent focus:border-accent
+                    sm:text-sm rounded-control bg-surface text-ink"
                   value=""
                   onChange={handleRegionSelect}
                 >

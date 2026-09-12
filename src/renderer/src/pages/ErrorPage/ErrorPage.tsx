@@ -22,8 +22,8 @@ const ErrorPage = () => {
   }
 
   return (
-    <div className="flex-1 p-4 bg-gray-100 overflow-x-auto dark:bg-gray-900 h-screen gap-2 flex flex-col justify-center content-center items-center">
-      <h1 className="text-xl">Oops!</h1>
+    <div className="flex-1 p-2.5 bg-raised overflow-x-auto h-screen gap-2 flex flex-col justify-center content-center items-center">
+      <h1 className="text-title">Oops!</h1>
       <div>Error: {getErrorMessage()}</div>
       <Link to={'/'}>
         <Button color={'gray'}>Return to HomePage</Button>

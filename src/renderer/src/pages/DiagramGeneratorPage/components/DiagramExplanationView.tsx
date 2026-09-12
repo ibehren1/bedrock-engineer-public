@@ -44,37 +44,33 @@ const DiagramExplanationViewComponent = ({
     detectAWSElements(xml, explanation) && onCDKConvert && !isStreaming && hasMessages
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <div className="h-full flex flex-col bg-surface rounded-container shadow-md overflow-hidden">
       {/* ヘッダー部分 */}
-      <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-medium text-gray-800 dark:text-white">図の説明</h3>
+      <div className="flex justify-between items-center p-3 border-b border-subtle">
+        <h3 className="text-heading font-medium text-ink">図の説明</h3>
         <div className="flex gap-2">
           <button
             onClick={handleCopyExplanation}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            className="p-1 hover:bg-raised rounded-control"
             title="説明をコピー"
           >
-            <MdOutlineContentCopy className="text-gray-500 dark:text-gray-300" size={18} />
+            <MdOutlineContentCopy className="text-ink-muted" size={18} />
           </button>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-            title="閉じる"
-          >
-            <AiOutlineCloseCircle className="text-gray-500 dark:text-gray-300" size={18} />
+          <button onClick={onClose} className="p-1 hover:bg-raised rounded-control" title="閉じる">
+            <AiOutlineCloseCircle className="text-ink-muted" size={18} />
           </button>
         </div>
       </div>
 
       {/* コンテンツ部分 */}
-      <div className="flex-1 p-4 overflow-y-auto text-gray-900 dark:text-white">
+      <div className="flex-1 p-2.5 overflow-y-auto text-ink">
         <MD>{explanation}</MD>
         {isStreaming && (
-          <div className="flex items-center gap-2 mt-2 text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 mt-2 text-ink-muted">
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-sunken rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2 h-2 bg-sunken rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2 h-2 bg-sunken rounded-full animate-bounce"></div>
             </div>
             <span className="text-sm">生成中...</span>
           </div>

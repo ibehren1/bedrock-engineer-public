@@ -47,14 +47,12 @@ const DataSourceConnectModal = React.memo(({ isOpen, onClose }: DataSourceConnec
     <Modal dismissible show={isOpen} onClose={onClose}>
       <Modal.Header>Connect Knowledge Base</Modal.Header>
       <Modal.Body>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
           {/* Enable/Disable Toggle */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BsDatabase className="text-lg text-gray-600 dark:text-gray-400" />
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                Knowledge Base Connection
-              </span>
+              <BsDatabase className="text-base text-ink-muted" />
+              <span className="text-sm font-medium text-ink">Knowledge Base Connection</span>
             </div>
             <ToggleSwitch
               checked={enableKnowledgeBase}
@@ -63,11 +61,9 @@ const DataSourceConnectModal = React.memo(({ isOpen, onClose }: DataSourceConnec
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {knowledgeBases.length > 0 && (
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Currently connected knowledge bases:
-              </div>
+              <div className="text-sm text-ink-muted">Currently connected knowledge bases:</div>
             )}
 
             {knowledgeBases.length > 0 ? (
@@ -75,15 +71,11 @@ const DataSourceConnectModal = React.memo(({ isOpen, onClose }: DataSourceConnec
                 {knowledgeBases.map((kb, index) => (
                   <div
                     key={index}
-                    className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                    className="flex justify-between items-center p-3 bg-surface-2 rounded-container border border-subtle"
                   >
                     <div className="flex-1">
-                      <div className="font-medium text-sm text-gray-900 dark:text-white">
-                        {kb.knowledgeBaseId}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {kb.description}
-                      </div>
+                      <div className="font-medium text-sm text-ink">{kb.knowledgeBaseId}</div>
+                      <div className="text-sm text-ink-muted">{kb.description}</div>
                     </div>
                     <Button
                       size="xs"
@@ -96,14 +88,12 @@ const DataSourceConnectModal = React.memo(({ isOpen, onClose }: DataSourceConnec
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                No knowledge bases connected
-              </div>
+              <div className="text-sm text-ink-muted italic">No knowledge bases connected</div>
             )}
           </div>
 
           {/* Add New Knowledge Base Form */}
-          <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="space-y-2 pt-4 border-t border-subtle">
             <Label>Add New Knowledge Base</Label>
             <div className="grid gap-4">
               <div>
@@ -122,7 +112,7 @@ const DataSourceConnectModal = React.memo(({ isOpen, onClose }: DataSourceConnec
               <div>
                 <div className="mb-2 block flex flex-col gap-1">
                   <Label htmlFor="description" value="Description" />
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-ink-muted">
                     This is where you outline the data you store, and how it will be referenced in
                     the knowledge base when generating your website.
                   </span>

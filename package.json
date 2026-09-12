@@ -1,7 +1,10 @@
 {
   "name": "bedrock-engineer",
   "productName": "Bedrock Engineer",
-  "version": "2026.904.6",
+  "version": "2026.909.26",
+  "browserslist": [
+    "electron >= 44"
+  ],
   "description": "Autonomous software development agent apps using Amazon Bedrock, capable of customize to create/edit files, execute commands, search the web, use knowledge base, use multi-agents, generative images and more.",
   "main": "./out/main/index.js",
   "homepage": "https://github.com/aws-samples/bedrock-engineer",
@@ -44,6 +47,10 @@
     "@codesandbox/sandpack-react": "2.18.3",
     "@electron-toolkit/preload": "3.0.2",
     "@electron-toolkit/utils": "4.0.0",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@headlessui/react": "^2.2.0",
     "@iconify-json/bi": "^1.2.7",
     "@iconify-json/fa6-brands": "^1.2.6",
@@ -62,6 +69,7 @@
     "@tshepomgaga/aws-sfn-graph": "0.0.6",
     "axios": "^1.18.0",
     "chart.js": "^4.4.8",
+    "clsx": "^2.1.1",
     "cors": "^2.8.6",
     "diff": "8.0.3",
     "electron-store": "8.2.0",
@@ -96,6 +104,7 @@
     "rxjs": "^7.8.2",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
+    "tailwind-merge": "^3.6.0",
     "turndown": "^7.2.4",
     "turndown-plugin-gfm": "^1.0.2",
     "uuid": "^13.0.0",

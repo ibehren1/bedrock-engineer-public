@@ -21,16 +21,16 @@ const ToolSpecJsonModal = memo(
         size="4xl"
         show={isOpen}
         onClose={onClose}
-        className="dark:bg-gray-800 border border-gray-200 dark:border-gray-500 shadow-lg dark:shadow-gray-900/50"
+        className="bg-surface border border-subtle shadow-lg"
       >
-        <Modal.Header className="border-b border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-t-lg">
+        <Modal.Header className="border-b border-subtle bg-surface text-ink rounded-t-container">
           <div className="flex items-center gap-2">
             <span>{toolName}</span>
-            <span className="text-gray-500 dark:text-gray-400">- Tool Specification</span>
+            <span className="text-ink-muted">- Tool Specification</span>
           </div>
         </Modal.Header>
 
-        <Modal.Body className="dark:bg-gray-800 rounded-b-lg">
+        <Modal.Body className="bg-surface rounded-b-container">
           <div className="w-full">
             {toolSpec ? (
               <JSONViewer
@@ -40,18 +40,15 @@ const ToolSpecJsonModal = memo(
                 showCopyButton={true}
               />
             ) : (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-8 text-ink-muted">
                 {t('No tool specification available')}
               </div>
             )}
           </div>
         </Modal.Body>
 
-        <Modal.Footer className="dark:bg-gray-800 dark:border-t dark:border-gray-600 rounded-b-lg">
-          <Button
-            onClick={onClose}
-            className="dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-white"
-          >
+        <Modal.Footer className="bg-surface border-t border-subtle rounded-b-container">
+          <Button onClick={onClose} className="bg-accent hover:bg-accent-strong text-ink">
             {t('Close')}
           </Button>
         </Modal.Footer>

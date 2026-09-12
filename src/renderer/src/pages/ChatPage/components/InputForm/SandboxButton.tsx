@@ -70,41 +70,39 @@ export const SandboxButton: React.FC<SandboxButtonProps> = ({
         disabled={isBusy}
         title={t('dockerSandbox.menu.title')}
         aria-label={t('dockerSandbox.menu.title')}
-        className={`p-2 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-          isRunning ? 'text-[#2496ED]' : 'text-gray-400'
+        className={`p-2 rounded-full hover:bg-surface transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+          isRunning ? 'text-[#2496ED]' : 'text-ink-faint'
         }`}
       >
         <FaDocker className={isBusy ? 'animate-pulse' : ''} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-20 w-72 bottom-full mb-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
-          <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="absolute right-0 z-20 w-72 bottom-full mb-1 bg-surface rounded-container shadow-lg border border-subtle py-1">
+          <div className="px-2.5 py-1 border-b border-subtle">
             <div className="flex items-center gap-2">
               <div
-                className={`w-2 h-2 rounded-full ${isRunning ? 'bg-green-500' : 'bg-gray-400'}`}
+                className={`w-2 h-2 rounded-full ${isRunning ? 'bg-success-soft' : 'bg-sunken'}`}
               />
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {t('dockerSandbox.menu.title')}
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">{statusLabel()}</span>
+              <span className="text-sm font-medium text-ink">{t('dockerSandbox.menu.title')}</span>
+              <span className="text-xs text-ink-muted">{statusLabel()}</span>
             </div>
 
             {status.metadata?.directory && (
               <p
-                className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400 truncate"
+                className="mt-1 text-xs font-mono text-ink-muted truncate"
                 title={status.metadata.directory}
               >
                 {folderName(status.metadata.directory)}
               </p>
             )}
 
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-xs text-ink-muted">
               {(status.metadata?.services ?? []).map((service) => service.name).join(', ') || '—'}
             </p>
 
             {publishedPorts.length > 0 && (
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-xs text-ink-muted">
                 {t('dockerSandbox.menu.ports')}:{' '}
                 {publishedPorts.map((port) => `${port.host}→${port.container}`).join(', ')}
               </p>
@@ -113,7 +111,7 @@ export const SandboxButton: React.FC<SandboxButtonProps> = ({
 
           <button
             onClick={() => act(onOpenFolder)}
-            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+            className="w-full text-left px-2.5 py-1 text-sm text-ink hover:bg-raised flex items-center gap-2"
           >
             <FiFolder className="w-4 h-4" />
             {t('dockerSandbox.menu.openFolder')}
@@ -122,7 +120,7 @@ export const SandboxButton: React.FC<SandboxButtonProps> = ({
           {isRunning ? (
             <button
               onClick={() => act(onStop)}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+              className="w-full text-left px-2.5 py-1 text-sm text-ink hover:bg-raised flex items-center gap-2"
             >
               <FiSquare className="w-4 h-4" />
               {t('dockerSandbox.menu.stop')}
@@ -130,7 +128,7 @@ export const SandboxButton: React.FC<SandboxButtonProps> = ({
           ) : (
             <button
               onClick={() => act(onStart)}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+              className="w-full text-left px-2.5 py-1 text-sm text-ink hover:bg-raised flex items-center gap-2"
             >
               <FiPlay className="w-4 h-4" />
               {t('dockerSandbox.menu.start')}
@@ -143,7 +141,7 @@ export const SandboxButton: React.FC<SandboxButtonProps> = ({
                 act(() => onRemove(false))
               }
             }}
-            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+            className="w-full text-left px-2.5 py-1 text-sm text-danger hover:bg-raised flex items-center gap-2"
           >
             <FiTrash2 className="w-4 h-4" />
             {t('dockerSandbox.menu.remove')}
@@ -155,7 +153,7 @@ export const SandboxButton: React.FC<SandboxButtonProps> = ({
                 act(() => onRemove(true))
               }
             }}
-            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+            className="w-full text-left px-2.5 py-1 text-sm text-danger hover:bg-raised flex items-center gap-2"
           >
             <FiTrash2 className="w-4 h-4" />
             {t('dockerSandbox.menu.removeWithData')}

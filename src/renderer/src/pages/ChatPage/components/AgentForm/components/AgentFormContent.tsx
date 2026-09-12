@@ -60,8 +60,8 @@ export const AgentFormContent: React.FC<{
   switch (activeTab) {
     case 'basic':
       return (
-        <div className="space-y-6 pb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 pb-2 border-b border-gray-200 dark:border-gray-700/50">
+        <div className="space-y-3 pb-4">
+          <h3 className="text-heading font-semibold text-ink mb-3 pb-2 border-b border-subtle">
             {t('Basic Agent Settings')}
           </h3>
 

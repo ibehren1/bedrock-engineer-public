@@ -15,17 +15,12 @@ export const ScenariosList: React.FC<ScenariosListProps> = ({ scenarios }) => {
 
   return (
     <div>
-      <h3 className="text-lg font-medium mb-2 dark:text-white">{t('scenariosLabel')}</h3>
+      <h3 className="text-heading font-medium mb-2 text-ink">{t('scenariosLabel')}</h3>
       <div className="space-y-3">
         {scenarios.map((scenario, index) => (
-          <div
-            key={index}
-            className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700"
-          >
-            <h4 className="font-medium text-sm dark:text-white mb-2">{scenario.title}</h4>
-            <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
-              {scenario.content}
-            </div>
+          <div key={index} className="p-2.5 bg-surface-2 rounded-container border border-subtle">
+            <h4 className="font-medium text-sm text-ink mb-2">{scenario.title}</h4>
+            <div className="text-sm text-ink-muted whitespace-pre-wrap">{scenario.content}</div>
           </div>
         ))}
       </div>

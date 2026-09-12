@@ -26,14 +26,14 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, onT
                 onClick={() => onTabChange(tab.id)}
                 aria-current={isActive ? 'page' : undefined}
                 title={t(tab.labelKey)}
-                className={`relative flex items-center w-full px-3 py-2.5 rounded-lg text-left transition-all duration-200 ease-in-out ${
+                className={`relative flex items-center w-full px-3 py-2.5 rounded-container text-left transition-all duration-200 ease-in-out ${
                   isActive
-                    ? 'bg-blue-50 text-blue-600 dark:bg-gray-700/50 dark:text-gray-100'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'bg-accent-tint text-accent'
+                    : 'text-ink hover:bg-raised hover:text-ink'
                 }`}
               >
                 <span className="flex items-center justify-center w-6">
-                  <tab.icon className={tab.iconClassName ?? 'w-5 h-5'} />
+                  <tab.icon className={tab.iconClassName ?? 'w-4 h-4'} />
                 </span>
                 <span className="text-sm font-medium ml-3 lg:block hidden">{t(tab.labelKey)}</span>
               </button>

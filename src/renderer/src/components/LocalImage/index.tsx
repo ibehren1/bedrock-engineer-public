@@ -32,14 +32,12 @@ const LocalImage: React.FC<LocalImageProps> = ({ src, alt, className }) => {
   }, [src])
 
   if (loading) {
-    return <div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg w-full h-48"></div>
+    return <div className="animate-pulse bg-raised rounded-container w-full h-48"></div>
   }
 
   if (error) {
     return (
-      <div className="text-red-500 dark:text-red-400 text-sm p-2 border border-red-300 dark:border-red-600 rounded-lg">
-        {error}
-      </div>
+      <div className="text-danger text-sm p-2 border border-danger rounded-container">{error}</div>
     )
   }
 
@@ -47,7 +45,7 @@ const LocalImage: React.FC<LocalImageProps> = ({ src, alt, className }) => {
     <img
       src={imageUrl}
       alt={alt}
-      className={`max-w-full rounded-lg ${className || ''}`}
+      className={`max-w-full rounded-container ${className || ''}`}
       loading="lazy"
     />
   )

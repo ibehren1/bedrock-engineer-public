@@ -51,27 +51,27 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {isMacOS && (
           <div className="relative mr-2 group">
             <BsQuestionCircle
-              className="w-4 h-4 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer"
+              className="w-4 h-4 text-ink-muted hover:text-accent cursor-pointer"
               onClick={onOpenPermissionHelp}
             />
             <div
               className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-1 text-xs
-                          font-medium text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-sm opacity-0 group-hover:opacity-100
+                          font-medium bg-ink text-canvas rounded-container shadow-sm opacity-0 group-hover:opacity-100
                           transition-opacity duration-300 whitespace-nowrap pointer-events-none"
             >
               {t('permissionHelp.tooltip')}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-gray-900 dark:border-b-gray-700"></div>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-ink"></div>
             </div>
           </div>
         )}
         <span
-          className="text-xs text-gray-400 font-thin cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
+          className="text-xs text-ink-faint font-thin cursor-pointer hover:text-ink"
           onClick={onOpenVoiceSelector}
         >
           VOICE
         </span>
         <span
-          className="text-xs text-gray-400 font-thin cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
+          className="text-xs text-ink-faint font-thin cursor-pointer hover:text-ink"
           onClick={onOpenSystemPrompt}
         >
           SYSTEM_PROMPT
@@ -100,8 +100,8 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
   onStop,
   size = 'large'
 }) => {
-  const sizeClass = size === 'large' ? 'w-16 h-16' : 'w-12 h-12'
-  const iconSize = size === 'large' ? 'w-6 h-6' : 'w-5 h-5'
+  const sizeClass = size === 'large' ? 'w-10 h-10' : 'w-8 h-8'
+  const iconSize = size === 'large' ? 'w-4 h-4' : 'w-3.5 h-3.5'
 
   if (isRecording) {
     return (
@@ -110,8 +110,8 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
         disabled={!canStopRecording}
         className={`${sizeClass} rounded-full flex items-center justify-center font-medium transition-colors border ${
           canStopRecording
-            ? 'bg-red-50 hover:bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-300 dark:border-red-800'
-            : 'bg-gray-100 cursor-not-allowed text-gray-400 border-gray-200 dark:bg-gray-800 dark:text-gray-600 dark:border-gray-700'
+            ? 'bg-danger-soft hover:bg-danger-soft-strong text-danger border-danger'
+            : 'bg-raised cursor-not-allowed text-ink-faint border-subtle'
         }`}
         title="Stop Recording"
       >
@@ -129,9 +129,9 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
       className={`${sizeClass} rounded-full flex items-center justify-center font-medium transition-colors border ${
         canStartRecording
           ? size === 'large'
-            ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'
-            : 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:text-green-300 dark:border-green-800'
-          : 'bg-gray-100 cursor-not-allowed text-gray-400 border-gray-200 dark:bg-gray-800 dark:text-gray-600 dark:border-gray-700'
+            ? 'bg-accent-tint hover:bg-accent-tint-strong text-accent border-accent'
+            : 'bg-success-soft hover:bg-success-soft-strong text-success border-success'
+          : 'bg-raised cursor-not-allowed text-ink-faint border-subtle'
       }`}
       title={status === 'processing' ? 'Processing...' : 'Start Recording'}
     >
@@ -174,17 +174,8 @@ const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({ thinkingState }) 
 
   const isListening = thinkingState.waitingForUserTranscription
   const text = isListening ? 'Listening' : 'Thinking'
-  const gradientClass = isListening
-    ? 'bg-gradient-to-r from-green-500 via-teal-500 to-blue-400'
-    : 'bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400'
 
-  return (
-    <span
-      className={`text-lg font-semibold bg-[length:200%_100%] animate-gradient-x bg-clip-text text-transparent ${gradientClass}`}
-    >
-      {text}
-    </span>
-  )
+  return <span className="text-heading font-semibold text-accent">{text}</span>
 }
 
 interface ErrorDisplayProps {
@@ -277,7 +268,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ status, errorState, onOpenS
   const getErrorIcon = () => {
     if (errorState?.type === 'recording') {
       return (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -288,7 +279,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ status, errorState, onOpenS
       )
     }
     return (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -303,13 +294,13 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ status, errorState, onOpenS
   const isFilterError = errorState && isContentFilterError(errorState.message || '')
 
   return (
-    <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg max-w-sm">
+    <div className="fixed bottom-4 right-4 bg-danger-soft text-danger px-2.5 py-1 rounded-container shadow-lg max-w-sm">
       <div className="flex items-start space-x-2">
         {getErrorIcon()}
         <div className="flex flex-col space-y-1 flex-1">
           <span className="text-sm font-medium">{getErrorMessage()}</span>
           {errorState?.timestamp && (
-            <span className="text-xs text-red-200">
+            <span className="text-xs text-danger">
               {new Date(errorState.timestamp).toLocaleTimeString()}
             </span>
           )}
@@ -317,14 +308,14 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ status, errorState, onOpenS
             {(isRegionError || isFilterError) && onOpenSettings && (
               <button
                 onClick={onOpenSettings}
-                className="text-xs bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded transition-colors"
+                className="text-xs bg-warning hover:bg-warning-strong px-2 py-1 rounded-control transition-colors"
               >
                 {t('voiceChat.error.openSettings', 'Open Settings')}
               </button>
             )}
             <button
               onClick={handleReload}
-              className="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded transition-colors"
+              className="text-xs bg-danger hover:bg-danger-strong px-2 py-1 rounded-control transition-colors"
             >
               {t('common.reload', 'Reload Page')}
             </button>
@@ -391,7 +382,7 @@ const SimpleView: React.FC<SimpleViewProps> = ({
     <>
       {/* Main content - centered AI icon */}
       <div className="flex-1 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-6">
+        <div className="flex flex-col items-center space-y-3">
           <VoiceAILottie
             style={{ width: 240, height: 240 }}
             loop={isRecording || status === 'processing'}
@@ -453,7 +444,7 @@ const DetailView: React.FC<DetailViewProps> = ({
         toolExecutionState={toolExecutionState}
         className="h-full"
         audioControls={
-          <div className="flex items-center justify-center space-x-4 p-4">
+          <div className="flex items-center justify-center space-x-4 p-2.5">
             <RecordingButton
               isRecording={false}
               canStartRecording={canStartRecording}

@@ -40,12 +40,12 @@ export const AwsCredentialsSection: React.FC = () => {
 
   return (
     <SettingSection title={t('AWS Settings')} icon={FcKey}>
-      <div className="space-y-4">
-        <p className="text-xs text-gray-600 dark:text-gray-400">
+      <div className="space-y-2">
+        <p className="text-xs text-ink-muted">
           {t('This application requires specific IAM permissions to access Amazon Bedrock.')}{' '}
           <button
             onClick={() => setIsPolicyModalOpen(true)}
-            className="text-blue-600 dark:text-blue-400 hover:underline"
+            className="text-accent hover:underline"
           >
             {t('View required IAM policies')}
           </button>
@@ -56,23 +56,19 @@ export const AwsCredentialsSection: React.FC = () => {
             <label className="inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300
-                  focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800
-                  focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                className="form-checkbox h-4 w-4 text-accent rounded-control border-strong
+                  focus:ring-accent ring-offset-surface
+                  focus:ring-2 bg-raised border-subtle"
                 checked={useAwsProfile}
                 onChange={(e) => setUseAwsProfile(e.target.checked)}
               />
-              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                {t('Use AWS Profile')}
-              </span>
+              <span className="ml-2 text-sm text-ink">{t('Use AWS Profile')}</span>
             </label>
           </div>
 
           {useAwsProfile ? (
-            <div className="space-y-4 p-4 border border-gray-200 dark:border-gray-700 rounded-md">
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                {t('Use credentials from ~/.aws')}
-              </p>
+            <div className="space-y-2 p-2.5 border border-subtle rounded-control">
+              <p className="text-xs text-ink-muted">{t('Use credentials from ~/.aws')}</p>
 
               <SettingInput
                 label={t('AWS Profile Name')}
@@ -85,7 +81,7 @@ export const AwsCredentialsSection: React.FC = () => {
               {regionSelect}
             </div>
           ) : (
-            <div className="space-y-4 p-4 border border-gray-200 dark:border-gray-700 rounded-md">
+            <div className="space-y-2 p-2.5 border border-subtle rounded-control">
               <SettingInput
                 label={t('AWS Access Key ID')}
                 type="string"

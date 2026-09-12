@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { FiAlertCircle, FiImage } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
 import { FiMaximize2, FiMinimize2, FiDownload } from 'react-icons/fi'
 
@@ -55,12 +56,12 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ filename, imagePath 
 
   if (imageError) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
-        <div className="text-red-500 text-4xl mb-4">🖼️</div>
-        <p className="text-gray-500 dark:text-gray-400 text-sm text-center">
+      <div className="flex flex-col items-center justify-center p-8 bg-surface-2 border border-subtle rounded-container">
+        <FiAlertCircle className="w-4 h-4 mb-3 text-danger" />
+        <p className="text-ink-muted text-sm text-center">
           {t('code interpreter display.Failed to load image', 'Failed to load image')}
         </p>
-        <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">{filename}</p>
+        <p className="text-ink-faint text-xs mt-1">{filename}</p>
       </div>
     )
   }
@@ -68,15 +69,15 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ filename, imagePath 
   return (
     <div className="space-y-3">
       {/* Image Header */}
-      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-t-lg">
+      <div className="flex items-center justify-between p-3 bg-surface-2 border border-subtle rounded-t-container">
         <div className="flex items-center gap-2">
-          <span className="text-purple-500">🖼️</span>
-          <span className="text-sm font-medium text-gray-900 dark:text-white">{filename}</span>
+          <FiImage className="w-4 h-4 text-ink-muted" />
+          <span className="text-sm font-medium text-ink">{filename}</span>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={toggleFullscreen}
-            className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+            className="p-1 text-ink-muted hover:text-ink hover:bg-raised rounded-control transition-colors"
             title={
               isFullscreen
                 ? t('code interpreter display.Minimize', 'Minimize')
@@ -87,7 +88,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ filename, imagePath 
           </button>
           <button
             onClick={handleDownload}
-            className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+            className="p-1 text-ink-muted hover:text-ink hover:bg-raised rounded-control transition-colors"
             title={t('code interpreter display.Download image', 'Download image')}
           >
             <FiDownload className="size-4" />
@@ -97,7 +98,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ filename, imagePath 
 
       {/* Image Display */}
       <div
-        className={`border border-gray-200 dark:border-gray-700 rounded-b-lg overflow-hidden bg-white dark:bg-gray-800 ${
+        className={`border border-subtle rounded-b-container overflow-hidden bg-surface ${
           isFullscreen ? 'fixed inset-4 z-50 shadow-2xl' : ''
         }`}
       >

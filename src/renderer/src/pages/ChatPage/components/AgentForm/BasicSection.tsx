@@ -185,40 +185,38 @@ export const BasicSection: React.FC<BasicSectionProps> = ({
       <div className="flex items-center gap-4">
         {/* Name & Icon */}
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Name & Icon
-          </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('nameDescription')}</p>
+          <label className="block text-sm font-medium text-ink">Name & Icon</label>
+          <p className="text-xs text-ink-muted mb-1">{t('nameDescription')}</p>
           <div className="flex gap-3">
             {/* Icon */}
             <div className="relative pt-1">
               <button
                 type="button"
                 onClick={() => setShowIconPicker(!showIconPicker)}
-                className="flex items-center justify-center rounded-md border
-              border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800
-              transition-colors w-10 h-10 bg-blue-50 dark:bg-blue-900/20"
+                className="flex items-center justify-center rounded-control border
+              border-subtle bg-raised hover:bg-sunken
+              transition-colors w-10 h-10"
               >
                 {icon ? (
                   <AgentIconView
                     icon={icon}
                     iconColor={iconColor}
-                    className={`w-5 h-5 ${!iconColor ? 'text-gray-700 dark:text-gray-300' : ''}`}
+                    className={`w-4 h-4 ${!iconColor ? 'text-ink' : ''}`}
                   />
                 ) : (
-                  <TbRobot className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                  <TbRobot className="w-4 h-4 text-ink" />
                 )}
               </button>
 
               {showIconPicker && (
                 <div
                   ref={iconPickerRef}
-                  className="absolute z-50 left-0 top-full mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border
-                border-gray-200 dark:border-gray-700 p-2 w-[400px]"
+                  className="absolute z-50 left-0 top-full mt-2 bg-surface rounded-container shadow-lg border
+                border-subtle p-2 w-[400px]"
                 >
                   {/* Color Picker */}
-                  <div className="p-2 border-b border-gray-200 dark:border-gray-700 pb-6 color-picker-container">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                  <div className="p-2 border-b border-subtle pb-6 color-picker-container">
+                    <label className="block text-sm font-medium text-ink mb-2">
                       {t('iconColor')}
                     </label>
                     <div className="flex items-center gap-2">
@@ -229,21 +227,21 @@ export const BasicSection: React.FC<BasicSectionProps> = ({
                           onChange={(e) => {
                             onChange('iconColor', e.target.value)
                           }}
-                          className="w-8 h-8 rounded cursor-pointer"
+                          className="w-8 h-8 rounded-control cursor-pointer"
                           style={{ position: 'relative', zIndex: 60 }}
                         />
                       </div>
                       <button
                         type="button"
                         onClick={() => onChange('iconColor', undefined)}
-                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        className="text-sm text-ink-muted hover:text-ink"
                       >
                         {t('reset')}
                       </button>
                       <button
                         type="button"
                         onClick={autoSelectIconAndColor}
-                        className="ml-auto px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                        className="ml-auto px-2 py-1 text-xs bg-accent hover:bg-accent-strong text-accent-fg rounded-control transition-colors"
                       >
                         {t('autoSelect')}
                       </button>
@@ -265,8 +263,8 @@ export const BasicSection: React.FC<BasicSectionProps> = ({
               type="text"
               value={name}
               onChange={(e) => onChange('name', e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800
-              text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="mt-1 block w-full rounded-control border-strong bg-surface
+              text-ink shadow-sm focus:border-accent focus:ring-accent sm:text-sm"
               required
               placeholder={t('namePlaceholder')}
             />
@@ -276,18 +274,14 @@ export const BasicSection: React.FC<BasicSectionProps> = ({
 
       {/* Description Section */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Description
-        </label>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-          {t('descriptionDescription')}
-        </p>
+        <label className="block text-sm font-medium text-ink">Description</label>
+        <p className="text-xs text-ink-muted mb-1">{t('descriptionDescription')}</p>
         <input
           type="text"
           value={description}
           onChange={(e) => onChange('description', e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800
-            text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          className="mt-1 block w-full rounded-control border-strong bg-surface
+            text-ink shadow-sm focus:border-accent focus:ring-accent sm:text-sm"
           required
           placeholder={t('descriptionPlaceholder')}
         />

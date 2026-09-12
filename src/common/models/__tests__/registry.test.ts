@@ -1,13 +1,19 @@
 import { describe, test, expect } from '@jest/globals'
-import { allModels, getModelConfig, getModelsForRegion } from '../models'
+import {
+  allModels,
+  clampMaxTokensToModelLimit,
+  getModelConfig,
+  getModelsForRegion
+} from '../models'
 import { PricingCalculator } from '../pricing'
 
-// OpenAI GPT-5.6 models are served through the standard Bedrock Converse API.
-// They do NOT support on-demand invocation of the bare model ID, so each is
-// exposed only via cross-region inference profiles (global.* and us.*). These
-// cases guard registration, per-region availability, config resolution, and
-// pricing.
+// OpenAI GPT-6 and GPT-5.6 models are served through the standard Bedrock
+// Converse API. They do NOT support on-demand invocation of the bare model ID,
+// so each is exposed only via cross-region inference profiles (global.* and
+// us.*). These cases guard registration, per-region availability, config
+// resolution, and pricing.
 const OPENAI_GPT_MODELS = [
+  { base: 'gpt-6-astra', name: 'GPT-6 Astra' },
   { base: 'gpt-5.6-sol', name: 'GPT-5.6 Sol' },
   { base: 'gpt-5.6-terra', name: 'GPT-5.6 Terra' },
   { base: 'gpt-5.6-luna', name: 'GPT-5.6 Luna' }
@@ -37,7 +43,7 @@ describe('OpenAI GPT model registry integration', () => {
     expect(ids.some((id) => id.includes('gpt-5.4'))).toBe(false)
   })
 
-  test('all GPT-5.6 models are available in the three US regions', () => {
+  test('all OpenAI GPT models are available in the three US regions', () => {
     for (const region of ['us-east-1', 'us-east-2', 'us-west-2'] as const) {
       const ids = getModelsForRegion(region).map((m) => m.modelId)
       for (const { base } of OPENAI_GPT_MODELS) {
@@ -54,7 +60,7 @@ describe('OpenAI GPT model registry integration', () => {
     }
   })
 
-  test('every GPT-5.6 model has pricing wired', () => {
+  test('every OpenAI GPT model has pricing wired', () => {
     for (const { base } of OPENAI_GPT_MODELS) {
       const pricing = getModelConfig(`us.openai.${base}`)?.pricing
       expect(pricing).toBeDefined()
@@ -68,6 +74,17 @@ describe('OpenAI GPT model registry integration', () => {
     // 1M input tokens = $5.50, 1M output tokens = $33.00
     expect(calc.calculateInputCost(1_000_000)).toBeCloseTo(5.5, 5)
     expect(calc.calculateOutputCost(1_000_000)).toBeCloseTo(33.0, 5)
+  })
+
+  test('pricing calculator uses per-1K rates (GPT-6 Astra: $11/$55 per 1M)', () => {
+    const calc = new PricingCalculator('us.openai.gpt-6-astra')
+    // Short Context Window (272K) Geo CRIS rate: 1M input = $11.00, 1M output = $55.00
+    expect(calc.calculateInputCost(1_000_000)).toBeCloseTo(11.0, 5)
+    expect(calc.calculateOutputCost(1_000_000)).toBeCloseTo(55.0, 5)
+  })
+
+  test('GPT-6 Astra allows 128K max output tokens', () => {
+    expect(getModelConfig('us.openai.gpt-6-astra')?.maxTokensLimit).toBe(128000)
   })
 })
 
@@ -123,5 +140,71 @@ describe('xAI Grok model registry integration', () => {
     expect(calc.calculateInputCost(1_000_000)).toBeCloseTo(2.2, 5)
     expect(calc.calculateOutputCost(1_000_000)).toBeCloseTo(6.6, 5)
     expect(calc.calculateCacheReadCost(1_000_000)).toBeCloseTo(0.55, 5)
+  })
+})
+
+// Max Output Tokens is a single global setting, so every request is clamped to
+// the selected model's own ceiling before it is sent.
+describe('clampMaxTokensToModelLimit', () => {
+  test('lowers a request that exceeds the model ceiling', () => {
+    // Haiku 4.5 stops at 64000 even though the setting allows 128000.
+    expect(clampMaxTokensToModelLimit('us.anthropic.claude-haiku-4-5-20251001-v1:0', 128000)).toBe(
+      64000
+    )
+    // First-generation Nova models stop far lower.
+    expect(clampMaxTokensToModelLimit('us.amazon.nova-lite-v1:0', 128000)).toBe(5120)
+  })
+
+  test('leaves a request at or below the ceiling untouched', () => {
+    expect(clampMaxTokensToModelLimit('us.anthropic.claude-opus-5', 128000)).toBe(128000)
+    expect(clampMaxTokensToModelLimit('us.anthropic.claude-opus-5', 4096)).toBe(4096)
+    expect(clampMaxTokensToModelLimit('us.openai.gpt-6-astra', 8192)).toBe(8192)
+  })
+
+  test('passes through models the registry does not know', () => {
+    // Custom inference profile ARNs and imported models have no known ceiling,
+    // so clamping them to a default would silently truncate their output.
+    expect(
+      clampMaxTokensToModelLimit(
+        'arn:aws:bedrock:us-east-1:123456789012:imported-model/abcdefg',
+        200000
+      )
+    ).toBe(200000)
+  })
+
+  test('passes through an unset maxTokens rather than inventing one', () => {
+    expect(clampMaxTokensToModelLimit('us.anthropic.claude-opus-5', undefined)).toBeUndefined()
+  })
+
+  test('every registered text model declares a max output ceiling', () => {
+    // A model with no ceiling silently opts out of clamping, so guard against
+    // an entry being added without one.
+    const missing = allModels.filter((m) => !m.maxTokensLimit).map((m) => m.modelId)
+    expect(missing).toEqual([])
+  })
+})
+
+// Output ceilings verified against each model's AWS model card and confirmed
+// against the Converse API, which rejects an over-large maxTokens with
+// "exceeds the model limit of N".
+describe('model output ceilings', () => {
+  test.each([
+    ['us.anthropic.claude-haiku-4-5-20251001-v1:0', 64000],
+    ['us.anthropic.claude-sonnet-4-5-20250929-v1:0', 64000],
+    ['us.anthropic.claude-opus-4-1-20250805-v1:0', 32000],
+    ['us.anthropic.claude-opus-5', 128000],
+    ['us.anthropic.claude-sonnet-5', 128000],
+    ['us.amazon.nova-premier-v1:0', 32000],
+    ['us.amazon.nova-pro-v1:0', 5120],
+    ['us.amazon.nova-2-lite-v1:0', 64000],
+    ['us.deepseek.r1-v1:0', 32768],
+    ['us.openai.gpt-6-astra', 128000],
+    ['us.openai.gpt-5.6-sol', 128000],
+    ['openai.gpt-oss-120b-1:0', 16384],
+    ['openai.gpt-oss-20b-1:0', 16384],
+    ['moonshotai.kimi-k2.5', 16384],
+    ['us.xai.grok-4.6', 32768]
+  ])('%s caps output at %i tokens', (modelId, expected) => {
+    expect(getModelConfig(modelId as string)?.maxTokensLimit).toBe(expected)
   })
 })

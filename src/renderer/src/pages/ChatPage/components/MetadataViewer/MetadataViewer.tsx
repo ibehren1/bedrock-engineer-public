@@ -14,32 +14,30 @@ export const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata }) => {
   const currencyLocale = i18n.language === 'ja' ? 'ja-JP' : 'en-US'
 
   if (!metadata) {
-    return <div className="text-gray-500 dark:text-gray-300">{t('No metadata available')}</div>
+    return <div className="text-ink-muted">{t('No metadata available')}</div>
   }
 
   return (
-    <div className="text-sm flex flex-col gap-6">
+    <div className="text-sm flex flex-col gap-3">
       {metadata?.converseMetadata?.usage && (
         <div className="flex flex-col gap-3">
-          <h3 className="font-medium text-base border-b pb-2 text-gray-900 dark:text-gray-100">
-            {t('Token Usage')}
-          </h3>
-          <div className="grid grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+          <h3 className="font-medium text-base border-b pb-2 text-ink">{t('Token Usage')}</h3>
+          <div className="grid grid-cols-3 gap-4 bg-surface-2 p-2.5 rounded-container">
             <div className="flex flex-col">
-              <span className="text-gray-500 dark:text-gray-300">{t('Input')}</span>
-              <span className="font-medium text-lg text-gray-900 dark:text-gray-100">
+              <span className="text-ink-muted">{t('Input')}</span>
+              <span className="font-medium text-heading text-ink">
                 {metadata.converseMetadata.usage.inputTokens}
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-gray-500 dark:text-gray-300">{t('Output')}</span>
-              <span className="font-medium text-lg text-gray-900 dark:text-gray-100">
+              <span className="text-ink-muted">{t('Output')}</span>
+              <span className="font-medium text-heading text-ink">
                 {metadata.converseMetadata.usage.outputTokens}
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-gray-500 dark:text-gray-300">{t('Total')}</span>
-              <span className="font-medium text-lg text-gray-900 dark:text-gray-100">
+              <span className="text-ink-muted">{t('Total')}</span>
+              <span className="font-medium text-heading text-ink">
                 {metadata.converseMetadata.usage.totalTokens}
               </span>
             </div>
@@ -50,15 +48,13 @@ export const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata }) => {
       {/* コスト情報セクション - 使用量がある場合のみ表示 */}
       {metadata.sessionCost && (
         <div className="flex flex-col gap-3">
-          <h3 className="font-medium text-base border-b pb-2 text-gray-900 dark:text-gray-100">
-            {t('Cost')}
-          </h3>
-          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+          <h3 className="font-medium text-base border-b pb-2 text-ink">{t('Cost')}</h3>
+          <div className="bg-surface-2 p-2.5 rounded-container">
             <div className="flex items-center">
-              <CurrencyDollarIcon className="w-5 h-5 text-green-600 mr-2" />
+              <CurrencyDollarIcon className="w-4 h-4 text-success mr-2" />
               <div className="flex flex-col">
-                <span className="text-gray-500 dark:text-gray-300">{t('Session Cost')}</span>
-                <span className="font-medium text-lg text-gray-900 dark:text-gray-100">
+                <span className="text-ink-muted">{t('Session Cost')}</span>
+                <span className="font-medium text-heading text-ink">
                   {PricingCalculator.formatCurrency(metadata.sessionCost, 'USD', currencyLocale)}
                 </span>
               </div>
@@ -72,19 +68,17 @@ export const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata }) => {
         (metadata.converseMetadata.usage.cacheReadInputTokens !== undefined ||
           metadata.converseMetadata.usage.cacheWriteInputTokens !== undefined) && (
           <div className="flex flex-col gap-3">
-            <h3 className="font-medium text-base border-b pb-2 text-gray-900 dark:text-gray-100">
-              {t('Cache Usage')}
-            </h3>
-            <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+            <h3 className="font-medium text-base border-b pb-2 text-ink">{t('Cache Usage')}</h3>
+            <div className="grid grid-cols-2 gap-4 bg-surface-2 p-2.5 rounded-container">
               <div className="flex flex-col">
-                <span className="text-gray-500 dark:text-gray-300">{t('Cache Read')}</span>
-                <span className="font-medium text-lg text-gray-900 dark:text-gray-100">
+                <span className="text-ink-muted">{t('Cache Read')}</span>
+                <span className="font-medium text-heading text-ink">
                   {metadata.converseMetadata.usage.cacheReadInputTokens || 0}
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-gray-500 dark:text-gray-300">{t('Cache Write')}</span>
-                <span className="font-medium text-lg text-gray-900 dark:text-gray-100">
+                <span className="text-ink-muted">{t('Cache Write')}</span>
+                <span className="font-medium text-heading text-ink">
                   {metadata.converseMetadata.usage.cacheWriteInputTokens || 0}
                 </span>
               </div>
@@ -93,14 +87,14 @@ export const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata }) => {
             {/* キャッシュ状態インジケーター */}
             <div className="mt-1">
               {metadata.converseMetadata.usage.cacheReadInputTokens > 0 && (
-                <div className="flex items-center text-green-500 text-sm">
+                <div className="flex items-center text-success text-sm">
                   <CheckCircleIcon className="w-4 h-4 mr-1" />
                   <span>{t('Cache hit detected!')}</span>
                 </div>
               )}
               {metadata.converseMetadata.usage.cacheWriteInputTokens > 0 &&
                 metadata.converseMetadata.usage.cacheReadInputTokens === 0 && (
-                  <div className="flex items-center text-blue-500 text-sm">
+                  <div className="flex items-center text-accent text-sm">
                     <ServerIcon className="w-4 h-4 mr-1" />
                     <span>{t('New cache created')}</span>
                   </div>
@@ -111,13 +105,11 @@ export const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata }) => {
 
       {metadata?.converseMetadata?.metrics && (
         <div className="flex flex-col gap-3">
-          <h3 className="font-medium text-base border-b pb-2 text-gray-900 dark:text-gray-100">
-            {t('Performance')}
-          </h3>
-          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+          <h3 className="font-medium text-base border-b pb-2 text-ink">{t('Performance')}</h3>
+          <div className="bg-surface-2 p-2.5 rounded-container">
             <div className="flex flex-col">
-              <span className="text-gray-500 dark:text-gray-300">{t('Latency')}</span>
-              <span className="font-medium text-lg text-gray-900 dark:text-gray-100">
+              <span className="text-ink-muted">{t('Latency')}</span>
+              <span className="font-medium text-heading text-ink">
                 {metadata.converseMetadata.metrics.latencyMs} ms
               </span>
             </div>
@@ -127,10 +119,8 @@ export const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata }) => {
 
       {metadata?.converseMetadata?.trace && (
         <div className="flex flex-col gap-3">
-          <h3 className="font-medium text-base border-b pb-2 text-gray-900 dark:text-gray-100">
-            {t('Trace')}
-          </h3>
-          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg overflow-auto max-h-64">
+          <h3 className="font-medium text-base border-b pb-2 text-ink">{t('Trace')}</h3>
+          <div className="bg-surface-2 p-2.5 rounded-container overflow-auto max-h-64">
             <JSONCodeBlock json={metadata.converseMetadata.trace} />
           </div>
         </div>
@@ -138,10 +128,10 @@ export const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata }) => {
 
       {metadata?.converseMetadata?.performanceConfig && (
         <div className="flex flex-col gap-3">
-          <h3 className="font-medium text-base border-b pb-2 text-gray-900 dark:text-gray-100">
+          <h3 className="font-medium text-base border-b pb-2 text-ink">
             {t('Performance Config')}
           </h3>
-          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg overflow-auto max-h-64">
+          <div className="bg-surface-2 p-2.5 rounded-container overflow-auto max-h-64">
             <JSONCodeBlock json={metadata.converseMetadata.performanceConfig} />
           </div>
         </div>

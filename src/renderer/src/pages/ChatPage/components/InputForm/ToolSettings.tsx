@@ -9,10 +9,10 @@ export const ToolSettings: React.FC<ToolSettingsProps> = ({ onOpenToolSettings }
   return (
     <label
       onClick={onOpenToolSettings}
-      className="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:text-gray-500"
+      className="block text-sm font-medium text-ink cursor-pointer hover:text-ink-muted"
     >
       <div className="flex gap-2 items-center">
-        <FcSupport className="text-lg" />
+        <FcSupport className="text-base" />
         <span>Tools</span>
       </div>
     </label>

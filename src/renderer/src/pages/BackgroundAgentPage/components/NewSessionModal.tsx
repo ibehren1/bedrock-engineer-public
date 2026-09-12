@@ -56,25 +56,22 @@ export const NewSessionModal: React.FC<NewSessionModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-surface rounded-container shadow-xl w-full max-w-md mx-4">
         {/* ヘッダー */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="flex items-center justify-between p-3 border-b border-subtle">
+          <h2 className="text-heading font-semibold text-ink">
             {t('backgroundAgent.newSession.title')}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-          >
-            <FiX className="w-5 h-5" />
+          <button onClick={onClose} className="text-ink-faint hover:text-ink-muted">
+            <FiX className="w-4 h-4" />
           </button>
         </div>
 
         {/* フォーム */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-3 space-y-3">
           {/* モデル選択 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               {t('backgroundAgent.newSession.modelSelection')}
             </label>
             <ModelSelector openable={true} />
@@ -82,14 +79,14 @@ export const NewSessionModal: React.FC<NewSessionModalProps> = ({
 
           {/* エージェント選択 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               {t('backgroundAgent.newSession.agentSelection')}
             </label>
             <div className="relative">
               <select
                 value={selectedAgentId || ''}
                 onChange={(e) => setSelectedAgentId(e.target.value || null)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white appearance-none"
+                className="w-full px-3 py-2 border border-strong rounded-control focus:outline-none focus:ring-2 focus:ring-accent bg-raised text-ink appearance-none"
               >
                 <option value="">{t('backgroundAgent.newSession.noAgent')}</option>
                 {agents.map((agent) => (
@@ -102,7 +99,7 @@ export const NewSessionModal: React.FC<NewSessionModalProps> = ({
 
             {/* 選択されたエージェントの詳細表示 */}
             {selectedAgent && (
-              <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+              <div className="mt-3 p-3 bg-surface-2 rounded-control">
                 <div className="flex items-center gap-2 mb-2">
                   {selectedAgent.icon ? (
                     <AgentIconView
@@ -113,13 +110,9 @@ export const NewSessionModal: React.FC<NewSessionModalProps> = ({
                   ) : (
                     <TbRobot className="w-4 h-4" />
                   )}
-                  <span className="font-medium text-sm text-gray-900 dark:text-white">
-                    {selectedAgent.name}
-                  </span>
+                  <span className="font-medium text-sm text-ink">{selectedAgent.name}</span>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  {selectedAgent.description}
-                </p>
+                <p className="text-xs text-ink-muted">{selectedAgent.description}</p>
               </div>
             )}
           </div>
@@ -129,13 +122,13 @@ export const NewSessionModal: React.FC<NewSessionModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="flex-1 px-2.5 py-1 text-ink border border-strong rounded-control hover:bg-surface-2 transition-colors"
             >
               {t('backgroundAgent.newSession.cancel')}
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              className="flex-1 px-2.5 py-1 bg-accent text-accent-fg rounded-control hover:bg-accent-strong transition-colors"
             >
               {t('backgroundAgent.newSession.create')}
             </button>

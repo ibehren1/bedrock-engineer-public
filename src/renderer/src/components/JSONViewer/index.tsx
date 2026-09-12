@@ -39,16 +39,15 @@ export const JSONViewer: React.FC<JSONViewerProps> = ({
     return (
       jsonStr
         // キーの色を変更（"key": の部分）
-        .replace(/"([^"]+)":/g, '<span class="text-indigo-600 dark:text-indigo-400">"$1"</span>:')
+        .replace(/"([^"]+)":/g, '<span class="text-accent">"$1"</span>:')
         // 文字列値の色を変更（": "value" の部分）
-        .replace(/: "([^"]*)"/g, ': <span class="text-green-600 dark:text-green-400">"$1"</span>')
+        .replace(/: "([^"]*)"/g, ': <span class="text-success">"$1"</span>')
         // 数値の色を変更
-        .replace(/: (\\d+)(,?)/g, ': <span class="text-blue-600 dark:text-blue-400">$1</span>$2')
+        // `\\d` matched a literal backslash followed by "d", so numbers were
+        // never actually highlighted.
+        .replace(/: (\d+)(,?)/g, ': <span class="text-accent">$1</span>$2')
         // ブール値の色を変更
-        .replace(
-          /: (true|false)(,?)/g,
-          ': <span class="text-yellow-600 dark:text-yellow-400">$1</span>$2'
-        )
+        .replace(/: (true|false)(,?)/g, ': <span class="text-warning">$1</span>$2')
         // nullの色を変更
         .replace(
           /: (null)(,?)/g,
@@ -68,7 +67,7 @@ export const JSONViewer: React.FC<JSONViewerProps> = ({
   return (
     <div className="json-viewer">
       {title && (
-        <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+        <h4 className="mb-2 text-sm font-medium text-ink flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-5 w-5 mr-2"
@@ -90,11 +89,9 @@ export const JSONViewer: React.FC<JSONViewerProps> = ({
       <div className="relative group">
         <pre
           className={`
-            bg-gray-50 dark:bg-gray-800 p-4 rounded-md text-sm font-mono
+            bg-surface-2 p-4 rounded-control text-sm font-mono
             overflow-auto whitespace-pre border
-            border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200
-            scrollbar scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600
-            scrollbar-track-gray-100 dark:scrollbar-track-gray-800
+            border-subtle text-ink
           `}
           style={{ maxHeight }}
           dangerouslySetInnerHTML={{ __html: highlightedJson }}
@@ -103,9 +100,9 @@ export const JSONViewer: React.FC<JSONViewerProps> = ({
         {showCopyButton && (
           <button
             onClick={handleCopy}
-            className="absolute top-2 right-2 bg-gray-200 dark:bg-gray-700 p-1.5 rounded-md
+            className="absolute top-2 right-2 bg-raised p-1.5 rounded-control
                       opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                      text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      text-ink-muted hover:bg-sunken"
             title={t('Copy JSON')}
             aria-label={t('Copy JSON')}
           >

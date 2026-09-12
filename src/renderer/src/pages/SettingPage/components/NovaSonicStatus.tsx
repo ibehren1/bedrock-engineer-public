@@ -36,14 +36,14 @@ export const NovaSonicStatus: React.FC<NovaSonicStatusProps> = ({ currentRegion 
 
   const getStatusIcon = () => {
     if (loading) {
-      return <BsArrowClockwise className="w-4 h-4 text-gray-500 animate-spin" />
+      return <BsArrowClockwise className="w-4 h-4 text-ink-muted animate-spin" />
     }
 
     if (regionCheck?.isSupported) {
-      return <BsCheckCircle className="w-4 h-4 text-green-500" />
+      return <BsCheckCircle className="w-4 h-4 text-success" />
     }
 
-    return <BsXCircle className="w-4 h-4 text-red-500" />
+    return <BsXCircle className="w-4 h-4 text-danger" />
   }
 
   const getStatusText = () => {
@@ -59,21 +59,21 @@ export const NovaSonicStatus: React.FC<NovaSonicStatusProps> = ({ currentRegion 
   }
 
   const getStatusColor = () => {
-    if (loading) return 'text-gray-600 dark:text-gray-400'
-    if (regionCheck?.isSupported) return 'text-green-600 dark:text-green-400'
-    return 'text-red-600 dark:text-red-400'
+    if (loading) return 'text-ink-muted'
+    if (regionCheck?.isSupported) return 'text-success'
+    return 'text-danger'
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+    <div className="bg-surface-2 rounded-container p-2.5">
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <h4 className="text-sm font-medium text-ink">
           {t('settings.novaSonic.title', 'Voice Chat (Nova Sonic)')}
         </h4>
         <button
           onClick={checkRegionStatus}
           disabled={loading}
-          className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50"
+          className="p-1 text-ink-muted hover:text-ink disabled:opacity-50"
           title={t('settings.novaSonic.refresh', 'Refresh status')}
         >
           <BsArrowClockwise className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -87,7 +87,7 @@ export const NovaSonicStatus: React.FC<NovaSonicStatusProps> = ({ currentRegion 
 
       {regionCheck && !loading && (
         <>
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+          <div className="text-xs text-ink-muted mb-2">
             {t('settings.novaSonic.currentRegion', 'Current region: {{region}}', {
               region: regionCheck.currentRegion
             })}
@@ -95,16 +95,16 @@ export const NovaSonicStatus: React.FC<NovaSonicStatusProps> = ({ currentRegion 
 
           {!regionCheck.isSupported && (
             <div className="space-y-2">
-              <div className="flex items-start space-x-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded">
-                <BsExclamationCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                <div className="text-xs text-amber-700 dark:text-amber-300">
+              <div className="flex items-start space-x-2 p-2 bg-warning-soft rounded-control">
+                <BsExclamationCircle className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-warning">
                   {t('settings.novaSonic.supportedRegions', 'Supported regions: {{regions}}', {
                     regions: regionCheck.supportedRegions.join(', ')
                   })}
                 </div>
               </div>
               {regionCheck.error && (
-                <div className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded">
+                <div className="text-xs text-danger bg-danger-soft p-2 rounded-control">
                   {regionCheck.error}
                 </div>
               )}

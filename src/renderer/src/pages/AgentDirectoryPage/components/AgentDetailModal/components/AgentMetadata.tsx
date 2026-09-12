@@ -14,12 +14,10 @@ export const AgentMetadata: React.FC<AgentMetadataProps> = ({ author, tags }) =>
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
+    <div className="bg-surface-2 p-2.5 rounded-container">
       {author && (
         <div className="mb-4">
-          <span className="text-sm text-gray-500 dark:text-gray-400 mb-2 block">
-            {t('authorLabel')}
-          </span>
+          <span className="text-sm text-ink-muted mb-2 block">{t('authorLabel')}</span>
           <div
             className="flex items-center cursor-pointer"
             onClick={() => open(`https://github.com/${author}`)}
@@ -27,7 +25,7 @@ export const AgentMetadata: React.FC<AgentMetadataProps> = ({ author, tags }) =>
             <img
               src={`https://github.com/${author}.png`}
               alt={`${author} avatar`}
-              className="w-8 h-8 rounded-full object-cover mr-2 flex-shrink-0 border border-gray-200 dark:border-gray-700"
+              className="w-8 h-8 rounded-full object-cover mr-2 flex-shrink-0 border border-subtle"
               onError={(e) => {
                 e.currentTarget.style.display = 'none'
                 const sibling = e.currentTarget.nextElementSibling
@@ -37,26 +35,26 @@ export const AgentMetadata: React.FC<AgentMetadataProps> = ({ author, tags }) =>
               }}
             />
             <div
-              className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mr-2"
+              className="w-8 h-8 rounded-full bg-raised flex items-center justify-center mr-2"
               style={{ display: 'none' }}
             >
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              <span className="text-sm font-medium text-ink-muted">
                 {author.charAt(0).toUpperCase()}
               </span>
             </div>
-            <span className="dark:text-white">{author}</span>
+            <span className="text-ink">{author}</span>
           </div>
         </div>
       )}
 
       {tags && tags.length > 0 && (
         <div>
-          <span className="text-sm text-gray-500 dark:text-gray-400 block mb-2">Tags</span>
+          <span className="text-sm text-ink-muted block mb-2">Tags</span>
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300"
+                className="bg-raised text-ink text-xs font-medium px-2.5 py-0.5 rounded-control"
               >
                 {tag}
               </span>

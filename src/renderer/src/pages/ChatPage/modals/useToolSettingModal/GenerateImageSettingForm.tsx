@@ -45,10 +45,10 @@ export const GenerateImageSettingForm: React.FC = () => {
   }
 
   return (
-    <div className="prose dark:prose-invert max-w-none w-full">
+    <div className="max-w-none w-full">
       {/* ツールの説明 */}
-      <div className="mb-6 w-full">
-        <p className="mb-4 text-gray-700 dark:text-gray-300">
+      <div className="mb-3 w-full">
+        <p className="mb-4 text-ink">
           {t(
             'tool info.generateImage.description',
             'The generateImage tool uses AI image generation capabilities to create images from text descriptions. It helps the AI assistant generate visual content based on textual prompts and save them to specified locations.'
@@ -57,7 +57,7 @@ export const GenerateImageSettingForm: React.FC = () => {
       </div>
 
       {/* 設定フォーム */}
-      <div className="flex flex-col gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-md mb-6 w-full">
+      <div className="flex flex-col gap-2 p-2.5 border border-subtle rounded-control mb-3 w-full">
         <div className="mb-4 w-full">
           <Label htmlFor="generateImageModel" value={t('Image Generation Model')} />
           {sortedModels.length > 0 ? (
@@ -74,8 +74,8 @@ export const GenerateImageSettingForm: React.FC = () => {
               ))}
             </Select>
           ) : (
-            <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/20 dark:border dark:border-red-700 rounded-md">
-              <p className="text-sm text-red-700 dark:text-red-300">
+            <div className="mt-2 p-3 bg-danger-soft border border-danger rounded-control">
+              <p className="text-sm text-danger">
                 {t(
                   'No image generation models available in the selected region',
                   'No image generation models are available in the selected AWS region. Please select a different region that supports image generation models.'
@@ -86,9 +86,9 @@ export const GenerateImageSettingForm: React.FC = () => {
         </div>
 
         {/* 使用上の注意 */}
-        <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 dark:border dark:border-yellow-700 rounded-md">
-          <h5 className="font-medium mb-2 dark:text-yellow-300">{t('Important Notes')}</h5>
-          <ul className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
+        <div className="mt-4 p-3 bg-warning-soft border border-warning rounded-control">
+          <h5 className="font-medium mb-2 text-warning">{t('Important Notes')}</h5>
+          <ul className="text-sm text-ink space-y-1">
             <li>• {t('Model availability may vary by AWS region')}</li>
             <li>• {t('Different models support different aspect ratios and features')}</li>
             <li>• {t('Image generation costs vary by model and output resolution')}</li>

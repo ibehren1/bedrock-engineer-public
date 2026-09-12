@@ -361,6 +361,12 @@ export const CustomAgentSchema = BaseAgentSchema.extend({
   isShared: z.boolean().optional(),
   directoryOnly: z.boolean().optional(),
   organizationId: z.string().optional(),
+  /**
+   * Absolute path of the file a shared agent was loaded from. Set when reading
+   * `.bedrock-engineer/agents/`, and stripped again before writing an agent back out — it describes
+   * where this copy came from, not the agent itself.
+   */
+  sharedFilePath: z.string().optional(),
   tools: z.array(ToolNameSchema).optional(),
   category: AgentCategorySchema.optional(),
   allowedCommands: z.array(CommandConfigSchema).optional(),

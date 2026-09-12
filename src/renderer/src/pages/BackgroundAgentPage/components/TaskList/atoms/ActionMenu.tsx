@@ -45,26 +45,24 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({ items, title = 'More act
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="p-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+        className="p-2 text-ink-muted hover:text-ink transition-colors rounded-control hover:bg-raised"
         title={title}
       >
-        <EllipsisVerticalIcon className="h-5 w-5" />
+        <EllipsisVerticalIcon className="h-4 w-4" />
       </button>
 
       {showMenu && (
-        <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-600 z-10">
+        <div className="absolute right-0 top-full mt-2 w-48 bg-surface rounded-control shadow-lg border border-subtle z-10">
           <div className="py-1">
             {items.map((item, index) => (
               <React.Fragment key={item.key}>
-                {item.separator && index > 0 && (
-                  <hr className="my-1 border-gray-200 dark:border-gray-600" />
-                )}
+                {item.separator && index > 0 && <hr className="my-1 border-subtle" />}
                 <button
                   onClick={() => handleItemClick(item)}
-                  className={`flex items-center w-full px-4 py-2 text-sm transition-colors ${
+                  className={`flex items-center w-full px-2.5 py-1 text-sm transition-colors ${
                     item.variant === 'danger'
-                      ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      ? 'text-danger hover:bg-danger-soft'
+                      : 'text-ink hover:bg-raised'
                   }`}
                 >
                   {item.icon && <span className="mr-3">{item.icon}</span>}

@@ -14,9 +14,9 @@ export const NotificationSection = () => {
           id="enable-notification"
           checked={notification}
           onChange={(e) => setNotification(e.target.checked)}
-          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          className="h-4 w-4 rounded-control border-strong text-accent focus:ring-accent"
         />
-        <label htmlFor="enable-notification" className="text-sm text-gray-700">
+        <label htmlFor="enable-notification" className="text-sm text-ink">
           {t('notification.enable')}
         </label>
       </div>

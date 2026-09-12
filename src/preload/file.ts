@@ -30,19 +30,26 @@ async function readSharedAgents(): Promise<{ agents: CustomAgent[]; error?: Erro
     // Read all files in the directory
     const files = await promisify(fs.readdir)(sharedAgentsDir)
 
-    // Filter only yaml files
-    const yamlFiles = files.filter((file) => file.endsWith('.yaml') || file.endsWith('.yml'))
+    // Accept the same formats the main-process loader writes and reads
+    const agentFiles = files.filter(
+      (file) => file.endsWith('.yaml') || file.endsWith('.yml') || file.endsWith('.json')
+    )
 
-    // Read and parse each yaml file
+    // Read and parse each agent file
     const agents = await Promise.all(
-      yamlFiles.map(async (file) => {
+      agentFiles.map(async (file) => {
         try {
           const filePath = path.join(sharedAgentsDir, file)
           const content = await promisify(fs.readFile)(filePath, 'utf8')
-          const agent = yaml.load(content) as CustomAgent
+          const agent = (
+            file.endsWith('.json') ? JSON.parse(content) : yaml.load(content)
+          ) as CustomAgent
 
           // Flag this agent as shared
           agent.isShared = true
+
+          // Remember the source file so the UI can download or delete it
+          agent.sharedFilePath = filePath
           return agent
         } catch (error) {
           console.error(`Error parsing agent file ${file}:`, error)
@@ -148,6 +155,69 @@ async function saveSharedAgent(
     return await ipcRenderer.invoke('save-shared-agent', agent, options)
   } catch (error) {
     console.error('Error saving shared agent:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+}
+
+/**
+ * Delete the shared copy of an agent: its file under .bedrock-engineer/agents. The user confirms in
+ * a native dialog first, and their own copy of the agent is left untouched.
+ * @param filePath The shared agent file to delete, as reported by readSharedAgents
+ * @returns Result with success status, or `canceled` when the user backed out
+ */
+async function deleteSharedAgent(
+  filePath: string
+): Promise<{ success: boolean; canceled?: boolean; filePath?: string; error?: string }> {
+  try {
+    return await ipcRenderer.invoke('delete-shared-agent', { filePath })
+  } catch (error) {
+    console.error('Error deleting shared agent:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+}
+
+/**
+ * Write an agent to a YAML file the user picks, for sending to someone else or keeping outside the
+ * app. Fields describing this particular copy (id, sharing flags) are left out of the file.
+ * @param agent The agent to export
+ * @returns Result with the written path, or `canceled` when the user dismissed the save dialog
+ */
+async function exportAgentYaml(
+  agent: CustomAgent
+): Promise<{ success: boolean; canceled?: boolean; filePath?: string; error?: string }> {
+  try {
+    return await ipcRenderer.invoke('export-agent-yaml', { agent })
+  } catch (error) {
+    console.error('Error exporting agent YAML:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+}
+
+/**
+ * Read an agent config file the user picks. The caller is responsible for giving the result a fresh
+ * id and adding it to the user's own agents.
+ * @returns The parsed agent, or `canceled` when the user dismissed the file picker
+ */
+async function importAgentFile(): Promise<{
+  success: boolean
+  canceled?: boolean
+  agent?: CustomAgent
+  filePath?: string
+  error?: string
+}> {
+  try {
+    return await ipcRenderer.invoke('import-agent-file')
+  } catch (error) {
+    console.error('Error importing agent file:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : String(error)
@@ -272,6 +342,9 @@ export const file = {
   readSharedAgents,
   readDirectoryAgents,
   saveSharedAgent,
+  deleteSharedAgent,
+  exportAgentYaml,
+  importAgentFile,
   loadOrganizationAgents,
   saveAgentToOrganization,
   exportChatMarkdown,

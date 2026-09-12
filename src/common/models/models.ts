@@ -848,13 +848,15 @@ const MODEL_REGISTRY: ModelConfig[] = [
   },
 
   // Amazon Nova 2 Lite
+  // Unlike the first-generation Nova models, which stop at 5K output tokens,
+  // Nova 2 Lite emits up to 64K (AWS model card; the API accepts up to 65535).
   {
     baseId: 'nova-2-lite-v1:0',
     name: 'Amazon Nova 2 Lite',
     provider: 'amazon',
     category: 'text',
     toolUse: true,
-    maxTokensLimit: 5120,
+    maxTokensLimit: 64000,
     inferenceProfiles: [
       {
         type: 'regional-us',
@@ -933,6 +935,47 @@ const MODEL_REGISTRY: ModelConfig[] = [
         displaySuffix: '(US)'
       }
     ]
+  },
+
+  // OpenAI GPT-6 Astra
+  // Invoked through the Bedrock Converse API via a cross-region inference
+  // profile (`us.openai.gpt-6-astra` / `global.openai.gpt-6-astra`); on-demand
+  // invocation of the bare model ID is not supported. OpenAI's most capable
+  // model: complex reasoning, coding, computer use, research, document
+  // creation. 1.05M context window, 128K max output.
+  // Pricing: $11.00/$55.00 per 1M in/out (stored per 1K), Short Context Window
+  // (272K) at the Geo CRIS rate. The (Global) profile is ~9% cheaper and input
+  // beyond 272K bills at the Long Context tier (~2x), so displayed cost is a
+  // floor rather than an exact figure.
+  {
+    baseId: 'gpt-6-astra',
+    name: 'GPT-6 Astra',
+    provider: 'openai',
+    category: 'text',
+    toolUse: true,
+    maxTokensLimit: 128000,
+    supportsThinking: true,
+    supportedThinkingTypes: ['enabled'],
+    inferenceProfiles: [
+      {
+        type: 'global',
+        prefix: 'global',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(US)'
+      }
+    ],
+    pricing: {
+      input: 0.011,
+      output: 0.055,
+      cacheRead: 0.0011,
+      cacheWrite: 0.01375
+    }
   },
 
   // OpenAI GPT-5.6 Sol
@@ -1045,13 +1088,14 @@ const MODEL_REGISTRY: ModelConfig[] = [
   },
 
   // OpenAI GPT-OSS 120B
+  // 16K output tokens per the AWS model card.
   {
     baseId: 'gpt-oss-120b-1:0',
     name: 'GPT-OSS 120B',
     provider: 'openai',
     category: 'text',
     toolUse: true,
-    maxTokensLimit: 8192,
+    maxTokensLimit: 16384,
     supportsThinking: false,
     inferenceProfiles: [
       {
@@ -1069,13 +1113,14 @@ const MODEL_REGISTRY: ModelConfig[] = [
   },
 
   // OpenAI GPT-OSS 20B
+  // 16K output tokens per the AWS model card.
   {
     baseId: 'gpt-oss-20b-1:0',
     name: 'GPT-OSS 20B',
     provider: 'openai',
     category: 'text',
     toolUse: true,
-    maxTokensLimit: 8192,
+    maxTokensLimit: 16384,
     supportsThinking: false,
     inferenceProfiles: [
       {
@@ -1511,6 +1556,29 @@ export const getModelConfig = (modelId: string): ModelConfig | undefined => {
   return MODEL_REGISTRY.find(
     (c) => baseModelId.includes(c.baseId) || baseModelId.includes(`${c.provider}.${c.baseId}`)
   )
+}
+
+/**
+ * Resolve the maxTokens value to send for a model: the lesser of what the
+ * caller asked for and the model's own output ceiling.
+ *
+ * Max Output Tokens is a single global setting, but the ceiling is per model —
+ * 128000 is valid for Opus 5 and rejected by Haiku 4.5, which stops at 64000.
+ * Rather than making the user re-tune the setting per model, every request is
+ * clamped here.
+ *
+ * Models the registry does not know (custom inference profile ARNs, imported
+ * models) have no ceiling to clamp against, so their requested value is passed
+ * through untouched.
+ */
+export const clampMaxTokensToModelLimit = (
+  modelId: string,
+  requestedMaxTokens: number | undefined
+): number | undefined => {
+  if (typeof requestedMaxTokens !== 'number') return requestedMaxTokens
+  const limit = getModelConfig(modelId)?.maxTokensLimit
+  if (!limit) return requestedMaxTokens
+  return Math.min(requestedMaxTokens, limit)
 }
 
 /**

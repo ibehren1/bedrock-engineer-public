@@ -15,22 +15,20 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, onTagClic
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 transition-all hover:shadow-md cursor-pointer"
+      className="bg-surface rounded-container shadow-sm border border-subtle p-5 transition-all hover:shadow-md cursor-pointer"
       onClick={() => onSelect(agent)}
     >
       <div className="flex items-start">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bg-blue-100 dark:bg-blue-900/40">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bg-raised">
           {agent.icon ? (
             <AgentIconView icon={agent.icon} iconColor={agent.iconColor || '#3B82F6'} />
           ) : (
-            <TbRobot className="w-5 h-5" style={{ color: agent.iconColor || '#3B82F6' }} />
+            <TbRobot className="w-4 h-4" style={{ color: agent.iconColor || '#3B82F6' }} />
           )}
         </div>
         <div>
-          <h3 className="font-medium text-lg dark:text-white">{agent.name}</h3>
-          <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2">
-            {agent.description}
-          </p>
+          <h3 className="font-medium text-heading text-ink">{agent.name}</h3>
+          <p className="text-ink-muted text-sm line-clamp-2">{agent.description}</p>
         </div>
       </div>
 
@@ -40,7 +38,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, onTagClic
           {agent.tags.slice(0, 3).map((tag) => (
             <button
               key={tag}
-              className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="bg-raised text-ink text-xs font-medium px-2.5 py-0.5 rounded-control hover:bg-sunken transition-colors"
               onClick={(e) => {
                 e.stopPropagation() // Prevent card click from triggering
                 if (onTagClick) onTagClick(tag)
@@ -50,7 +48,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, onTagClic
             </button>
           ))}
           {agent.tags.length > 3 && (
-            <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+            <span className="bg-raised text-ink text-xs font-medium px-2.5 py-0.5 rounded-control">
               +{agent.tags.length - 3}
             </span>
           )}
@@ -59,7 +57,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, onTagClic
 
       {/* Author */}
       {agent.author && (
-        <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-4 text-xs text-ink-muted">
           {t('authorLabel')}: {agent.author}
         </div>
       )}

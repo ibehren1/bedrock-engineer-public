@@ -41,10 +41,10 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+      <div className="bg-surface rounded-container p-8 max-w-md w-full mx-4 shadow-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('Select Voice')}</h2>
+          <h2 className="text-title text-ink">{t('Select Voice')}</h2>
         </div>
 
         {/* Voice Visual Container */}
@@ -52,10 +52,10 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
           {/* Previous Button */}
           <button
             onClick={handlePrevious}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            className="p-2 text-ink-faint hover:text-ink-muted transition-colors"
             aria-label="Previous voice"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -70,23 +70,19 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
             <VoiceVisual voiceId={currentVoice.id} />
 
             {/* Voice Name */}
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-4 mb-2">
-              {currentVoice.name}
-            </h3>
+            <h3 className="text-heading text-ink mt-3 mb-2">{currentVoice.name}</h3>
 
             {/* Voice Description */}
-            <p className="text-gray-600 dark:text-gray-300 text-center text-sm">
-              {t(currentVoice.description)}
-            </p>
+            <p className="text-ink-muted text-center text-sm">{t(currentVoice.description)}</p>
           </div>
 
           {/* Next Button */}
           <button
             onClick={handleNext}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            className="p-2 text-ink-faint hover:text-ink-muted transition-colors"
             aria-label="Next voice"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -102,9 +98,7 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
                 onSelectVoice(AVAILABLE_VOICES[index].id)
               }}
               className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentIndex
-                  ? 'bg-blue-500'
-                  : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                index === currentIndex ? 'bg-accent-tint' : 'bg-sunken hover:bg-raised'
               }`}
               aria-label={`Select ${AVAILABLE_VOICES[index].name}`}
             />
@@ -115,14 +109,14 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
         <div className="space-y-3">
           <button
             onClick={onStartNewChat}
-            className="w-full bg-black hover:bg-gray-800 text-white py-3 px-6 rounded-full font-medium transition-colors"
+            className="w-full bg-accent hover:bg-accent-strong text-accent-fg py-1.5 px-3 rounded-full font-medium transition-colors"
           >
             {t('Start New Chat')}
           </button>
 
           <button
             onClick={onCancel}
-            className="w-full text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 py-2 text-center transition-colors"
+            className="w-full text-ink-muted hover:text-ink py-2 text-center transition-colors"
           >
             {t('Cancel')}
           </button>

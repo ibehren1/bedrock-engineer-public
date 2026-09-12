@@ -39,7 +39,7 @@ export const CameraCaptureResult: React.FC<{ response: CameraCaptureResponse }> 
   // Null safety check
   if (!result) {
     return (
-      <div className="w-full bg-red-800 text-red-100 p-4 rounded-lg">
+      <div className="w-full bg-danger text-danger p-2.5 rounded-container">
         <p>{t('Error: Camera capture result is missing')}</p>
       </div>
     )
@@ -90,15 +90,15 @@ export const CameraCaptureResult: React.FC<{ response: CameraCaptureResponse }> 
 
   return (
     <div className="w-full">
-      <div className="bg-gray-800 text-white dark:bg-gray-900 dark:text-gray-100 rounded-lg overflow-hidden shadow-sm border border-gray-700 dark:border-gray-800">
+      <div className="bg-surface-2 text-ink rounded-container overflow-hidden shadow-raised border border-subtle">
         {/* Header section with title and metadata */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 pb-2 border-b border-gray-700 dark:border-gray-600">
-          <h3 className="text-lg font-medium flex items-center gap-2">
-            <HiOutlineCamera className="w-5 h-5 text-blue-400" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 pb-2 border-b border-faint">
+          <h3 className="text-heading font-medium flex items-center gap-2">
+            <HiOutlineCamera className="w-4 h-4 text-accent" />
             {t('Camera Capture')}
           </h3>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-            <span className="text-blue-400" title={`Device ID: ${metadata.deviceId}`}>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
+            <span className="text-accent" title={`Device ID: ${metadata.deviceId}`}>
               {metadata.deviceName}
             </span>
             <span>
@@ -111,7 +111,7 @@ export const CameraCaptureResult: React.FC<{ response: CameraCaptureResponse }> 
         </div>
 
         {/* Main content area */}
-        <div className="flex flex-col md:flex-row gap-4 p-4 pt-2">
+        <div className="flex flex-col md:flex-row gap-4 p-2.5 pt-2">
           {/* Left side: Image display */}
           <div className="flex-shrink-0 md:w-2/5">
             <div
@@ -121,16 +121,16 @@ export const CameraCaptureResult: React.FC<{ response: CameraCaptureResponse }> 
               <LocalImage
                 src={filePath}
                 alt="Camera capture"
-                className="aspect-auto max-h-[40vh] object-contain w-full rounded"
+                className="aspect-auto max-h-[40vh] object-contain w-full rounded-control"
               />
             </div>
-            <div className="mt-2 text-xs text-gray-400 truncate" title={filePath}>
+            <div className="mt-2 text-xs text-ink-faint truncate" title={filePath}>
               {filePath}
             </div>
 
             {/* Camera device info */}
-            <div className="mt-2 text-xs text-gray-400">
-              <span className="text-blue-400">{t('Camera Device')}:</span> {metadata.deviceName}
+            <div className="mt-2 text-xs text-ink-faint">
+              <span className="text-accent">{t('Camera Device')}:</span> {metadata.deviceName}
               {metadata.deviceId !== 'default' && (
                 <span className="opacity-70 ml-1">({metadata.deviceId})</span>
               )}
@@ -141,7 +141,7 @@ export const CameraCaptureResult: React.FC<{ response: CameraCaptureResponse }> 
               <div className="mt-3">
                 <button
                   onClick={() => setIsPromptExpanded(!isPromptExpanded)}
-                  className="text-xs text-gray-400 hover:text-gray-300 flex items-center gap-1 mb-2 transition-colors"
+                  className="text-xs text-ink-faint hover:text-ink-faint flex items-center gap-1 mb-2 transition-colors"
                 >
                   <span
                     className={`transform transition-transform ${isPromptExpanded ? 'rotate-90' : ''}`}
@@ -151,7 +151,7 @@ export const CameraCaptureResult: React.FC<{ response: CameraCaptureResponse }> 
                   {t('Analysis Prompt')}
                 </button>
                 {isPromptExpanded && (
-                  <div className="bg-blue-900/30 text-blue-300 p-2 rounded-md text-sm">
+                  <div className="bg-accent/30 text-accent p-2 rounded-control text-sm">
                     {result.recognition.prompt}
                   </div>
                 )}
@@ -162,13 +162,13 @@ export const CameraCaptureResult: React.FC<{ response: CameraCaptureResponse }> 
           {/* Right side: Analysis results */}
           {result.recognition && (
             <div className="flex-1 flex flex-col h-[40vh]">
-              <div className="bg-gray-900 dark:bg-gray-800 p-3 rounded-md flex-1 overflow-y-auto">
-                <p className="text-gray-300 whitespace-pre-wrap text-sm">
+              <div className="bg-sunken p-2 rounded-control flex-1 overflow-y-auto">
+                <p className="text-ink-faint whitespace-pre-wrap text-sm">
                   {result.recognition.content}
                 </p>
               </div>
 
-              <div className="text-xs text-gray-400 mt-3">
+              <div className="text-xs text-ink-faint mt-3">
                 {t('Analyzed with')}:{' '}
                 <span className="font-mono">{result.recognition.modelId}</span>
               </div>
@@ -191,7 +191,7 @@ export const CameraCaptureResult: React.FC<{ response: CameraCaptureResponse }> 
               style={{ zIndex: 2147483647 }}
               onClick={() => setIsFullscreen(false)}
             >
-              <IoIosClose className="text-white w-8 h-8 hover:bg-gray-700 rounded cursor-pointer" />
+              <IoIosClose className="text-white w-8 h-8 hover:bg-white/20 rounded-control cursor-pointer" />
             </div>
 
             {/* Image content */}

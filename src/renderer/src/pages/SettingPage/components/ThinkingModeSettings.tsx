@@ -26,20 +26,16 @@ export const ThinkingModeSettings = () => {
   }
 
   return (
-    <div className="space-y-4 pt-2 pb-1">
+    <div className="space-y-2 pt-2 pb-1">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-900 dark:text-white">
-          {t('Thinking Mode')}
-        </label>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <label className="block text-sm font-medium text-ink">{t('Thinking Mode')}</label>
+        <p className="text-xs text-ink-muted">
           {t('Thinking mode allows Claude to work through complex problems step by step.')}
         </p>
       </div>
 
       <div className="space-y-1">
-        <label className="block text-sm font-medium text-gray-900 dark:text-white">
-          {t('Thinking Budget')}
-        </label>
+        <label className="block text-sm font-medium text-ink">{t('Thinking Budget')}</label>
         {supportsAdaptive ? (
           <select
             value={thinkingMode?.type === 'adaptive' ? '1' : '0'}
@@ -52,12 +48,12 @@ export const ThinkingModeSettings = () => {
               }
             }}
             className="
-              bg-white dark:bg-gray-800
-              border border-gray-300 dark:border-gray-600
-              text-gray-900 dark:text-white
-              text-sm rounded-lg
-              focus:ring-blue-500 dark:focus:ring-blue-500
-              focus:border-blue-500 dark:focus:border-blue-500
+              bg-surface
+              border border-strong
+              text-ink
+              text-sm rounded-container
+              focus:ring-accent
+              focus:border-accent
               block w-full p-2.5
             "
           >
@@ -69,12 +65,12 @@ export const ThinkingModeSettings = () => {
             value={thinkingMode?.budget_tokens?.toString() || ThinkingModeBudget.NORMAL.toString()}
             onChange={handleBudgetChange}
             className="
-              bg-white dark:bg-gray-800
-              border border-gray-300 dark:border-gray-600
-              text-gray-900 dark:text-white
-              text-sm rounded-lg
-              focus:ring-blue-500 dark:focus:ring-blue-500
-              focus:border-blue-500 dark:focus:border-blue-500
+              bg-surface
+              border border-strong
+              text-ink
+              text-sm rounded-container
+              focus:ring-accent
+              focus:border-accent
               block w-full p-2.5
             "
           >

@@ -37,23 +37,23 @@ const BackgroundAgentPage: React.FC = () => {
   }
 
   return (
-    <div className="px-4 py-6">
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold mb-2 dark:text-white">Background Agent</h1>
+    <div className="px-2.5 py-1.5">
+      <header className="mb-3">
+        <h1 className="text-title mb-2 text-ink">Background Agent</h1>
         <div className="flex items-center">
-          <p className="text-gray-600 dark:text-gray-400">{t('backgroundAgent.pageDescription')}</p>
+          <p className="text-ink-muted">{t('backgroundAgent.pageDescription')}</p>
           <div className="relative ml-2 group">
             <BsQuestionCircle
-              className="w-4 h-4 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer"
+              className="w-4 h-4 text-ink-muted hover:text-accent cursor-pointer"
               onClick={openModal}
             />
             <div
               className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 text-xs
-                            font-medium text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-sm opacity-0 group-hover:opacity-100
+                            font-medium bg-ink text-canvas rounded-container shadow-sm opacity-0 group-hover:opacity-100
                             transition-opacity duration-300 whitespace-nowrap pointer-events-none"
             >
               {t('backgroundAgent.help.tooltip')}
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-ink"></div>
             </div>
           </div>
         </div>

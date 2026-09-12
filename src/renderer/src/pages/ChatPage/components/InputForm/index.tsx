@@ -86,7 +86,7 @@ export const InputForm: React.FC<InputFormProps> = ({
   // so the input slides right in step with the message area above it.
   return (
     <div
-      className={`flex gap-2 fixed bottom-0 right-5 bottom-3 pt-3 transition-all duration-300 ease-in-out ${
+      className={`flex gap-2 fixed bottom-3 right-5 pt-3 transition-all duration-300 ease-in-out ${
         isHistoryOpen ? 'left-[29rem]' : 'left-[5rem]'
       }`}
     >
@@ -126,7 +126,7 @@ export const InputForm: React.FC<InputFormProps> = ({
                   <Tooltip content={t('Stop generation')} placement="top" animation="duration-500">
                     <button
                       onClick={onStopGeneration}
-                      className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
+                      className="p-2 text-danger hover:text-danger-strong rounded-full hover:bg-danger-soft transition-colors duration-200"
                     >
                       <FiStopCircle />
                     </button>
@@ -152,7 +152,7 @@ export const InputForm: React.FC<InputFormProps> = ({
                     <button
                       onClick={onExportChat}
                       disabled={isExporting}
-                      className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2 text-ink-muted hover:text-ink rounded-full hover:bg-surface transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <TbMarkdown />
                     </button>
@@ -167,7 +167,7 @@ export const InputForm: React.FC<InputFormProps> = ({
                     <button
                       onClick={onExportWord}
                       disabled={isExportingWord}
-                      className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2 text-ink-muted hover:text-ink rounded-full hover:bg-surface transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <TbFileTypeDocx />
                     </button>
@@ -182,7 +182,7 @@ export const InputForm: React.FC<InputFormProps> = ({
                     <button
                       onClick={onExportPdf}
                       disabled={isExportingPdf}
-                      className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2 text-ink-muted hover:text-ink rounded-full hover:bg-surface transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <TbFileTypePdf />
                     </button>
@@ -191,7 +191,7 @@ export const InputForm: React.FC<InputFormProps> = ({
                 <Tooltip content={t('New chat')} placement="top" animation="duration-500">
                   <button
                     onClick={onClearChat}
-                    className="p-2 text-green-500 hover:text-green-600 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors duration-200"
+                    className="p-2 text-success hover:text-success-strong rounded-full hover:bg-success-soft transition-colors duration-200"
                   >
                     <TbMessagePlus />
                   </button>

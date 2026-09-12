@@ -391,11 +391,11 @@ export const TextArea: React.FC<TextAreaProps> = ({
               <img
                 src={image.preview}
                 alt={t('textarea.aria.removeImage')}
-                className="w-20 h-20 object-cover rounded-lg"
+                className="w-20 h-20 object-cover rounded-container"
               />
               <button
                 onClick={() => removeImage(index)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -top-2 -right-2 bg-danger text-canvas rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label={t('textarea.aria.removeImage')}
               >
                 <FiX size={14} />
@@ -407,18 +407,16 @@ export const TextArea: React.FC<TextAreaProps> = ({
 
       {/* Container with border that wraps both textarea and controls */}
       <div
-        className={`relative border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 ${
-          dragActive ? 'border-blue-500' : ''
+        className={`relative border border-strong rounded-container bg-surface ${
+          dragActive ? 'border-accent' : ''
         }`}
         onDragEnter={handleDrag}
       >
         <div className="relative textarea-container">
           {/* Resize bar at the top */}
           <div
-            className={`resize-bar h-2 w-full cursor-ns-resize rounded-t-lg transition-opacity duration-200 ${
-              isHovering
-                ? 'opacity-100 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                : 'opacity-0'
+            className={`resize-bar h-2 w-full cursor-ns-resize rounded-t-container transition-opacity duration-200 ${
+              isHovering ? 'opacity-100 bg-raised hover:bg-sunken' : 'opacity-0'
             }`}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
@@ -468,7 +466,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
             ref={textareaRef}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
-            className="block w-full p-4 pb-16 text-sm text-gray-900 border-none bg-transparent dark:text-white resize-none focus:outline-none focus:ring-0"
+            className="block w-full p-2.5 pb-16 text-sm text-ink border-none bg-transparent resize-none focus:outline-none focus:ring-0"
             placeholder={placeholder}
             value={value}
             onChange={(e) => {
@@ -513,36 +511,28 @@ export const TextArea: React.FC<TextAreaProps> = ({
         </div>
 
         {/* Controls at the bottom */}
-        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 rounded-b-lg">
+        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-2.5 py-1 bg-surface rounded-b-container">
           {/* The Help chat pins its own agent and model, so it shows them as plain text rather
               than pickers that would appear to change a chat they cannot change. */}
           {helpSession.isHelpSession ? (
             <div className="flex items-center gap-2.5 z-10 pointer-events-auto">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {t('inputControls.agent')}
-                </span>
-                <span className="text-xs font-medium dark:text-white">{helpSession.agentName}</span>
+                <span className="text-xs text-ink-muted">{t('inputControls.agent')}</span>
+                <span className="text-xs font-medium text-ink">{helpSession.agentName}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {t('inputControls.model')}
-                </span>
-                <span className="text-xs font-medium dark:text-white">{helpSession.modelId}</span>
+                <span className="text-xs text-ink-muted">{t('inputControls.model')}</span>
+                <span className="text-xs font-medium text-ink">{helpSession.modelId}</span>
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-2.5 z-10 pointer-events-auto">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {t('inputControls.agent')}
-                </span>
+                <span className="text-xs text-ink-muted">{t('inputControls.agent')}</span>
                 <AgentSelector agents={agents} alignment="left" />
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {t('inputControls.model')}
-                </span>
+                <span className="text-xs text-ink-muted">{t('inputControls.model')}</span>
                 <ModelSelector openable={true} />
               </div>
               <ThinkingModeSelector label={t('inputControls.thinking')} />
@@ -557,15 +547,15 @@ export const TextArea: React.FC<TextAreaProps> = ({
             <button
               onClick={handleSubmit}
               disabled={disabled}
-              className={`rounded-lg ${
-                disabled ? '' : 'hover:bg-gray-200'
-              } px-2 py-2 dark:text-white dark:hover:bg-gray-700`}
+              className={`rounded-container ${
+                disabled ? '' : 'hover:bg-raised'
+              } px-2 py-2 text-ink hover:bg-raised`}
               aria-label={disabled ? t('textarea.aria.sending') : t('textarea.aria.sendMessage')}
             >
               {disabled ? (
-                <FiLoader className="text-xl animate-spin" />
+                <FiLoader className="text-base animate-spin" />
               ) : (
-                <FiSend className="text-xl" />
+                <FiSend className="text-base" />
               )}
             </button>
           </div>

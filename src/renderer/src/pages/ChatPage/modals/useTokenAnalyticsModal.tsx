@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { isDarkAppearance } from '@renderer/lib/appearance'
 import { IdentifiableMessage } from '@/types/chat/message'
 import { Pie, Line } from 'react-chartjs-2'
 import {
@@ -192,7 +193,7 @@ export const calculateAnalytics = (messages: IdentifiableMessage[], modelId: str
 
 // トークン使用量グラフのデータを作成
 const createTokenChartData = (tokenUsage: TokenUsage, t: any): ChartData<'pie'> => {
-  const isDarkMode = document.documentElement.classList.contains('dark')
+  const isDarkMode = isDarkAppearance()
 
   return {
     labels: [
@@ -244,7 +245,7 @@ const createTokenChartData = (tokenUsage: TokenUsage, t: any): ChartData<'pie'> 
 
 // コスト分析グラフのデータを作成
 const createCostChartData = (costAnalysis: CostAnalysis, t: any): ChartData<'pie'> => {
-  const isDarkMode = document.documentElement.classList.contains('dark')
+  const isDarkMode = isDarkAppearance()
 
   return {
     labels: [t('Input Cost'), t('Output Cost'), t('Cache Read Cost'), t('Cache Write Cost')],
@@ -299,7 +300,7 @@ const createTokenTimeSeriesData = (
     return new Date(timestamp).toLocaleTimeString()
   }
 
-  const isDarkMode = document.documentElement.classList.contains('dark')
+  const isDarkMode = isDarkAppearance()
 
   // ダークモード用の明るい色セット
   const darkModeColors = {
@@ -424,7 +425,7 @@ const createCostTimeSeriesData = (
     return new Date(timestamp).toLocaleTimeString()
   }
 
-  const isDarkMode = document.documentElement.classList.contains('dark')
+  const isDarkMode = isDarkAppearance()
 
   // ダークモード用の明るい色セット
   const darkModeColors = {
@@ -548,7 +549,7 @@ const pieChartOptions: ChartOptions<'pie'> = {
       position: 'bottom',
       labels: {
         padding: 20,
-        color: document.documentElement.classList.contains('dark')
+        color: isDarkAppearance()
           ? '#e2e8f0' // gray-200に相当
           : '#718096',
         font: {
@@ -558,17 +559,17 @@ const pieChartOptions: ChartOptions<'pie'> = {
     },
     tooltip: {
       backgroundColor: () => {
-        return document.documentElement.classList.contains('dark')
-          ? 'rgba(30, 41, 59, 0.9)' // dark:bg-slate-800
+        return isDarkAppearance()
+          ? 'rgba(30, 41, 59, 0.9)' // near-black slate, matches a dark canvas
           : 'rgba(255, 255, 255, 0.9)'
       },
       titleColor: () => {
-        return document.documentElement.classList.contains('dark')
-          ? '#f8fafc' // gray-50に相当
+        return isDarkAppearance()
+          ? '#f8fafc' // ほぼ白
           : '#1e293b'
       },
       bodyColor: () => {
-        return document.documentElement.classList.contains('dark')
+        return isDarkAppearance()
           ? '#e2e8f0' // gray-200に相当
           : '#334155'
       },
@@ -592,14 +593,14 @@ const lineChartOptions: ChartOptions<'line'> = {
       beginAtZero: true,
       grid: {
         color: () => {
-          return document.documentElement.classList.contains('dark')
-            ? 'rgba(148, 163, 184, 0.1)' // dark:gray-400 with low opacity
+          return isDarkAppearance()
+            ? 'rgba(148, 163, 184, 0.1)' // faint slate, low opacity grid line
             : 'rgba(203, 213, 225, 0.5)' // gray-300
         }
       },
       ticks: {
         color: () => {
-          return document.documentElement.classList.contains('dark')
+          return isDarkAppearance()
             ? '#cbd5e1' // gray-300
             : '#64748b' // gray-500
         }
@@ -608,14 +609,14 @@ const lineChartOptions: ChartOptions<'line'> = {
     x: {
       grid: {
         color: () => {
-          return document.documentElement.classList.contains('dark')
-            ? 'rgba(148, 163, 184, 0.1)' // dark:gray-400 with low opacity
+          return isDarkAppearance()
+            ? 'rgba(148, 163, 184, 0.1)' // faint slate, low opacity grid line
             : 'rgba(203, 213, 225, 0.5)' // gray-300
         }
       },
       ticks: {
         color: () => {
-          return document.documentElement.classList.contains('dark')
+          return isDarkAppearance()
             ? '#cbd5e1' // gray-300
             : '#64748b' // gray-500
         }
@@ -627,7 +628,7 @@ const lineChartOptions: ChartOptions<'line'> = {
       position: 'top',
       labels: {
         padding: 20,
-        color: document.documentElement.classList.contains('dark')
+        color: isDarkAppearance()
           ? '#e2e8f0' // gray-200
           : '#475569', // gray-600
         font: {
@@ -639,17 +640,17 @@ const lineChartOptions: ChartOptions<'line'> = {
       mode: 'index',
       intersect: false,
       backgroundColor: () => {
-        return document.documentElement.classList.contains('dark')
-          ? 'rgba(30, 41, 59, 0.9)' // dark:bg-slate-800
+        return isDarkAppearance()
+          ? 'rgba(30, 41, 59, 0.9)' // near-black slate, matches a dark canvas
           : 'rgba(255, 255, 255, 0.9)'
       },
       titleColor: () => {
-        return document.documentElement.classList.contains('dark')
-          ? '#f8fafc' // gray-50に相当
+        return isDarkAppearance()
+          ? '#f8fafc' // ほぼ白
           : '#1e293b'
       },
       bodyColor: () => {
-        return document.documentElement.classList.contains('dark')
+        return isDarkAppearance()
           ? '#e2e8f0' // gray-200に相当
           : '#334155'
       }
@@ -657,7 +658,7 @@ const lineChartOptions: ChartOptions<'line'> = {
     title: {
       display: true,
       text: '',
-      color: document.documentElement.classList.contains('dark')
+      color: isDarkAppearance()
         ? '#f1f5f9' // gray-100
         : '#334155' // gray-700
     }
@@ -703,51 +704,50 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
   }
 
   return (
-    <Modal show={isOpen} onClose={onClose} size="6xl" dismissible className="dark:bg-gray-900">
-      <div className="border-[0.5px] border-white dark:border-gray-100 rounded-lg shadow-xl dark:shadow-gray-900/80">
-        <Modal.Header className="border-b border-gray-200 dark:border-gray-700/50 dark:bg-gray-900 rounded-t-lg">
-          <h2 className="text-xl font-bold dark:text-white">{t('Token Usage Analytics')}</h2>
+    <Modal show={isOpen} onClose={onClose} size="6xl" dismissible className="bg-canvas">
+      <div className="border-[0.5px] border-surface rounded-container shadow-xl">
+        <Modal.Header className="border-b border-subtle bg-canvas rounded-t-container">
+          <h2 className="text-title text-ink">{t('Token Usage Analytics')}</h2>
         </Modal.Header>
-        <Modal.Body className="max-h-[80vh] overflow-y-auto dark:bg-gray-900 rounded-b-lg">
+        <Modal.Body className="max-h-[80vh] overflow-y-auto bg-canvas rounded-b-container">
           {/* セッション全体の統計 */}
-          <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-700/80 rounded-lg border border-transparent dark:border-gray-600 shadow-sm">
-            <h3 className="text-lg font-semibold mb-2 dark:text-white">{t('Session Summary')}</h3>
+          <div className="mb-3 p-2.5 bg-raised rounded-container border border-transparent border-subtle shadow-sm">
+            <h3 className="text-heading font-semibold mb-2 text-ink">{t('Session Summary')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-200">
+                <p className="text-sm text-ink-muted">
                   {t('Total Tokens')}:{' '}
-                  <span className="font-medium dark:text-white">
+                  <span className="font-medium text-ink">
                     {analytics.tokenUsage.totalTokens.toLocaleString()}
                   </span>
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-200">
+                <p className="text-sm text-ink-muted">
                   {t('Total Cost')}:{' '}
-                  <span className="font-medium dark:text-white">
+                  <span className="font-medium text-ink">
                     {PricingCalculator.formatCurrency(analytics.costAnalysis.totalCost)}
                   </span>
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-200">
-                  {t('Model')}: <span className="font-medium dark:text-white">{modelId}</span>
+                <p className="text-sm text-ink-muted">
+                  {t('Model')}: <span className="font-medium text-ink">{modelId}</span>
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-200">
-                  {t('Messages')}:{' '}
-                  <span className="font-medium dark:text-white">{messages.length}</span>
+                <p className="text-sm text-ink-muted">
+                  {t('Messages')}: <span className="font-medium text-ink">{messages.length}</span>
                 </p>
               </div>
             </div>
           </div>
 
           {/* タブナビゲーション */}
-          <div className="border-b border-gray-200 dark:border-gray-600 mb-6">
+          <div className="border-b border-subtle mb-3">
             <nav className="flex space-x-8" aria-label="Tabs">
               <button
                 onClick={() => handleTabChange('summary')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'summary'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-300'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:border-gray-500'
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-ink-muted hover:text-ink hover:border-strong'
                 }`}
               >
                 {t('Summary')}
@@ -756,8 +756,8 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
                 onClick={() => handleTabChange('timeSeries')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'timeSeries'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-300'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:border-gray-500'
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-ink-muted hover:text-ink hover:border-strong'
                 }`}
               >
                 {t('Time Series Analysis')}
@@ -767,32 +767,32 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
 
           {/* サマリータブ */}
           {activeTab === 'summary' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* トークン使用量の詳細 */}
-              <div className="p-4 border dark:border-gray-600 dark:bg-gray-700/20 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('Token Usage')}</h3>
+              <div className="p-2.5 border border-subtle bg-raised/20 rounded-container shadow-sm">
+                <h3 className="text-heading font-semibold mb-4 text-ink">{t('Token Usage')}</h3>
                 <div className="mb-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-200 flex justify-between items-center py-1 border-b border-gray-100 dark:border-gray-600/50">
+                  <p className="text-sm text-ink-muted flex justify-between items-center py-1 border-b border-faint">
                     <span>{t('Input Tokens')}:</span>
-                    <span className="font-medium dark:text-blue-200">
+                    <span className="font-medium tabular-nums text-ink">
                       {analytics.tokenUsage.inputTokens.toLocaleString()}
                     </span>
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-200 flex justify-between items-center py-1 border-b border-gray-100 dark:border-gray-600/50">
+                  <p className="text-sm text-ink-muted flex justify-between items-center py-1 border-b border-faint">
                     <span>{t('Output Tokens')}:</span>
-                    <span className="font-medium dark:text-teal-200">
+                    <span className="font-medium tabular-nums text-ink">
                       {analytics.tokenUsage.outputTokens.toLocaleString()}
                     </span>
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-200 flex justify-between items-center py-1 border-b border-gray-100 dark:border-gray-600/50">
+                  <p className="text-sm text-ink-muted flex justify-between items-center py-1 border-b border-faint">
                     <span>{t('Cache Read Tokens')}:</span>
-                    <span className="font-medium dark:text-yellow-200">
+                    <span className="font-medium tabular-nums text-ink">
                       {analytics.tokenUsage.cacheReadTokens.toLocaleString()}
                     </span>
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-200 flex justify-between items-center py-1">
+                  <p className="text-sm text-ink-muted flex justify-between items-center py-1">
                     <span>{t('Cache Write Tokens')}:</span>
-                    <span className="font-medium dark:text-orange-200">
+                    <span className="font-medium tabular-nums text-ink">
                       {analytics.tokenUsage.cacheWriteTokens.toLocaleString()}
                     </span>
                   </p>
@@ -802,7 +802,7 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
                   {analytics.tokenUsage.totalTokens > 0 ? (
                     <Pie data={tokenChartData} options={pieChartOptions} />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-center h-full text-ink-muted">
                       {t('No token usage data available')}
                     </div>
                   )}
@@ -810,35 +810,35 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
               </div>
 
               {/* コスト分析の詳細 */}
-              <div className="p-4 border dark:border-gray-700 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('Cost Analysis')}</h3>
+              <div className="p-2.5 border border-subtle rounded-container">
+                <h3 className="text-heading font-semibold mb-4 text-ink">{t('Cost Analysis')}</h3>
                 <div className="mb-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-ink-muted">
                     {t('Input Cost')}:{' '}
                     <span className="font-medium">
                       {PricingCalculator.formatCurrency(analytics.costAnalysis.inputCost)}
                     </span>
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-ink-muted">
                     {t('Output Cost')}:{' '}
                     <span className="font-medium">
                       {PricingCalculator.formatCurrency(analytics.costAnalysis.outputCost)}
                     </span>
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-ink-muted">
                     {t('Cache Read Cost')}:{' '}
                     <span className="font-medium">
                       {PricingCalculator.formatCurrency(analytics.costAnalysis.cacheReadCost)}
                     </span>
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-ink-muted">
                     {t('Cache Write Cost')}:{' '}
                     <span className="font-medium">
                       {PricingCalculator.formatCurrency(analytics.costAnalysis.cacheWriteCost)}
                     </span>
                   </p>
                   {analytics.costAnalysis.cacheSavings > 0 && (
-                    <p className="mt-3 text-sm text-green-600 dark:text-green-400 font-medium">
+                    <p className="mt-3 text-sm text-success font-medium">
                       {t('Saved approximately {{amount}} by using prompt cache', {
                         amount: PricingCalculator.formatCurrency(
                           analytics.costAnalysis.cacheSavings
@@ -852,7 +852,7 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
                   {analytics.costAnalysis.totalCost > 0 ? (
                     <Pie data={costChartData} options={pieChartOptions} />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-center h-full text-ink-muted">
                       {t('No cost data available')}
                     </div>
                   )}
@@ -863,10 +863,10 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
 
           {/* 時系列分析タブ */}
           {activeTab === 'timeSeries' && (
-            <div className="space-y-6">
+            <div className="space-y-3">
               {/* 時系列トークン使用量グラフ */}
-              <div className="p-4 border dark:border-gray-700 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 dark:text-white">
+              <div className="p-2.5 border border-subtle rounded-container">
+                <h3 className="text-heading font-semibold mb-4 text-ink">
                   {t('Token Usage Over Time')}
                 </h3>
                 <div className="h-80">
@@ -885,7 +885,7 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
                       }}
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-center h-full text-ink-muted">
                       {t('No time series data available')}
                     </div>
                   )}
@@ -893,8 +893,8 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
               </div>
 
               {/* 時系列コスト分析グラフ */}
-              <div className="p-4 border dark:border-gray-700 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 dark:text-white">
+              <div className="p-2.5 border border-subtle rounded-container">
+                <h3 className="text-heading font-semibold mb-4 text-ink">
                   {t('Cost Analysis Over Time')}
                 </h3>
                 <div className="h-80">
@@ -913,7 +913,7 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
                       }}
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-center h-full text-ink-muted">
                       {t('No time series data available')}
                     </div>
                   )}
@@ -921,15 +921,15 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
               </div>
 
               {/* 累積トークン使用量とコスト */}
-              <div className="p-4 border dark:border-gray-600 dark:bg-gray-700/20 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold mb-4 dark:text-white">
+              <div className="p-2.5 border border-subtle bg-raised/20 rounded-container shadow-sm">
+                <h3 className="text-heading font-semibold mb-4 text-ink">
                   {t('Cumulative Usage')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-200 flex justify-between items-center py-1 border-b border-gray-100 dark:border-gray-600/50">
+                    <p className="text-sm text-ink-muted flex justify-between items-center py-1 border-b border-faint">
                       <span>{t('Average Tokens per Message')}:</span>
-                      <span className="font-medium dark:text-blue-200">
+                      <span className="font-medium tabular-nums text-ink">
                         {analytics.timeSeriesData.length > 0
                           ? Math.round(
                               analytics.tokenUsage.totalTokens / analytics.timeSeriesData.length
@@ -937,9 +937,9 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
                           : '0'}
                       </span>
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-200 flex justify-between items-center py-1">
+                    <p className="text-sm text-ink-muted flex justify-between items-center py-1">
                       <span>{t('Average Cost per Message')}:</span>
-                      <span className="font-medium dark:text-teal-200">
+                      <span className="font-medium tabular-nums text-ink">
                         {analytics.timeSeriesData.length > 0
                           ? PricingCalculator.formatCurrency(
                               analytics.costAnalysis.totalCost / analytics.timeSeriesData.length
@@ -949,24 +949,24 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-200 flex justify-between items-center py-1 border-b border-gray-100 dark:border-gray-600/50">
+                    <p className="text-sm text-ink-muted flex justify-between items-center py-1 border-b border-faint">
                       <span>{t('Token Usage Efficiency')}:</span>
-                      <span className="font-medium dark:text-orange-200">
+                      <span className="font-medium tabular-nums text-ink">
                         {analytics.tokenUsage.inputTokens > 0
                           ? `${((analytics.tokenUsage.outputTokens / analytics.tokenUsage.inputTokens) * 100).toFixed(1)}%`
                           : '0%'}
                       </span>
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-200 flex justify-between items-center py-1">
+                    <p className="text-sm text-ink-muted flex justify-between items-center py-1">
                       <span>{t('Cache Efficiency')}:</span>
-                      <span className="font-medium dark:text-yellow-200">
+                      <span className="font-medium tabular-nums text-ink">
                         {analytics.tokenUsage.inputTokens + analytics.tokenUsage.outputTokens > 0
                           ? `${((analytics.tokenUsage.cacheReadTokens / (analytics.tokenUsage.inputTokens + analytics.tokenUsage.outputTokens)) * 100).toFixed(1)}%`
                           : '0%'}
                       </span>
                     </p>
                     {analytics.costAnalysis.cacheSavings > 0 && (
-                      <p className="mt-3 text-sm font-medium py-2 px-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg border border-green-200 dark:border-green-800">
+                      <p className="mt-3 text-sm font-medium py-2 px-3 bg-success-soft text-success rounded-container border border-success">
                         {t('Saved approximately {{amount}} by using prompt cache', {
                           amount: PricingCalculator.formatCurrency(
                             analytics.costAnalysis.cacheSavings
@@ -981,7 +981,7 @@ export const TokenAnalyticsModal: React.FC<TokenAnalyticsModalProps> = ({
           )}
 
           {/* 注意書き */}
-          <div className="mt-6 text-xs text-gray-500 dark:text-gray-400 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+          <div className="mt-3 text-xs text-ink-muted p-3 bg-surface-2 rounded-container">
             <p>
               {t(
                 'Note: Token usage and cost calculations are estimates based on the available metadata.'

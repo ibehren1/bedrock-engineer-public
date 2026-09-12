@@ -50,18 +50,16 @@ export const SampleTextCarousel: React.FC<SampleTextCarouselProps> = ({
     <div className={`text-center space-y-3 ${className}`}>
       {/* Header text */}
       <div className="space-y-1">
-        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-          {t('Try talking like this')}
-        </p>
+        <p className="text-sm text-ink-muted font-medium">{t('Try talking like this')}</p>
         {/* Notice text */}
-        <p className="text-[10px] text-gray-400 dark:text-gray-500 font-normal">
+        <p className="text-[10px] text-ink-faint font-normal">
           {t('Nova Sonic currently supports English only')}
         </p>
       </div>
 
       {/* Scenario text */}
       <div className="min-h-[3rem] flex items-center justify-center">
-        <p className="text-base text-gray-700 dark:text-gray-300 font-normal max-w-md leading-relaxed">
+        <p className="text-base text-ink font-normal max-w-md leading-relaxed">
           &ldquo;{validScenarios[currentIndex]?.content}&rdquo;
         </p>
       </div>
@@ -73,9 +71,7 @@ export const SampleTextCarousel: React.FC<SampleTextCarouselProps> = ({
             <div
               key={index}
               className={`w-1.5 h-1.5 rounded-full ${
-                index === currentIndex
-                  ? 'bg-blue-500 dark:bg-blue-400'
-                  : 'bg-gray-300 dark:bg-gray-600'
+                index === currentIndex ? 'bg-accent-tint' : 'bg-sunken'
               }`}
             />
           ))}

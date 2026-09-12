@@ -30,21 +30,15 @@ export const InterleaveThinkingToggle: React.FC<InterleaveThinkingToggleProps> =
     <button
       type="button"
       onClick={handleToggle}
-      className={`flex items-center gap-1 text-sm rounded-md transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+      className={`flex items-center gap-1 text-sm rounded-control transition-colors p-1 hover:bg-raised ${
         className || ''
       }`}
       title={t('interleaveThinking.title')}
     >
-      <TbBolt
-        className={`size-4 ${
-          interleaveThinking ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'
-        }`}
-      />
+      <TbBolt className={`size-4 ${interleaveThinking ? 'text-warning' : 'text-ink-faint'}`} />
       <span
         className={`whitespace-nowrap text-xs ${
-          interleaveThinking
-            ? 'text-amber-600 dark:text-amber-400 font-medium'
-            : 'text-gray-500 dark:text-gray-500'
+          interleaveThinking ? 'text-warning font-medium' : 'text-ink-muted'
         }`}
       >
         {t('interleaveThinking.label')}

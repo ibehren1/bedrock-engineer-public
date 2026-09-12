@@ -31,8 +31,8 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({ stdout, output }) 
 
   if (!displayContent) {
     return (
-      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+      <div className="bg-surface-2 border border-subtle rounded-container p-2.5">
+        <p className="text-ink-muted text-sm italic">
           {t('code interpreter display.No output produced', 'No output produced')}
         </p>
       </div>
@@ -40,15 +40,15 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({ stdout, output }) 
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <div className="bg-surface-2 border border-subtle rounded-container overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+      <div className="flex items-center justify-between px-2.5 py-1 bg-raised border-b border-subtle">
+        <span className="text-xs text-ink-muted font-medium">
           {t('code interpreter display.Console Output', 'Console Output')}
         </span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+          className="flex items-center gap-1 px-2 py-1 text-xs text-ink-muted hover:text-ink hover:bg-raised rounded-control transition-colors"
           title={t('code interpreter display.Copy output', 'Copy output')}
         >
           {copied ? (
@@ -66,8 +66,8 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({ stdout, output }) 
       </div>
 
       {/* Content */}
-      <div className="p-4 max-h-[30vh] overflow-auto">
-        <pre className="whitespace-pre-wrap text-sm font-mono text-gray-800 dark:text-gray-200 leading-relaxed">
+      <div className="p-2.5 max-h-[30vh] overflow-auto">
+        <pre className="whitespace-pre-wrap text-sm font-mono text-ink leading-relaxed">
           {displayContent}
         </pre>
       </div>

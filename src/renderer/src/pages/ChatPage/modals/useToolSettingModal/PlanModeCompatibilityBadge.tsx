@@ -13,7 +13,7 @@ export const PlanModeCompatibilityBadge: React.FC<PlanModeCompatibilityBadgeProp
   // Planモード非対応のツールの場合のみバッジを表示
   if (!isPlanCompatible) {
     return (
-      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-blue-900/50 dark:text-blue-200">
+      <span className="bg-accent-tint text-accent text-xs font-medium px-2 py-0.5 rounded-control">
         Act only
       </span>
     )

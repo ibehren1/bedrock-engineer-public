@@ -13,7 +13,8 @@ import { processImageContent } from '../utils/imageUtils'
 import { getAlternateRegionOnThrottling } from '../utils/awsUtils'
 import {
   getThinkingSupportedModelIds,
-  getSupportedThinkingTypes
+  getSupportedThinkingTypes,
+  clampMaxTokensToModelLimit
 } from '../../../../common/models/models'
 import type { CallConverseAPIProps, ServiceContext } from '../types'
 import { createCategoryLogger } from '../../../../common/logger'
@@ -105,6 +106,20 @@ export class ConverseService {
     const baseInferenceConfig = props?.inferenceConfig ?? this.context.store.get('inferenceParams')
     const inferenceConfig = { ...baseInferenceConfig }
 
+    // Max Output Tokens is one global setting shared by every model, so honour
+    // whichever is smaller: the configured value or the model's own ceiling.
+    // Without this, a setting of 128000 is rejected outright by a model that
+    // stops at 64000.
+    const clampedMaxTokens = clampMaxTokensToModelLimit(modelId, inferenceConfig.maxTokens)
+    if (clampedMaxTokens !== inferenceConfig.maxTokens) {
+      converseLogger.debug('Clamped maxTokens to the model limit', {
+        modelId,
+        requested: inferenceConfig.maxTokens,
+        applied: clampedMaxTokens
+      })
+      inferenceConfig.maxTokens = clampedMaxTokens
+    }
+
     const thinkingMode = this.context.store.get('thinkingMode')
     const interleaveThinking = this.context.store.get('interleaveThinking')
 
@@ -114,12 +129,14 @@ export class ConverseService {
     // Thinking対応モデルのIDリストを取得
     const thinkingSupportedModelIds = getThinkingSupportedModelIds()
 
-    // Reasoning-effort models (OpenAI GPT-5.x, xAI Grok) do NOT accept
+    // Reasoning-effort models (OpenAI GPT-5.x/GPT-6, xAI Grok) do NOT accept
     // temperature/topP or the Anthropic-style `thinking` field. They take only
     // maxTokens plus an optional reasoning effort via
     // additionalModelRequestFields, so they need dedicated handling instead of
-    // the Claude-style thinking path below.
-    const isOpenAiReasoningModel = modelId.includes('openai.gpt-5')
+    // the Claude-style thinking path below. The open-weight gpt-oss models are
+    // deliberately excluded — they are not reasoning-effort models.
+    const isOpenAiReasoningModel =
+      modelId.includes('openai.gpt-5') || modelId.includes('openai.gpt-6')
     const isGrokReasoningModel = modelId.includes('xai.grok')
     const isReasoningEffortModel = isOpenAiReasoningModel || isGrokReasoningModel
 

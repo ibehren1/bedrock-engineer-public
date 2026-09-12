@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FiSearch } from 'react-icons/fi'
+import { FiSearch, FiUpload } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
 import { CustomAgent } from '@/types/agent-chat'
 import { AgentCard } from './AgentCard'
@@ -17,10 +17,14 @@ interface AgentListProps {
   selectedAgentId?: string
   onSelectAgent: (agentId: string) => void
   onAddNewAgent: () => void
+  /** Bring in an agent from a YAML/JSON file as a new editable agent */
+  onImportAgent?: () => void
   onEditAgent: (agent: CustomAgent) => void
   onDuplicateAgent: (agent: CustomAgent) => void
   onDeleteAgent: (agentId: string) => void
   onSaveAsShared?: (agent: CustomAgent) => void
+  onDeleteSharedFile?: (agent: CustomAgent) => void
+  onDownloadYaml?: (agent: CustomAgent) => void
   onShareToOrganization?: (agent: CustomAgent) => void
   onConvertToStrands?: (agentId: string) => void
   /** Default agents the user hid; drives the unhide dropdown */
@@ -36,10 +40,13 @@ export const AgentList: React.FC<AgentListProps> = ({
   selectedAgentId,
   onSelectAgent,
   onAddNewAgent,
+  onImportAgent,
   onEditAgent,
   onDuplicateAgent,
   onDeleteAgent,
   onSaveAsShared,
+  onDeleteSharedFile,
+  onDownloadYaml,
   onShareToOrganization,
   onConvertToStrands,
   hiddenAgents,
@@ -72,18 +79,18 @@ export const AgentList: React.FC<AgentListProps> = ({
   const dragOrder = useAgentDragOrder(agents, isDragEnabled)
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-900">
+    <div className="p-2.5 bg-surface">
       <div className="flex items-center justify-between gap-4 mb-4">
         <div className="relative flex-1 max-w-md">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <FiSearch className="w-5 h-5 text-gray-400" />
+            <FiSearch className="w-4 h-4 text-ink-faint" />
           </div>
           <input
             type="search"
-            className="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg
-              bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700
-              dark:border-gray-600 dark:placeholder-gray-400 dark:text-white
-              dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="block w-full p-2 pl-10 text-sm text-ink border border-strong rounded-container
+              bg-surface-2 focus:ring-accent focus:border-accent
+              border-subtle placeholder-ink-faint text-ink
+              focus:ring-accent focus:border-accent"
             placeholder={t('searchAgents')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -98,12 +105,25 @@ export const AgentList: React.FC<AgentListProps> = ({
             />
           )}
           <AgentViewToggle viewMode={viewMode} onToggle={setViewMode} />
+          {onImportAgent && (
+            <button
+              onClick={onImportAgent}
+              className="px-2.5 py-1 text-sm font-medium text-ink
+                bg-surface border border-strong rounded-container
+                shadow-sm hover:bg-surface-2 focus:outline-none focus:ring-2
+                focus:ring-offset-2 focus:ring-accent focus:ring-offset-canvas
+                whitespace-nowrap flex gap-2 items-center"
+            >
+              <FiUpload className="w-4 h-4" />
+              {t('importAgent')}
+            </button>
+          )}
           <button
             onClick={onAddNewAgent}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-700
-              border border-transparent rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-600
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-              dark:focus:ring-offset-gray-900 whitespace-nowrap flex gap-2 items-center"
+            className="px-2.5 py-1 text-sm font-medium text-accent-fg bg-accent
+              border border-transparent rounded-container shadow-sm hover:bg-accent-strong
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent
+              focus:ring-offset-canvas whitespace-nowrap flex gap-2 items-center"
           >
             {t('addNewAgent')}
           </button>
@@ -133,6 +153,8 @@ export const AgentList: React.FC<AgentListProps> = ({
                 onDuplicate={onDuplicateAgent}
                 onDelete={onDeleteAgent}
                 onSaveAsShared={onSaveAsShared}
+                onDeleteSharedFile={onDeleteSharedFile}
+                onDownloadYaml={onDownloadYaml}
                 onShareToOrganization={isEditable ? onShareToOrganization : undefined}
                 onConvertToStrands={onConvertToStrands}
                 dragProps={dragOrder.dragProps(agent.id)}
@@ -150,6 +172,8 @@ export const AgentList: React.FC<AgentListProps> = ({
           onDuplicateAgent={onDuplicateAgent}
           onDeleteAgent={onDeleteAgent}
           onSaveAsShared={onSaveAsShared}
+          onDeleteSharedFile={onDeleteSharedFile}
+          onDownloadYaml={onDownloadYaml}
           onShareToOrganization={onShareToOrganization}
           onConvertToStrands={onConvertToStrands}
           sortKey={sortKey}

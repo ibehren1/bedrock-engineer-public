@@ -42,29 +42,29 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   }
 
   return (
-    <Modal show={isOpen} onClose={onClose} size="md" className="dark:bg-gray-900">
-      <div className="border-[0.5px] border-white dark:border-gray-100 rounded-lg shadow-xl dark:shadow-gray-900/80">
-        <Modal.Header className="border-b border-gray-200 dark:border-gray-700/50 dark:bg-gray-900 rounded-t-lg">
+    <Modal show={isOpen} onClose={onClose} size="md" className="bg-canvas">
+      <div className="border-[0.5px] border-surface rounded-container shadow-xl">
+        <Modal.Header className="border-b border-subtle bg-canvas rounded-t-container">
           {t('organization.deleteConfirmTitle')}
         </Modal.Header>
-        <Modal.Body className="p-0 bg-white dark:bg-gray-900">
-          <div className="p-6">
+        <Modal.Body className="p-0 bg-surface">
+          <div className="p-3">
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
-                <HiExclamationTriangle className="w-6 h-6 text-red-600" />
+                <HiExclamationTriangle className="w-4 h-4 text-danger" />
               </div>
               <div>
-                <p className="text-gray-900 dark:text-gray-100 mb-2">
+                <p className="text-ink mb-2">
                   <strong>{organization.name}</strong>
                 </p>
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                <p className="text-ink whitespace-pre-line">
                   {t('organization.deleteConfirmMessage')}
                 </p>
               </div>
             </div>
           </div>
         </Modal.Body>
-        <Modal.Footer className="border-t border-gray-200 dark:border-gray-700/50 dark:bg-gray-900 rounded-b-lg">
+        <Modal.Footer className="border-t border-subtle bg-canvas rounded-b-container">
           <Button onClick={handleDelete} disabled={isDeleting} color="failure">
             {isDeleting ? t('organization.saving') : t('organization.delete')}
           </Button>
@@ -168,23 +168,23 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({ organization, isO
   }
 
   return (
-    <Modal show={isOpen} onClose={handleClose} size="lg" className="dark:bg-gray-900">
-      <div className="border-[0.5px] border-white dark:border-gray-100 rounded-lg shadow-xl dark:shadow-gray-900/80">
-        <Modal.Header className="border-b border-gray-200 dark:border-gray-700/50 dark:bg-gray-900 rounded-t-lg">
+    <Modal show={isOpen} onClose={handleClose} size="lg" className="bg-canvas">
+      <div className="border-[0.5px] border-surface rounded-container shadow-xl">
+        <Modal.Header className="border-b border-subtle bg-canvas rounded-t-container">
           {organization ? t('organization.editOrganization') : t('organization.addOrganization')}
         </Modal.Header>
-        <Modal.Body className="p-0 bg-white dark:bg-gray-900">
-          <div className="space-y-4 p-6">
+        <Modal.Body className="p-0 bg-surface">
+          <div className="space-y-2 p-3">
             {error && (
-              <div className="p-3 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-md">
-                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+              <div className="p-3 bg-danger-soft border border-danger rounded-control">
+                <p className="text-danger text-sm">{error}</p>
               </div>
             )}
 
             {/* 組織名 */}
             <div>
               <Label htmlFor="orgName">
-                {t('organization.organizationName')} <span className="text-red-500">*</span>
+                {t('organization.organizationName')} <span className="text-danger">*</span>
               </Label>
               <TextInput
                 id="orgName"
@@ -210,8 +210,8 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({ organization, isO
             </div>
 
             {/* 組織の説明文 */}
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
+            <div className="p-3 bg-accent-tint border border-accent rounded-control">
+              <p className="text-sm text-accent">
                 {t('organization.organizationSetupDescription')}
               </p>
             </div>
@@ -219,14 +219,14 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({ organization, isO
             {/* S3設定 */}
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-heading font-medium text-ink">
                   {t('organization.s3Settings')}
                 </h3>
                 <a
                   href={`https://${formData.s3Config.region}.console.aws.amazon.com/s3/home?region=${formData.s3Config.region}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                  className="text-sm text-accent hover:text-accent underline"
                 >
                   {t('organization.openS3Console')}
                 </a>
@@ -235,7 +235,7 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({ organization, isO
               {/* S3バケット */}
               <div className="mb-3">
                 <Label htmlFor="s3Bucket">
-                  {t('organization.s3Bucket')} <span className="text-red-500">*</span>
+                  {t('organization.s3Bucket')} <span className="text-danger">*</span>
                 </Label>
                 <TextInput
                   id="s3Bucket"
@@ -294,7 +294,7 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({ organization, isO
             </div>
           </div>
         </Modal.Body>
-        <Modal.Footer className="border-t border-gray-200 dark:border-gray-700/50 dark:bg-gray-900 rounded-b-lg">
+        <Modal.Footer className="border-t border-subtle bg-canvas rounded-b-container">
           <Button onClick={handleSave} disabled={isLoading} color="blue">
             {isLoading
               ? t('organization.saving')

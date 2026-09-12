@@ -9,8 +9,8 @@ export const ApplyDiffEditResult: React.FC<ApplyDiffEditResultProps> = ({ respon
   // If there was an error
   if (!response.success) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 p-4 rounded-md">
-        <h3 className="text-lg font-semibold">{t('errors.failedToApplyChanges')}</h3>
+      <div className="bg-danger-soft text-danger p-2.5 rounded-control">
+        <h3 className="text-heading font-semibold">{t('errors.failedToApplyChanges')}</h3>
         <p>{response.error}</p>
       </div>
     )
@@ -19,8 +19,8 @@ export const ApplyDiffEditResult: React.FC<ApplyDiffEditResultProps> = ({ respon
   // If there's no result data
   if (!response.result) {
     return (
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 p-4 rounded-md">
-        <h3 className="text-lg font-semibold">{t('common.noResults')}</h3>
+      <div className="bg-warning-soft text-warning p-2.5 rounded-control">
+        <h3 className="text-heading font-semibold">{t('common.noResults')}</h3>
       </div>
     )
   }

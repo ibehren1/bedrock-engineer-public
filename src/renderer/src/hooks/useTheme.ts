@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
+import { isDarkAppearanceName } from '@renderer/lib/appearance'
 
-export type AppTheme = 'light' | 'dim' | 'dark' | 'system'
+/** 選択できる外観。'system' だけは OS 設定に追従する擬似値。 */
+export type AppTheme = 'light' | 'newspaper' | 'dim' | 'charcoal' | 'dark' | 'system'
+
+/** 実際に <html data-theme> に入る値（'system' は解決済みなので含まない）。 */
+export type ResolvedTheme = Exclude<AppTheme, 'system'>
+
+const APP_THEMES: readonly AppTheme[] = ['light', 'newspaper', 'dim', 'charcoal', 'dark', 'system']
 
 /** OSがダークモードかどうかを返す */
 const systemPrefersDark = (): boolean =>
@@ -8,28 +15,32 @@ const systemPrefersDark = (): boolean =>
   !!window.matchMedia &&
   window.matchMedia('(prefers-color-scheme: dark)').matches
 
-/** 設定値と OS 設定から実際に適用するテーマ ('light' | 'dim' | 'dark') を解決する */
-const resolveTheme = (theme: AppTheme, prefersDark: boolean): 'light' | 'dim' | 'dark' => {
+/** 設定値と OS 設定から実際に適用するテーマを解決する */
+const resolveTheme = (theme: AppTheme, prefersDark: boolean): ResolvedTheme => {
   if (theme === 'system') return prefersDark ? 'dark' : 'light'
   return theme
 }
 
 /** <html> の data-theme 属性に解決済みテーマを反映する */
-const applyTheme = (resolved: 'light' | 'dim' | 'dark') => {
+const applyTheme = (resolved: ResolvedTheme) => {
   if (typeof document !== 'undefined') {
     document.documentElement.dataset.theme = resolved
   }
 }
 
-/** 保存済みの appTheme を読み出す（デフォルトは 'dim'） */
+/**
+ * 保存済みの appTheme を読み出す（デフォルトは 'dim'）。
+ * 未知の値は既定値に落とす。設定ファイルを手で編集された場合や、
+ * 外観を削除したあとの古い値でトークン未定義のまま描画されるのを防ぐため。
+ */
 const readStoredTheme = (): AppTheme => {
   const stored = window.store?.get('appTheme' as any) as AppTheme | undefined
-  return stored ?? 'dim'
+  return stored && APP_THEMES.includes(stored) ? stored : 'dim'
 }
 
 /**
  * アプリの外観テーマを管理するフック。
- * - appTheme: ユーザー設定 ('light' | 'dim' | 'dark' | 'system')
+ * - appTheme: ユーザー設定 ('light' | 'newspaper' | 'dim' | 'charcoal' | 'dark' | 'system')
  * - setAppTheme: 設定を更新し、electron-store と <html data-theme> に反映
  * - isDarkMode: 実際にダーク表示かどうか（既存コンポーネント互換のため維持）
  */
@@ -71,6 +82,8 @@ export const useTheme = () => {
     appTheme,
     setAppTheme,
     resolvedTheme: resolved,
-    isDarkMode: resolved === 'dark'
+    // ダーク判定は lib/appearance.ts の一覧に委譲する。外観を追加したときに
+    // ここと非 React 側で判定がずれないようにするため。
+    isDarkMode: isDarkAppearanceName(resolved)
   }
 }

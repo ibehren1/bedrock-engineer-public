@@ -33,23 +33,23 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
   const canStopRecording = isRecording
 
   return (
-    <div className={`flex flex-col items-center justify-center space-y-4 ${className}`}>
+    <div className={`flex flex-col items-center justify-center space-y-2 ${className}`}>
       {/* Recording Controls */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2">
         {/* Start Recording Button */}
         <button
           onClick={handleStartRecording}
           disabled={disabled || !canStartRecording}
-          className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-medium transition-all transform hover:scale-105 ${
+          className={`w-8 h-8 rounded-full flex items-center justify-center font-medium transition-all transform hover:scale-105 ${
             canStartRecording
-              ? 'bg-green-500 hover:bg-green-600 shadow-md hover:shadow-lg'
-              : 'bg-gray-400 cursor-not-allowed'
+              ? 'bg-success-soft text-success hover:bg-success-soft-strong shadow-raised'
+              : 'bg-sunken cursor-not-allowed'
           }`}
           title={status === 'processing' ? 'Processing...' : 'Start Speaking'}
         >
           {status === 'processing' ? (
             <svg
-              className="w-5 h-5 animate-spin"
+              className="w-4 h-4 animate-spin"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -62,7 +62,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
               />
             </svg>
           ) : (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -77,14 +77,14 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
         <button
           onClick={onStopRecording}
           disabled={disabled || !canStopRecording}
-          className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-medium transition-all transform hover:scale-105 ${
+          className={`w-8 h-8 rounded-full flex items-center justify-center font-medium transition-all transform hover:scale-105 ${
             canStopRecording
-              ? 'bg-red-500 hover:bg-red-600 shadow-md hover:shadow-lg'
-              : 'bg-gray-400 cursor-not-allowed'
+              ? 'bg-danger-soft text-danger hover:bg-danger-soft-strong shadow-raised'
+              : 'bg-sunken cursor-not-allowed'
           }`}
           title="Stop Speaking"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
             <rect x="6" y="6" width="12" height="12" rx="2" />
           </svg>
         </button>
@@ -94,23 +94,23 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
       <div className="flex items-center justify-center min-h-[24px]">
         {/* Recording Indicator */}
         {isRecording && (
-          <div className="flex items-center space-x-2 text-red-500">
-            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+          <div className="flex items-center space-x-2 text-danger">
+            <div className="w-3 h-3 bg-danger-soft rounded-full animate-pulse"></div>
             <span className="text-sm font-medium">Recording</span>
           </div>
         )}
 
         {/* Processing Indicator */}
         {status === 'processing' && (
-          <div className="flex items-center space-x-2 text-yellow-500">
+          <div className="flex items-center space-x-2 text-warning">
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-warning-soft rounded-full animate-bounce"></div>
               <div
-                className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce"
+                className="w-2 h-2 bg-warning-soft rounded-full animate-bounce"
                 style={{ animationDelay: '0.1s' }}
               ></div>
               <div
-                className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce"
+                className="w-2 h-2 bg-warning-soft rounded-full animate-bounce"
                 style={{ animationDelay: '0.2s' }}
               ></div>
             </div>

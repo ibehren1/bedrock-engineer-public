@@ -84,35 +84,30 @@ export const AttachmentsButton: React.FC<AttachmentsButtonProps> = ({
         disabled={isBusy}
         title={t('attachments.menu.title')}
         aria-label={t('attachments.menu.title')}
-        className={`relative p-2 rounded-full hover:bg-white dark:hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-          files.length > 0 ? 'text-blue-500' : 'text-gray-400'
+        className={`relative p-2 rounded-full hover:bg-surface transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+          files.length > 0 ? 'text-accent' : 'text-ink-faint'
         }`}
       >
         <FiPaperclip className={isBusy ? 'animate-pulse' : ''} />
         {files.length > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-blue-500 text-white text-[10px] leading-4 text-center">
+          <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-accent text-accent-fg text-[10px] leading-4 text-center">
             {files.length}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-20 w-80 bottom-full mb-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
-          <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-              {t('attachments.menu.title')}
-            </span>
+        <div className="absolute right-0 z-20 w-80 bottom-full mb-1 bg-surface rounded-container shadow-lg border border-subtle py-1">
+          <div className="px-2.5 py-1 border-b border-subtle">
+            <span className="text-sm font-medium text-ink">{t('attachments.menu.title')}</span>
 
             {directory && (
-              <p
-                className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400 truncate"
-                title={directory}
-              >
+              <p className="mt-1 text-xs font-mono text-ink-muted truncate" title={directory}>
                 {folderName(directory)}
               </p>
             )}
 
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-xs text-ink-muted">
               {files.length > 0
                 ? t('attachments.menu.summary', {
                     count: files.length,
@@ -123,24 +118,22 @@ export const AttachmentsButton: React.FC<AttachmentsButtonProps> = ({
           </div>
 
           {files.length > 0 && (
-            <div className="max-h-64 overflow-y-auto border-b border-gray-200 dark:border-gray-700">
+            <div className="max-h-64 overflow-y-auto border-b border-subtle">
               {files.map((file) => (
                 <div
                   key={file.name}
-                  className="group flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="group flex items-center gap-2 px-2.5 py-1 text-sm text-ink hover:bg-raised"
                 >
                   {kindIcon(file.kind)}
                   <span className="flex-1 truncate" title={file.path}>
                     {file.name}
                   </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatSize(file.size)}
-                  </span>
+                  <span className="text-xs text-ink-muted">{formatSize(file.size)}</span>
                   <button
                     onClick={() => onRemove(file.name)}
                     title={t('attachments.menu.remove', { name: file.name })}
                     aria-label={t('attachments.menu.remove', { name: file.name })}
-                    className="text-red-600 dark:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="text-danger opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <FiTrash2 className="w-4 h-4" />
                   </button>
@@ -151,7 +144,7 @@ export const AttachmentsButton: React.FC<AttachmentsButtonProps> = ({
 
           <button
             onClick={() => act(onAdd)}
-            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+            className="w-full text-left px-2.5 py-1 text-sm text-ink hover:bg-raised flex items-center gap-2"
           >
             <FiPlus className="w-4 h-4" />
             {t('attachments.menu.addFiles')}
@@ -159,7 +152,7 @@ export const AttachmentsButton: React.FC<AttachmentsButtonProps> = ({
 
           <button
             onClick={() => act(onOpenFolder)}
-            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+            className="w-full text-left px-2.5 py-1 text-sm text-ink hover:bg-raised flex items-center gap-2"
           >
             <FiFolder className="w-4 h-4" />
             {t('attachments.menu.openFolder')}

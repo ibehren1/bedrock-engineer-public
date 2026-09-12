@@ -30,7 +30,7 @@ export const Preview: React.FC<PreviewProps> = ({ isDark, code }) => {
               iframe?.requestFullscreen()
             }
           }}
-          className="border rounded-full bg-[#EFEFEF] p-2 text-gray-500 hover:text-gray-800"
+          className="border rounded-full bg-[#EFEFEF] p-2 text-ink-muted hover:text-ink"
         >
           <FiMaximize className="text-gray" />
         </button>

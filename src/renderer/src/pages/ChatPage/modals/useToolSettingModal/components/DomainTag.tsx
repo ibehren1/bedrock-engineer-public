@@ -7,18 +7,12 @@ interface DomainTagProps {
 }
 
 export const DomainTag = ({ domain, onRemove, variant = 'include' }: DomainTagProps) => {
-  const bgColor =
-    variant === 'include'
-      ? 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
-      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+  const bgColor = variant === 'include' ? 'bg-accent-tint text-accent' : 'bg-raised text-ink'
 
-  const hoverColor =
-    variant === 'include'
-      ? 'hover:text-blue-600 dark:hover:text-blue-400'
-      : 'hover:text-gray-500 dark:hover:text-gray-400'
+  const hoverColor = variant === 'include' ? 'hover:text-accent' : 'hover:text-ink-muted'
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded ${bgColor}`}>
+    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-control ${bgColor}`}>
       {domain}
       <button onClick={() => onRemove(domain)} className={`cursor-pointer ${hoverColor}`}>
         <FaTimes className="w-3 h-3" />

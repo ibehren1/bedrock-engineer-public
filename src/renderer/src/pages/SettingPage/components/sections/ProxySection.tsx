@@ -11,25 +11,23 @@ export const ProxySection: React.FC = () => {
 
   return (
     <SettingSection title={t('Proxy Settings')}>
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="flex items-center space-x-2">
           <label className="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300
-                focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800
-                focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              className="form-checkbox h-4 w-4 text-accent rounded-control border-strong
+                focus:ring-accent ring-offset-surface
+                focus:ring-2 bg-raised border-subtle"
               checked={proxySettings.enabled}
               onChange={(e) => setProxySettings({ enabled: e.target.checked })}
             />
-            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-              {t('Enable Proxy')}
-            </span>
+            <span className="ml-2 text-sm text-ink">{t('Enable Proxy')}</span>
           </label>
         </div>
 
         {proxySettings.enabled && (
-          <div className="space-y-4 p-4 border border-gray-200 dark:border-gray-700 rounded-md">
+          <div className="space-y-2 p-2.5 border border-subtle rounded-control">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SettingSelect
                 label={t('Protocol')}
@@ -75,8 +73,8 @@ export const ProxySection: React.FC = () => {
               />
             </div>
 
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+            <div className="mt-4 p-3 bg-accent-tint rounded-control">
+              <p className="text-sm text-accent">
                 {t(
                   'Proxy settings will be applied to all AWS SDK connections. Please test your configuration to ensure connectivity.'
                 )}

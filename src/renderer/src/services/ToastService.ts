@@ -158,34 +158,32 @@ export class ToastService {
       toastOptions: {
         className: '',
         duration: 4000,
+        // Everything here goes through the theme tokens rather than the hex
+        // values it used to carry, so toasts follow the chosen appearance
+        // instead of always being a dark grey slab in a light UI.
         style: {
-          background: '#363636',
-          color: '#fff',
-          fontFamily:
-            'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          fontSize: '14px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          maxWidth: '400px'
+          background: 'var(--surface)',
+          color: 'var(--ink)',
+          border: '1px solid var(--border)',
+          fontFamily: 'var(--font-sans)',
+          fontSize: '0.78125rem',
+          borderRadius: 'var(--radius-container)',
+          boxShadow: 'var(--shadow-raised)',
+          maxWidth: '380px',
+          padding: '0.375rem 0.625rem'
         },
         success: {
           duration: 3000,
-          style: {
-            background: '#10B981'
-          },
           iconTheme: {
-            primary: '#10B981',
-            secondary: '#fff'
+            primary: 'var(--success)',
+            secondary: 'var(--surface)'
           }
         },
         error: {
           duration: 5000,
-          style: {
-            background: '#EF4444'
-          },
           iconTheme: {
-            primary: '#EF4444',
-            secondary: '#fff'
+            primary: 'var(--danger)',
+            secondary: 'var(--surface)'
           }
         }
       }

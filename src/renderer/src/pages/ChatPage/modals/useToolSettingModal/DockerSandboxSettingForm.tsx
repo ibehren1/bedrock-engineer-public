@@ -79,8 +79,8 @@ export const DockerSandboxSettingForm: React.FC = () => {
   const dockerReady = !!availability?.dockerInstalled && !!availability?.daemonRunning
 
   const dockerStatusColor = () => {
-    if (isChecking) return 'bg-yellow-500'
-    return dockerReady ? 'bg-green-500' : 'bg-red-500'
+    if (isChecking) return 'bg-warning-soft'
+    return dockerReady ? 'bg-success-soft' : 'bg-danger-soft'
   }
 
   const dockerStatusText = () => {
@@ -92,9 +92,9 @@ export const DockerSandboxSettingForm: React.FC = () => {
   }
 
   const composeStatusColor = () => {
-    if (isChecking) return 'bg-yellow-500'
-    if (!availability) return 'bg-gray-400'
-    return availability.compose === 'none' ? 'bg-amber-500' : 'bg-green-500'
+    if (isChecking) return 'bg-warning-soft'
+    if (!availability) return 'bg-sunken'
+    return availability.compose === 'none' ? 'bg-warning-soft' : 'bg-success-soft'
   }
 
   const composeStatusText = () => {
@@ -108,27 +108,23 @@ export const DockerSandboxSettingForm: React.FC = () => {
   const lastChecked = availability?.lastChecked ? new Date(availability.lastChecked) : undefined
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div>
-        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+        <h3 className="text-base font-bold text-ink mb-2 flex items-center gap-2">
           <FaDocker className="text-[#2496ED]" />
           {t('Docker Sandbox')}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {t('dockerSandbox.settings.intro')}
-        </p>
+        <p className="text-sm text-ink-muted">{t('dockerSandbox.settings.intro')}</p>
       </div>
 
       {/* Docker / Compose status */}
-      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md space-y-3">
+      <div className="bg-surface-2 p-2.5 rounded-control space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('Environment')}
-          </span>
+          <span className="text-sm font-medium text-ink">{t('Environment')}</span>
           <button
             onClick={checkAvailability}
             disabled={isChecking}
-            className="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded hover:bg-blue-200 dark:hover:bg-blue-800 disabled:opacity-50"
+            className="px-3 py-1 text-xs bg-accent-tint text-accent rounded-control hover:bg-accent-tint-strong disabled:opacity-50"
           >
             {isChecking ? t('Checking...') : t('Re-check')}
           </button>
@@ -138,48 +134,40 @@ export const DockerSandboxSettingForm: React.FC = () => {
           <div
             className={`w-3 h-3 rounded-full ${dockerStatusColor()} ${isChecking ? 'animate-pulse' : ''}`}
           />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Docker: {dockerStatusText()}
-          </span>
+          <span className="text-sm text-ink-muted">Docker: {dockerStatusText()}</span>
         </div>
 
         <div className="flex items-center space-x-2">
           <div
             className={`w-3 h-3 rounded-full ${composeStatusColor()} ${isChecking ? 'animate-pulse' : ''}`}
           />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Compose: {composeStatusText()}
-          </span>
+          <span className="text-sm text-ink-muted">Compose: {composeStatusText()}</span>
         </div>
 
         {lastChecked && (
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-ink-muted">
             {t('Last checked')}: {lastChecked.toLocaleTimeString()}
           </p>
         )}
 
         {availability?.installGuidance && (
-          <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded text-sm text-amber-800 dark:text-amber-200 whitespace-pre-line">
+          <div className="mt-2 p-3 bg-warning-soft border border-warning rounded-control text-sm text-warning whitespace-pre-line">
             {availability.installGuidance}
           </div>
         )}
       </div>
 
       {/* Resource limits */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-        <h5 className="font-medium mb-4 text-blue-800 dark:text-blue-200">
-          {t('Container Limits')}
-        </h5>
+      <div className="bg-accent-tint p-2.5 rounded-control">
+        <h5 className="font-medium mb-4 text-accent">{t('Container Limits')}</h5>
 
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('Memory limit')}
-            </label>
+            <label className="block text-sm font-medium text-ink mb-1">{t('Memory limit')}</label>
             <select
               value={dockerSandboxConfig.memoryLimit}
               onChange={(e) => handleConfigChange('memoryLimit', e.target.value)}
-              className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full p-2 text-sm border border-strong rounded-control bg-surface text-ink"
             >
               {MEMORY_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -190,13 +178,11 @@ export const DockerSandboxSettingForm: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('CPU limit')}
-            </label>
+            <label className="block text-sm font-medium text-ink mb-1">{t('CPU limit')}</label>
             <select
               value={dockerSandboxConfig.cpuLimit}
               onChange={(e) => handleConfigChange('cpuLimit', Number(e.target.value))}
-              className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full p-2 text-sm border border-strong rounded-control bg-surface text-ink"
             >
               {CPU_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -207,13 +193,13 @@ export const DockerSandboxSettingForm: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-ink mb-1">
               {t('Command timeout')}
             </label>
             <select
               value={dockerSandboxConfig.timeout}
               onChange={(e) => handleConfigChange('timeout', Number(e.target.value))}
-              className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full p-2 text-sm border border-strong rounded-control bg-surface text-ink"
             >
               {TIMEOUT_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -221,21 +207,17 @@ export const DockerSandboxSettingForm: React.FC = () => {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {t('dockerSandbox.settings.timeoutHint')}
-            </p>
+            <p className="mt-1 text-xs text-ink-muted">{t('dockerSandbox.settings.timeoutHint')}</p>
           </div>
         </div>
 
-        <p className="mt-4 text-xs text-blue-700 dark:text-blue-300">
-          {t('dockerSandbox.settings.limitsHint')}
-        </p>
+        <p className="mt-4 text-xs text-accent">{t('dockerSandbox.settings.limitsHint')}</p>
       </div>
 
       {/* How it behaves */}
-      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
-        <h5 className="font-medium mb-2 text-gray-800 dark:text-gray-200">{t('How it works')}</h5>
-        <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+      <div className="bg-surface-2 p-2.5 rounded-control">
+        <h5 className="font-medium mb-2 text-ink">{t('How it works')}</h5>
+        <ul className="list-disc list-inside space-y-1 text-sm text-ink-muted">
           <li>{t('dockerSandbox.settings.behaviorPerChat')}</li>
           <li>{t('dockerSandbox.settings.behaviorWorkspace')}</li>
           <li>{t('dockerSandbox.settings.behaviorHost')}</li>

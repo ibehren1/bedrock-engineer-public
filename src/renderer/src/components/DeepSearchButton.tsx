@@ -5,30 +5,31 @@ type DeepSearchButtonProps = {
   handleToggleDeepSearch: () => void
 }
 
+/**
+ * A toggle, so the enabled state reads as "pressed" rather than decorated.
+ *
+ * This was the last gradient button in the app — a blue-to-cyan fill wrapping an
+ * inner panel, which both looked like a consumer app and could not follow an
+ * appearance. It is now a tinted accent fill with an accent border, which works
+ * in all five appearances including charcoal's amber.
+ */
 export const DeepSearchButton: React.FC<DeepSearchButtonProps> = (props) => {
   const { enableDeepSearch, handleToggleDeepSearch } = props
   return (
     <button
+      type="button"
       onClick={handleToggleDeepSearch}
-      className={`flex items-center justify-center p-[2px] overflow-hidden text-xs text-gray-900 rounded-lg group
+      aria-pressed={enableDeepSearch}
+      className={`flex items-center gap-1.5 px-2 py-1 text-xs rounded-control transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
         ${
           enableDeepSearch
-            ? 'bg-gradient-to-br from-blue-200 via-blue-300 to-cyan-200 group-hover:from-blue-200 group-hover:via-blue-300 group-hover:to-cyan-200'
-            : 'border border-gray-200 dark:border-gray-700'
-        }
-        dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-100 dark:focus:ring-blue-400`}
+            ? 'bg-accent-tint border border-accent text-accent'
+            : 'border border-subtle text-ink-muted hover:bg-raised hover:text-ink'
+        }`}
     >
-      <span
-        className={`items-center px-3 py-1.5 transition-all ease-in duration-75 rounded-md flex gap-2
-          ${
-            enableDeepSearch
-              ? 'bg-white dark:bg-gray-900 group-hover:bg-opacity-0'
-              : 'bg-transparent'
-          }`}
-      >
-        <BsGlobeAmericas className="text-sm" />
-        Search
-      </span>
+      <BsGlobeAmericas className="w-3.5 h-3.5" />
+      Search
     </button>
   )
 }

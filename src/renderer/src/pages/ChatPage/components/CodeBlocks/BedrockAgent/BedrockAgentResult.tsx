@@ -44,8 +44,8 @@ const GuardrailAssessmentView: React.FC<{ assessment: GuardrailAssessment }> = (
     <div className="space-y-2">
       {assessment.topicPolicy && (
         <div>
-          <h5 className="text-xs font-semibold text-yellow-400">Topic Policy</h5>
-          <div className="text-xs text-gray-300">
+          <h5 className="text-xs font-semibold text-warning">Topic Policy</h5>
+          <div className="text-xs text-ink-faint">
             {assessment.topicPolicy.topics?.map((topic, index) => (
               <div key={index} className="flex gap-2">
                 <span>{topic.name}:</span>
@@ -58,8 +58,8 @@ const GuardrailAssessmentView: React.FC<{ assessment: GuardrailAssessment }> = (
 
       {assessment.contentPolicy && (
         <div>
-          <h5 className="text-xs font-semibold text-yellow-400">Content Policy</h5>
-          <div className="text-xs text-gray-300">
+          <h5 className="text-xs font-semibold text-warning">Content Policy</h5>
+          <div className="text-xs text-ink-faint">
             {assessment.contentPolicy.filters?.map((filter, index) => (
               <div key={index} className="flex gap-2">
                 <span>{filter.type}:</span>
@@ -73,8 +73,8 @@ const GuardrailAssessmentView: React.FC<{ assessment: GuardrailAssessment }> = (
 
       {assessment.wordPolicy && (
         <div>
-          <h5 className="text-xs font-semibold text-yellow-400">Word Policy</h5>
-          <div className="text-xs text-gray-300">
+          <h5 className="text-xs font-semibold text-warning">Word Policy</h5>
+          <div className="text-xs text-ink-faint">
             {assessment.wordPolicy.customWords?.map((word, index) => (
               <div key={index} className="flex gap-2">
                 <span>Custom:</span>
@@ -95,8 +95,8 @@ const GuardrailAssessmentView: React.FC<{ assessment: GuardrailAssessment }> = (
 
       {assessment.sensitiveInformationPolicy && (
         <div>
-          <h5 className="text-xs font-semibold text-yellow-400">Sensitive Information Policy</h5>
-          <div className="text-xs text-gray-300">
+          <h5 className="text-xs font-semibold text-warning">Sensitive Information Policy</h5>
+          <div className="text-xs text-ink-faint">
             {assessment.sensitiveInformationPolicy.piiEntities?.map((entity, index) => (
               <div key={index} className="flex gap-2">
                 <span>{entity.type}:</span>
@@ -119,7 +119,7 @@ const GuardrailAssessmentView: React.FC<{ assessment: GuardrailAssessment }> = (
 const InvocationInputView: React.FC<{ input: InvocationInput }> = ({ input }) => {
   return (
     <div className="space-y-2">
-      <div className="text-gray-300">
+      <div className="text-ink-faint">
         <span className="font-semibold">Type: </span>
         {input.invocationType}
       </div>
@@ -130,8 +130,8 @@ const InvocationInputView: React.FC<{ input: InvocationInput }> = ({ input }) =>
 
       {input.knowledgeBaseLookupInput && (
         <div>
-          <h5 className="text-xs font-semibold text-blue-400">Knowledge Base Lookup</h5>
-          <div className="text-xs text-gray-300">
+          <h5 className="text-xs font-semibold text-accent">Knowledge Base Lookup</h5>
+          <div className="text-xs text-ink-faint">
             <div>ID: {input.knowledgeBaseLookupInput.knowledgeBaseId}</div>
             <div>Query: {input.knowledgeBaseLookupInput.text}</div>
           </div>
@@ -140,8 +140,8 @@ const InvocationInputView: React.FC<{ input: InvocationInput }> = ({ input }) =>
 
       {input.codeInterpreterInvocationInput && (
         <div>
-          <h5 className="text-xs font-semibold text-blue-400">Code Interpreter</h5>
-          <div className="text-xs text-gray-300 bg-gray-800 rounded-md p-2">
+          <h5 className="text-xs font-semibold text-accent">Code Interpreter</h5>
+          <div className="text-xs text-ink-faint bg-sunken rounded-control p-2">
             <code className="whitespace-pre">{input.codeInterpreterInvocationInput.code}</code>
           </div>
         </div>
@@ -152,7 +152,7 @@ const InvocationInputView: React.FC<{ input: InvocationInput }> = ({ input }) =>
 
 const ObservationView: React.FC<{ observation: Observation }> = ({ observation }) => {
   return (
-    <div className="text-xs text-gray-300">
+    <div className="text-xs text-ink-faint">
       <div>Type: {observation.type}</div>
       {observation.actionGroupInvocationOutput && (
         <ActionGroupInvocationOutputView output={observation.actionGroupInvocationOutput} />
@@ -169,7 +169,7 @@ const ModelInvocationInputView: React.FC<{ modelInvocationInput: ModelInvocation
   modelInvocationInput
 }) => {
   return (
-    <div className="text-xs text-gray-300">
+    <div className="text-xs text-ink-faint">
       <div>Type: {modelInvocationInput.type}</div>
       <div className="whitespace-pre-wrap">{modelInvocationInput.text}</div>
     </div>
@@ -180,7 +180,7 @@ const ModelInvocationOutputView: React.FC<{
   modelInvocationOutput: OrchestrationModelInvocationOutput
 }> = ({ modelInvocationOutput }) => {
   return (
-    <div className="text-xs text-gray-300">
+    <div className="text-xs text-ink-faint">
       <div className="whitespace-pre-wrap">{modelInvocationOutput.rawResponse?.content}</div>
     </div>
   )
@@ -191,8 +191,8 @@ const ActionGroupInvocationInputView: React.FC<{ input: ActionGroupInvocationInp
 }) => {
   return (
     <div>
-      <h5 className="text-xs font-semibold text-green-400">Action Group Invocation</h5>
-      <div className="text-xs text-gray-300">
+      <h5 className="text-xs font-semibold text-success">Action Group Invocation</h5>
+      <div className="text-xs text-ink-faint">
         {input.actionGroupName && <div>Group: {input.actionGroupName}</div>}
         {input.apiPath && (
           <div>
@@ -219,8 +219,8 @@ const ActionGroupInvocationOutputView: React.FC<{ output: ActionGroupInvocationO
 }) => {
   return (
     <div className="space-y-2">
-      <h5 className="text-xs font-semibold text-green-400">Action Output</h5>
-      <div className="text-xs text-gray-300">
+      <h5 className="text-xs font-semibold text-success">Action Output</h5>
+      <div className="text-xs text-ink-faint">
         <pre className="whitespace-pre-wrap">{output.text}</pre>
       </div>
     </div>
@@ -231,8 +231,8 @@ const PreProcessingTraceView: React.FC<{ trace: PreProcessingTrace }> = ({ trace
   if ('modelInvocationInput' in trace) {
     return (
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-blue-400">Pre-Processing Input</h5>
-        <div className="text-xs text-gray-300">
+        <h5 className="text-xs font-semibold text-accent">Pre-Processing Input</h5>
+        <div className="text-xs text-ink-faint">
           <div>Text: {trace.modelInvocationInput?.text}</div>
           {trace.modelInvocationInput?.inferenceConfiguration && (
             <div className="mt-1">
@@ -254,8 +254,8 @@ const PreProcessingTraceView: React.FC<{ trace: PreProcessingTrace }> = ({ trace
   if ('modelInvocationOutput' in trace) {
     return (
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-blue-400">Pre-Processing Output</h5>
-        <div className="text-xs text-gray-300">
+        <h5 className="text-xs font-semibold text-accent">Pre-Processing Output</h5>
+        <div className="text-xs text-ink-faint">
           {trace.modelInvocationOutput?.parsedResponse && (
             <>
               <div>Valid: {trace.modelInvocationOutput.parsedResponse.isValid ? 'Yes' : 'No'}</div>
@@ -274,8 +274,8 @@ const PostProcessingTraceView: React.FC<{ trace: PostProcessingTrace }> = ({ tra
   if ('modelInvocationInput' in trace) {
     return (
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-purple-400">Post-Processing Input</h5>
-        <div className="text-xs text-gray-300">
+        <h5 className="text-xs font-semibold text-accent-strong">Post-Processing Input</h5>
+        <div className="text-xs text-ink-faint">
           <div>Text: {trace.modelInvocationInput?.text}</div>
           {trace.modelInvocationInput?.inferenceConfiguration && (
             <div className="mt-1">
@@ -297,8 +297,8 @@ const PostProcessingTraceView: React.FC<{ trace: PostProcessingTrace }> = ({ tra
   if ('modelInvocationOutput' in trace) {
     return (
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-purple-400">Post-Processing Output</h5>
-        <div className="text-xs text-gray-300">
+        <h5 className="text-xs font-semibold text-accent-strong">Post-Processing Output</h5>
+        <div className="text-xs text-ink-faint">
           {trace.modelInvocationOutput?.parsedResponse && (
             <div>{trace.modelInvocationOutput.parsedResponse.text}</div>
           )}
@@ -314,8 +314,8 @@ const OrchestrationTraceView: React.FC<{ trace: OrchestrationTrace }> = ({ trace
   if ('rationale' in trace) {
     return (
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-green-400">Rationale</h5>
-        <div className="text-xs text-gray-300">{trace.rationale?.text}</div>
+        <h5 className="text-xs font-semibold text-success">Rationale</h5>
+        <div className="text-xs text-ink-faint">{trace.rationale?.text}</div>
       </div>
     )
   }
@@ -323,7 +323,7 @@ const OrchestrationTraceView: React.FC<{ trace: OrchestrationTrace }> = ({ trace
   if ('invocationInput' in trace) {
     return (
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-green-400">Invocation Input</h5>
+        <h5 className="text-xs font-semibold text-success">Invocation Input</h5>
         <InvocationInputView input={trace.invocationInput as InvocationInput} />
       </div>
     )
@@ -332,7 +332,7 @@ const OrchestrationTraceView: React.FC<{ trace: OrchestrationTrace }> = ({ trace
   if ('observation' in trace) {
     return (
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-green-400">Observation</h5>
+        <h5 className="text-xs font-semibold text-success">Observation</h5>
         <ObservationView observation={trace.observation as Observation} />
       </div>
     )
@@ -341,7 +341,7 @@ const OrchestrationTraceView: React.FC<{ trace: OrchestrationTrace }> = ({ trace
   if ('modelInvocationInput' in trace) {
     return (
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-green-400">Model Invocation Input</h5>
+        <h5 className="text-xs font-semibold text-success">Model Invocation Input</h5>
         <ModelInvocationInputView
           modelInvocationInput={trace.modelInvocationInput as ModelInvocationInput}
         />
@@ -352,7 +352,7 @@ const OrchestrationTraceView: React.FC<{ trace: OrchestrationTrace }> = ({ trace
   if ('modelInvocationOutput' in trace) {
     return (
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-green-400">Model Invocation Output</h5>
+        <h5 className="text-xs font-semibold text-success">Model Invocation Output</h5>
         <ModelInvocationOutputView
           modelInvocationOutput={trace.modelInvocationOutput as OrchestrationModelInvocationOutput}
         />
@@ -369,8 +369,8 @@ const TraceSection: React.FC<{ trace: TracePart }> = ({ trace }) => {
 
     if (trace.trace.preProcessingTrace) {
       return (
-        <div className="bg-gray-900 dark:bg-gray-800 p-4 rounded-lg">
-          <h4 className="text-sm font-semibold text-blue-400 mb-2">Pre-Processing</h4>
+        <div className="bg-sunken p-2.5 rounded-container">
+          <h4 className="text-sm font-semibold text-accent mb-2">Pre-Processing</h4>
           <PreProcessingTraceView trace={trace.trace.preProcessingTrace} />
         </div>
       )
@@ -378,8 +378,8 @@ const TraceSection: React.FC<{ trace: TracePart }> = ({ trace }) => {
 
     if (trace.trace.orchestrationTrace) {
       return (
-        <div className="bg-gray-900 dark:bg-gray-800 p-4 rounded-lg">
-          <h4 className="text-sm font-semibold text-green-400 mb-2">Orchestration</h4>
+        <div className="bg-sunken p-2.5 rounded-container">
+          <h4 className="text-sm font-semibold text-success mb-2">Orchestration</h4>
           <OrchestrationTraceView trace={trace.trace.orchestrationTrace} />
         </div>
       )
@@ -387,8 +387,8 @@ const TraceSection: React.FC<{ trace: TracePart }> = ({ trace }) => {
 
     if (trace.trace.postProcessingTrace) {
       return (
-        <div className="bg-gray-900 dark:bg-gray-800 p-4 rounded-lg">
-          <h4 className="text-sm font-semibold text-purple-400 mb-2">Post-Processing</h4>
+        <div className="bg-sunken p-2.5 rounded-container">
+          <h4 className="text-sm font-semibold text-accent-strong mb-2">Post-Processing</h4>
           <PostProcessingTraceView trace={trace.trace.postProcessingTrace} />
         </div>
       )
@@ -396,9 +396,9 @@ const TraceSection: React.FC<{ trace: TracePart }> = ({ trace }) => {
 
     if (trace.trace.failureTrace) {
       return (
-        <div className="bg-gray-900 dark:bg-gray-800 p-4 rounded-lg">
-          <h4 className="text-sm font-semibold text-red-400 mb-2">Failure</h4>
-          <div className="text-xs text-gray-300">
+        <div className="bg-sunken p-2.5 rounded-container">
+          <h4 className="text-sm font-semibold text-danger mb-2">Failure</h4>
+          <div className="text-xs text-ink-faint">
             <div>Reason: {trace.trace.failureTrace.failureReason}</div>
           </div>
         </div>
@@ -407,18 +407,18 @@ const TraceSection: React.FC<{ trace: TracePart }> = ({ trace }) => {
 
     if (trace.trace.guardrailTrace) {
       return (
-        <div className="bg-gray-900 dark:bg-gray-800 p-4 rounded-lg">
-          <h4 className="text-sm font-semibold text-yellow-400 mb-2">Guardrail</h4>
-          <div className="space-y-4">
+        <div className="bg-sunken p-2.5 rounded-container">
+          <h4 className="text-sm font-semibold text-warning mb-2">Guardrail</h4>
+          <div className="space-y-2">
             <div className="text-xs">
-              <span className="text-gray-400">Action:</span>
-              <span className="ml-2 text-gray-300">{trace.trace.guardrailTrace.action}</span>
+              <span className="text-ink-faint">Action:</span>
+              <span className="ml-2 text-ink-faint">{trace.trace.guardrailTrace.action}</span>
             </div>
 
             {trace.trace.guardrailTrace.inputAssessments &&
               trace.trace.guardrailTrace.inputAssessments.length > 0 && (
                 <div>
-                  <h5 className="text-xs font-semibold text-yellow-400 mb-1">Input Assessments</h5>
+                  <h5 className="text-xs font-semibold text-warning mb-1">Input Assessments</h5>
                   {trace.trace.guardrailTrace.inputAssessments.map((assessment, index) => (
                     <GuardrailAssessmentView key={index} assessment={assessment} />
                   ))}
@@ -428,7 +428,7 @@ const TraceSection: React.FC<{ trace: TracePart }> = ({ trace }) => {
             {trace.trace.guardrailTrace.outputAssessments &&
               trace.trace.guardrailTrace.outputAssessments.length > 0 && (
                 <div>
-                  <h5 className="text-xs font-semibold text-yellow-400 mb-1">Output Assessments</h5>
+                  <h5 className="text-xs font-semibold text-warning mb-1">Output Assessments</h5>
                   {trace.trace.guardrailTrace.outputAssessments.map((assessment, index) => (
                     <GuardrailAssessmentView key={index} assessment={assessment} />
                   ))}
@@ -447,20 +447,20 @@ const TraceSection: React.FC<{ trace: TracePart }> = ({ trace }) => {
       <div className="flex flex-wrap gap-4 text-sm">
         {trace.agentId && (
           <div>
-            <span className="text-gray-400">Agent ID:</span>
-            <span className="ml-2 text-gray-300">{trace.agentId}</span>
+            <span className="text-ink-faint">Agent ID:</span>
+            <span className="ml-2 text-ink-faint">{trace.agentId}</span>
           </div>
         )}
         {trace.sessionId && (
           <div>
-            <span className="text-gray-400">Session ID:</span>
-            <span className="ml-2 text-gray-300">{trace.sessionId}</span>
+            <span className="text-ink-faint">Session ID:</span>
+            <span className="ml-2 text-ink-faint">{trace.sessionId}</span>
           </div>
         )}
         {trace.agentVersion && (
           <div>
-            <span className="text-gray-400">Version:</span>
-            <span className="ml-2 text-gray-300">{trace.agentVersion}</span>
+            <span className="text-ink-faint">Version:</span>
+            <span className="ml-2 text-ink-faint">{trace.agentVersion}</span>
           </div>
         )}
       </div>
@@ -475,7 +475,7 @@ export const BedrockAgentResult: React.FC<{ response: BedrockAgentResponse }> = 
 
   if (!completion) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+      <div className="bg-danger-soft border border-danger text-danger px-2.5 py-1.5 rounded-control relative">
         <strong className="font-bold">Error:</strong>
         <span className="block sm:inline"> No completion data available.</span>
       </div>
@@ -483,26 +483,26 @@ export const BedrockAgentResult: React.FC<{ response: BedrockAgentResponse }> = 
   }
 
   return (
-    <div className="space-y-4 bg-gray-800 text-white dark:bg-gray-900 dark:text-gray-100 p-4 rounded-lg overflow-hidden shadow-sm border border-gray-700 dark:border-gray-800">
+    <div className="space-y-2 bg-surface-2 text-ink p-2.5 rounded-container overflow-hidden shadow-raised border border-subtle">
       {/* Message Section */}
       <div className="space-y-2">
-        <h3 className="text-sm font-bold text-gray-200">Response</h3>
-        <div className="bg-gray-900 dark:bg-gray-800 p-4 rounded-lg">
-          <p className="text-gray-300 whitespace-pre-wrap">{completion.message}</p>
+        <h3 className="text-sm font-bold text-ink">Response</h3>
+        <div className="bg-sunken p-2.5 rounded-container">
+          <p className="text-ink-faint whitespace-pre-wrap">{completion.message}</p>
         </div>
       </div>
 
       {/* Files Section - if any */}
       {completion.files.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-bold text-gray-200">Generated Files</h3>
-          <div className="bg-gray-900 dark:bg-gray-800 p-4 rounded-lg">
+          <h3 className="text-sm font-bold text-ink">Generated Files</h3>
+          <div className="bg-sunken p-2.5 rounded-container">
             <ul className="grid lg:grid-cols-2 md:grid-cols-1 gap-2">
               {completion.files.map((filePath, index) => (
                 <li key={index} className="h-full">
                   <div className="flex items-center space-x-2 p-2">
-                    <span className="text-blue-400">📄</span>
-                    <span className="text-gray-300">{filePath}</span>
+                    <span className="text-accent"></span>
+                    <span className="text-ink-faint">{filePath}</span>
                   </div>
                   <LocalImage src={filePath} alt={filePath} />
                 </li>
@@ -514,24 +514,24 @@ export const BedrockAgentResult: React.FC<{ response: BedrockAgentResponse }> = 
 
       {/* Metadata Section */}
       <div className="space-y-2">
-        <h3 className="text-sm font-bold text-gray-200">Metadata</h3>
-        <div className="bg-gray-900 dark:bg-gray-800 p-4 rounded-lg">
+        <h3 className="text-sm font-bold text-ink">Metadata</h3>
+        <div className="bg-sunken p-2.5 rounded-container">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-400">Session ID:</span>
-              <span className="ml-2 text-gray-300">{result.sessionId}</span>
+              <span className="text-ink-faint">Session ID:</span>
+              <span className="ml-2 text-ink-faint">{result.sessionId}</span>
             </div>
             <div>
-              <span className="text-gray-400">Content Type:</span>
-              <span className="ml-2 text-gray-300">{result.contentType}</span>
+              <span className="text-ink-faint">Content Type:</span>
+              <span className="ml-2 text-ink-faint">{result.contentType}</span>
             </div>
             <div>
-              <span className="text-gray-400">Status Code:</span>
-              <span className="ml-2 text-gray-300">{result.$metadata.httpStatusCode}</span>
+              <span className="text-ink-faint">Status Code:</span>
+              <span className="ml-2 text-ink-faint">{result.$metadata.httpStatusCode}</span>
             </div>
             <div>
-              <span className="text-gray-400">Request ID:</span>
-              <span className="ml-2 text-gray-300">{result.$metadata.requestId}</span>
+              <span className="text-ink-faint">Request ID:</span>
+              <span className="ml-2 text-ink-faint">{result.$metadata.requestId}</span>
             </div>
           </div>
         </div>
@@ -541,8 +541,8 @@ export const BedrockAgentResult: React.FC<{ response: BedrockAgentResponse }> = 
       {completion.traces.length > 0 && (
         <div className="space-y-2">
           <details>
-            <summary className="text-sm font-bold text-gray-200">Traces</summary>
-            <div className="space-y-4 mt-2">
+            <summary className="text-sm font-bold text-ink">Traces</summary>
+            <div className="space-y-2 mt-2">
               {completion.traces.map((trace, index) => (
                 <TraceSection key={index} trace={trace} />
               ))}

@@ -46,10 +46,10 @@ export const TavilySearchSettingForm = ({
   })
 
   return (
-    <div className="mt-4 space-y-4">
+    <div className="mt-4 space-y-2">
       {/* ツールの説明 */}
-      <div className="prose dark:prose-invert max-w-none">
-        <p className="mb-4 text-gray-700 dark:text-gray-300">
+      <div className="max-w-none">
+        <p className="mb-4 text-ink">
           {t(
             'tool info.tavilySearch.description',
             'Tavily Search enables the AI assistant to search the web for current information, providing better responses to queries about recent events, technical documentation, or other information that may not be in its training data.'
@@ -61,8 +61,8 @@ export const TavilySearchSettingForm = ({
       <ApiKeySection apiKey={tavilySearchApiKey} onSave={setTavilySearchApiKey} />
 
       {/* ドメイン設定 */}
-      <div className="flex flex-col gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-md">
-        <h4 className="font-medium text-sm mb-2 dark:text-gray-200">
+      <div className="flex flex-col gap-2 p-2.5 border border-subtle rounded-control">
+        <h4 className="font-medium text-sm mb-2 text-ink">
           {t('Domain Settings', 'Domain Settings')}
         </h4>
 
@@ -92,20 +92,20 @@ export const TavilySearchSettingForm = ({
           onClearAll={excludeDomainsHook.clearAll}
         />
 
-        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded">
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+        <div className="p-3 bg-surface-2 rounded-control">
+          <p className="text-xs text-ink-muted">
             {t(
               'Domain Settings Help',
               'Include domains to limit search to specific websites. Exclude domains to avoid certain websites. Changes are saved automatically.'
             )}
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-xs text-ink-muted mt-2">
             {t('Learn more about domain settings at')}{' '}
             <a
               href="https://docs.tavily.com/documentation/best-practices/best-practices-search#include-domains-restricting-searches-to-specific-domains"
               target="_blank"
               rel="noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-accent hover:underline"
             >
               Tavily Documentation
             </a>

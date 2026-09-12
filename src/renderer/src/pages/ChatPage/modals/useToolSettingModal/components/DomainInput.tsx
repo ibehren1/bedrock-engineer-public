@@ -33,19 +33,19 @@ export const DomainInput = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 px-3 py-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+          className="flex-1 px-3 py-2 text-sm border rounded-control bg-surface border-subtle text-ink"
           onKeyPress={handleKeyPress}
         />
         <button
           onClick={onAdd}
           disabled={error || !value}
-          className={`px-3 py-2 text-sm text-white rounded disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer bg-blue-500 hover:bg-blue-600`}
+          className={`px-3 py-2 text-sm text-accent-fg rounded-control disabled:bg-sunken disabled:cursor-not-allowed cursor-pointer bg-accent hover:bg-accent-strong`}
         >
           <FaPlus className="w-3 h-3" />
         </button>
       </div>
       {error && (
-        <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+        <p className="text-xs text-danger mt-1">
           {t(
             'Please enter a valid domain (e.g., example.com)',
             'Please enter a valid domain (e.g., example.com)'

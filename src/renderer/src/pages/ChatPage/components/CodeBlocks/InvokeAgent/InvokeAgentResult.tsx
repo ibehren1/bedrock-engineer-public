@@ -25,44 +25,40 @@ export const InvokeAgentResult: React.FC<{ response: InvokeAgentResultType }> = 
   const { result } = response
 
   if (!result) {
-    return (
-      <div className="text-sm text-red-600 dark:text-red-400">
-        {response.error || response.message}
-      </div>
-    )
+    return <div className="text-sm text-danger">{response.error || response.message}</div>
   }
 
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-gray-600 dark:text-gray-400">
+        <span className="text-ink-muted">
           {renderAgentIcon(result.agentIcon, result.agentIconColor)}
         </span>
-        <span className="font-medium text-gray-900 dark:text-white">{result.agentName}</span>
-        <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+        <span className="font-medium text-ink">{result.agentName}</span>
+        <span className="rounded-control bg-raised px-1.5 py-0.5 text-xs text-ink-muted">
           {t('invokeAgentResult.depth', { depth: result.depth })}
         </span>
       </div>
 
-      <div className="prose prose-sm max-w-none dark:prose-invert">
+      <div className="max-w-none">
         <Markdown>{result.finalText}</Markdown>
       </div>
 
       {result.truncated && (
-        <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+        <div className="flex items-center gap-1.5 text-xs text-warning">
           <FiAlertTriangle className="shrink-0" />
           {t('invokeAgentResult.truncated')}
         </div>
       )}
 
       {result.stoppedReason === 'maxToolExecutions' && (
-        <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+        <div className="flex items-center gap-1.5 text-xs text-warning">
           <FiAlertTriangle className="shrink-0" />
           {t('invokeAgentResult.toolBudgetReached')}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-gray-100 pt-2 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-faint pt-2 text-xs text-ink-muted">
         <span className="flex items-center gap-1">
           <FiTool className="shrink-0" />
           {t('invokeAgentResult.toolCalls', { count: result.toolCallCount })}
@@ -77,10 +73,7 @@ export const InvokeAgentResult: React.FC<{ response: InvokeAgentResultType }> = 
         {result.toolNames.length > 0 && (
           <span className="flex flex-wrap gap-1">
             {result.toolNames.map((name) => (
-              <span
-                key={name}
-                className="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-700 dark:text-gray-300"
-              >
+              <span key={name} className="rounded-control bg-raised px-1.5 py-0.5 text-ink">
                 {name}
               </span>
             ))}

@@ -59,12 +59,12 @@ export const AgentDirectoryPage: React.FC = () => {
   } = useOrganizationModal()
 
   return (
-    <div className="px-4 py-6">
-      <header className="mb-6">
+    <div className="px-2.5 py-1.5">
+      <header className="mb-3">
         <div>
           {/* タイトル行と組織セレクター */}
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold dark:text-white">{t('title')}</h1>
+            <h1 className="text-title text-ink">{t('title')}</h1>
             <OrganizationSelector
               selectedOrganization={selectedOrganization}
               organizations={organizations}
@@ -77,36 +77,36 @@ export const AgentDirectoryPage: React.FC = () => {
 
           {/* 説明行 */}
           <div className="flex items-center">
-            <p className="text-gray-600 dark:text-gray-400">{t('description')}</p>
+            <p className="text-ink-muted">{t('description')}</p>
             <div className="relative ml-2 group">
               <BsQuestionCircle
-                className="w-4 h-4 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer"
+                className="w-4 h-4 text-ink-muted hover:text-accent cursor-pointer"
                 onClick={openModal}
               />
               <div
                 className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 text-xs
-                            font-medium text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-sm opacity-0 group-hover:opacity-100
+                            font-medium bg-ink text-canvas rounded-container shadow-sm opacity-0 group-hover:opacity-100
                             transition-opacity duration-300 whitespace-nowrap pointer-events-none"
               >
                 {t('contributor.tooltip')}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-ink"></div>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="mb-6">
+      <div className="mb-3">
         <div className="relative max-w-lg">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <FiSearch className="w-5 h-5 text-gray-400" />
+            <FiSearch className="w-4 h-4 text-ink-faint" />
           </div>
           <input
             type="search"
-            className="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg
-              bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700
-              dark:border-gray-600 dark:placeholder-gray-400 dark:text-white
-              dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="block w-full p-2 pl-10 text-sm text-ink border border-strong rounded-container
+              bg-surface-2 focus:ring-accent focus:border-accent
+              border-subtle placeholder-ink-faint text-ink
+              focus:ring-accent focus:border-accent"
             placeholder={t('searchAgents')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -115,7 +115,7 @@ export const AgentDirectoryPage: React.FC = () => {
       </div>
 
       {allTags.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-3">
           <TagFilter tags={allTags} selectedTags={selectedTags} onSelectTag={handleTagToggle} />
         </div>
       )}

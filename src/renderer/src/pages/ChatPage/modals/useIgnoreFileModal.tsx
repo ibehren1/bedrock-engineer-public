@@ -51,9 +51,9 @@ const IgnoreFileModal = React.memo(({ isOpen, onClose }: IgnoreFileModalProps) =
     <Modal dismissible show={isOpen} onClose={onClose} size="4xl">
       <Modal.Header>{t('ignoreFiles.title')}</Modal.Header>
       <Modal.Body>
-        <p className="text-gray-700 text-sm pb-2 dark:text-white">{t('ignoreFiles.description')}</p>
+        <p className="text-ink text-sm pb-2">{t('ignoreFiles.description')}</p>
         <textarea
-          className={`block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 mt-2 dark:bg-gray-800 dark:text-white`}
+          className={`block w-full p-2.5 text-sm text-ink border border-strong rounded-container bg-surface-2 mt-2`}
           placeholder={`.git\nnode_modules\n.vscode\n${t('ignoreFiles.placeholder')}`}
           value={ignoreFilesText}
           onChange={(e) => handleIgnoreFilesChange(e.target.value)}
@@ -65,7 +65,7 @@ const IgnoreFileModal = React.memo(({ isOpen, onClose }: IgnoreFileModalProps) =
         <div className="flex justify-end w-full">
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            className="px-2.5 py-1 bg-accent text-accent-fg rounded-control hover:bg-accent-strong transition-colors"
           >
             {t('ignoreFiles.save')}
           </button>

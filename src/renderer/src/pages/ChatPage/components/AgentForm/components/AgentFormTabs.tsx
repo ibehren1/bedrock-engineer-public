@@ -24,15 +24,15 @@ export const AgentFormTabs: React.FC<{
   }
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+    <div className="border-b border-subtle mb-3">
       <ul className="flex flex-wrap -mb-px" onClick={formEventUtils.preventPropagation}>
         <li className="mr-2">
           <button
             type="button"
-            className={`inline-flex items-center gap-1.5 p-4 border-b-2 rounded-t-lg ${
+            className={`inline-flex items-center gap-1.5 p-2.5 border-b-2 rounded-t-container ${
               activeTab === 'basic'
-                ? 'text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300'
+                ? 'text-accent border-accent'
+                : 'text-ink-muted border-transparent hover:text-ink-muted hover:border-strong'
             }`}
             onClick={formEventUtils.createSafeHandler(() => onTabChange('basic' as AgentFormTabId))}
           >
@@ -43,10 +43,10 @@ export const AgentFormTabs: React.FC<{
         <li className="mr-2">
           <button
             type="button"
-            className={`inline-flex items-center gap-1.5 p-4 border-b-2 rounded-t-lg ${
+            className={`inline-flex items-center gap-1.5 p-2.5 border-b-2 rounded-t-container ${
               activeTab === 'mcp-servers'
-                ? 'text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300'
+                ? 'text-accent border-accent'
+                : 'text-ink-muted border-transparent hover:text-ink-muted hover:border-strong'
             }`}
             onClick={formEventUtils.createSafeHandler(() =>
               onTabChange('mcp-servers' as AgentFormTabId)
@@ -59,10 +59,10 @@ export const AgentFormTabs: React.FC<{
         <li>
           <button
             type="button"
-            className={`inline-flex items-center gap-1.5 p-4 border-b-2 rounded-t-lg ${
+            className={`inline-flex items-center gap-1.5 p-2.5 border-b-2 rounded-t-container ${
               activeTab === 'tools'
-                ? 'text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300'
+                ? 'text-accent border-accent'
+                : 'text-ink-muted border-transparent hover:text-ink-muted hover:border-strong'
             }`}
             onClick={handleToolsTabClick}
           >

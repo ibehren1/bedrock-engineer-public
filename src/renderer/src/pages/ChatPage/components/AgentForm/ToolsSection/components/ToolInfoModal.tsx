@@ -21,27 +21,24 @@ export const ToolInfoModal: React.FC<ToolInfoModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2.5"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg max-w-md w-full max-h-[80vh] overflow-y-auto"
+        className="bg-surface p-2.5 rounded-container shadow-lg max-w-md w-full max-h-[80vh] overflow-y-auto"
         onClick={preventEventPropagation}
       >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold">{getOriginalMcpToolName(toolName)}</h3>
-            <span className="bg-cyan-100 text-cyan-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-cyan-900 dark:text-cyan-300">
+            <h3 className="text-heading font-semibold">{getOriginalMcpToolName(toolName)}</h3>
+            <span className="bg-accent-tint text-accent text-xs font-medium px-2 py-0.5 rounded-control">
               MCP
             </span>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
+          <button onClick={onClose} className="text-ink-muted hover:text-ink">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
+              className="h-4 w-4"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -54,22 +51,18 @@ export const ToolInfoModal: React.FC<ToolInfoModalProps> = ({
           </button>
         </div>
 
-        <div className="prose dark:prose-invert max-w-none text-sm">
+        <div className="max-w-none text-sm">
           <p className="mb-4">{toolDescription}</p>
 
           {mcpServerInfo && (
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-              <h4 className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
-                {t('Server Information')}
-              </h4>
+            <div className="mt-4 p-3 bg-accent-tint rounded-control">
+              <h4 className="text-sm font-medium text-accent mb-1">{t('Server Information')}</h4>
               <p className="text-xs">{mcpServerInfo}</p>
             </div>
           )}
 
-          <div className="mt-4 p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-md border-l-4 border-cyan-500">
-            <h4 className="text-sm font-medium text-cyan-700 dark:text-cyan-300 mb-1">
-              {t('MCP Tool')}
-            </h4>
+          <div className="mt-4 p-3 bg-accent-tint rounded-control border-l-4 border-accent">
+            <h4 className="text-sm font-medium text-accent mb-1">{t('MCP Tool')}</h4>
             <p className="text-xs">
               {t(
                 'This tool is provided by an MCP server and is always enabled. It cannot be disabled.'

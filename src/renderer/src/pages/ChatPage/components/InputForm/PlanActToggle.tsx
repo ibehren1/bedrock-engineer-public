@@ -7,13 +7,12 @@ type PlanActToggleProps = {
   className?: string
 }
 
-const planModeStyle = 'bg-yellow-300 text-gray-700'
+const planModeStyle = 'bg-warning-soft text-ink'
 // Act mode is the default, so this pill is on screen for the whole session. It
 // used to animate its gradient position, which repaints continuously and shows
 // up as steady battery drain while the app just sits there.
-const actModeStyle = 'bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 text-white'
-const unselectedStyle =
-  'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+const actModeStyle = 'bg-accent text-accent-fg'
+const unselectedStyle = 'bg-surface-2 text-ink-muted hover:text-ink'
 
 export const PlanActToggle: React.FC<PlanActToggleProps> = ({ className = '' }) => {
   const { t } = useTranslation()

@@ -14,13 +14,11 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   return (
     <div className="flex items-center justify-end">
       <div className="flex items-center">
-        <label className="mr-2 text-sm text-gray-700 dark:text-gray-300">
-          {t('tools.category')}:
-        </label>
+        <label className="mr-2 text-sm text-ink">{t('tools.category')}:</label>
         <select
           value={selectedCategory}
           onChange={onChange}
-          className="text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+          className="text-sm border-strong rounded-control shadow-sm focus:ring-accent focus:border-accent bg-raised bg-surface text-ink"
         >
           <option value="general">{t('Tool Categories.General Purpose')}</option>
           <option value="coding">{t('Tool Categories.Software Development')}</option>

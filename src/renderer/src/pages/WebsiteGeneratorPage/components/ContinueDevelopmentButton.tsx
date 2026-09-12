@@ -43,15 +43,15 @@ const ContinueDevelopmentButtonComponent = ({
           onClick={onContinue}
           disabled={disabled}
           className={`
-            cursor-pointer rounded-md py-1.5 px-2 transition-all duration-200
+            cursor-pointer rounded-control py-1.5 px-2 transition-all duration-200
             ${
               disabled
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                ? 'text-ink-faint cursor-not-allowed'
+                : 'hover:border-strong hover:bg-surface-2'
             }
           `}
         >
-          <FaCode className="text-xl" />
+          <FaCode className="text-base" />
         </motion.button>
       </Tooltip>
     )
@@ -64,26 +64,26 @@ const ContinueDevelopmentButtonComponent = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
       transition={{ duration: 0.3 }}
-      className="mt-4 p-3 border-t border-gray-200 dark:border-gray-700"
+      className="mt-4 p-3 border-t border-subtle"
     >
       <button
         onClick={onContinue}
         disabled={disabled}
         className={`
-          w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg
-          font-medium text-white transition-all duration-200
+          w-full flex items-center justify-center gap-2 px-2.5 py-1 rounded-container
+          font-medium text-accent-fg transition-all duration-200
           ${
             disabled
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 hover:shadow-md'
+              ? 'bg-sunken cursor-not-allowed'
+              : 'bg-accent hover:bg-accent-strong active:bg-accent hover:shadow-md'
           }
         `}
       >
-        <FaCode className="text-lg" />
+        <FaCode className="text-base" />
         <span>{t('Continue development in Agent Chat', 'Agent Chatで開発を続ける')}</span>
       </button>
 
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+      <p className="text-xs text-ink-muted mt-2 text-center">
         {t(
           'Continue implementing and enhancing this website with an agent',
           'エージェントでこのウェブサイトの実装・改善を続けましょう'

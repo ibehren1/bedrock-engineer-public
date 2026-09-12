@@ -112,8 +112,8 @@ export const AgentMentionPopup: React.FC<AgentMentionPopupProps> = ({
 
   return (
     <div
-      className="fixed z-50 overflow-y-auto overscroll-contain rounded-lg border border-gray-200
-        bg-white py-1 shadow-lg dark:border-gray-600 dark:bg-gray-800"
+      className="fixed z-50 overflow-y-auto overscroll-contain rounded-container border border-subtle
+        bg-surface py-1 shadow-lg border-subtle"
       style={{
         top: placement?.top ?? 0,
         left: placement?.left ?? 0,
@@ -138,13 +138,11 @@ export const AgentMentionPopup: React.FC<AgentMentionPopupProps> = ({
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onSelect(agent)}
           className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors ${
-            index === activeIndex
-              ? 'bg-blue-50 dark:bg-gray-700'
-              : 'hover:bg-gray-50 dark:hover:bg-gray-700/60'
+            index === activeIndex ? 'bg-accent-tint' : 'hover:bg-surface-2'
           }`}
         >
-          <span className="shrink-0 text-gray-600 dark:text-gray-400">{renderIcon(agent)}</span>
-          <span className="truncate text-gray-900 dark:text-white">{agent.name}</span>
+          <span className="shrink-0 text-ink-muted">{renderIcon(agent)}</span>
+          <span className="truncate text-ink">{agent.name}</span>
         </button>
       ))}
     </div>

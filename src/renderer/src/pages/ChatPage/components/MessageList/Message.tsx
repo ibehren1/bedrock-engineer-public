@@ -11,8 +11,6 @@ import { TextCodeBlock } from '../CodeBlocks/TextCodeBlock'
 import { TaskListCard } from '../CodeInterpreter/TaskListCard'
 import CodeRenderer from '../Code/CodeRenderer'
 import { toolIcons } from '@renderer/components/icons/ToolIcons'
-import { FaCheck } from 'react-icons/fa'
-import { MdErrorOutline } from 'react-icons/md'
 import { FiTrash2, FiCopy } from 'react-icons/fi'
 import { LuFileText } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
@@ -175,47 +173,47 @@ export const ChatMessage = memo(function ChatMessage({
     <div className="flex gap-4 relative">
       <div className="relative" ref={avatarRef}>
         <div
-          className="cursor-pointer hover:bg-gray-200 rounded-md"
+          className="cursor-pointer hover:bg-raised rounded-control"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           title={t('Click for options')}
         >
           <Avatar role={message.role} modelId={message.metadata?.modelId} />
         </div>
         {isDropdownOpen && (
-          <div className="absolute left-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 min-w-32 py-1 border dark:border-gray-700 whitespace-nowrap p-1">
+          <div className="absolute left-0 mt-1 bg-surface rounded-container shadow-lg z-50 min-w-32 py-1 border border-subtle whitespace-nowrap p-1">
             <button
-              className="flex items-center gap-2 px-4 py-2 w-full text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              className="flex items-center gap-2 px-2.5 py-1 w-full text-left text-sm hover:bg-raised rounded-control"
               onClick={handleCopyMessage}
             >
-              <FiCopy className="text-blue-500" />
-              <span className="dark:text-gray-300">{t('Copy (markdown)')}</span>
+              <FiCopy className="text-accent" />
+              <span className="text-ink">{t('Copy (markdown)')}</span>
             </button>
             <button
-              className="flex items-center gap-2 px-4 py-2 w-full text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              className="flex items-center gap-2 px-2.5 py-1 w-full text-left text-sm hover:bg-raised rounded-control"
               onClick={handleCopyRichText}
             >
-              <LuFileText className="text-blue-500" />
-              <span className="dark:text-gray-300">{t('Copy (rich text)')}</span>
+              <LuFileText className="text-accent" />
+              <span className="text-ink">{t('Copy (rich text)')}</span>
             </button>
             <button
-              className="flex items-center gap-2 px-4 py-2 w-full text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              className="flex items-center gap-2 px-2.5 py-1 w-full text-left text-sm hover:bg-raised rounded-control"
               onClick={handleDeleteMessage}
             >
-              <FiTrash2 className="text-red-500" />
-              <span className="dark:text-gray-300">{t('Delete message')}</span>
+              <FiTrash2 className="text-danger" />
+              <span className="text-ink">{t('Delete message')}</span>
             </button>
           </div>
         )}
       </div>
       <div className="flex flex-col gap-2 w-full">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 relative">
+          <span className="text-xs text-ink-muted relative">
             {message.role === 'user' && userName ? userName : message.role}
           </span>
           {message.metadata && (
             <button
               onClick={() => setShowMetadataModal(true)}
-              className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-500 px-2 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+              className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-control hover:bg-sunken"
             >
               metadata
             </button>
@@ -253,11 +251,11 @@ export const ChatMessage = memo(function ChatMessage({
                 <Accordion className="w-full" collapseAll>
                   <Accordion.Panel>
                     <Accordion.Title>
-                      <div className="flex gap-6 items-center">
+                      <div className="flex gap-3 items-center">
                         <span>{toolIcons[c.toolUse?.name || 'unknown']}</span>
                         <div className="flex gap-2">
                           <span>ToolUse:</span>
-                          <span className="border rounded-md bg-gray-200 px-2 dark:text-gray-800">
+                          <span className="border rounded-control bg-raised px-2 text-ink">
                             {c.toolUse?.name}
                           </span>
                           <span>{c.toolUse?.toolUseId}</span>
@@ -277,23 +275,29 @@ export const ChatMessage = memo(function ChatMessage({
                 <Accordion className="w-full" collapseAll>
                   <Accordion.Panel>
                     <Accordion.Title>
-                      <div className="flex gap-6 items-center">
-                        <span className={`rounded-md`}>
-                          {c.toolResult?.status === 'success' ? (
-                            <FaCheck className="size-6 text-green-500" />
-                          ) : (
-                            <MdErrorOutline className="size-6 text-red-700" />
-                          )}
+                      {/* Status was a 24px saturated checkmark plus a solid
+                          bg-green-500 / bg-red-700 chip on every single tool
+                          result. Now a 5px dot and a quiet tinted badge, so a
+                          long run of successful calls reads as calm and a
+                          failure actually stands out. */}
+                      <div className="flex gap-3 items-center">
+                        <span
+                          className={`size-1.5 shrink-0 rounded-full ${
+                            c.toolResult?.status === 'success' ? 'bg-success' : 'bg-danger'
+                          }`}
+                        />
+                        <span
+                          className={`rounded-control px-1.5 py-0.5 text-micro ${
+                            c.toolResult?.status === 'success'
+                              ? 'bg-success/10 text-success'
+                              : 'bg-danger/10 text-danger'
+                          }`}
+                        >
+                          {c.toolResult?.status}
                         </span>
-                        <div className="flex gap-2">
-                          <span>ToolResult:</span>
-                          <span
-                            className={`rounded-md px-2 ${c.toolResult?.status === 'success' ? 'bg-green-500 text-white' : 'bg-red-700 text-white'}`}
-                          >
-                            {c.toolResult?.status}
-                          </span>
-                        </div>
-                        <span>{c.toolResult?.toolUseId}</span>
+                        <span className="font-mono text-[10.5px] text-ink-faint">
+                          {c.toolResult?.toolUseId}
+                        </span>
                       </div>
                     </Accordion.Title>
                     <Accordion.Content className="w-full">
@@ -330,7 +334,7 @@ export const ChatMessage = memo(function ChatMessage({
                 <img
                   src={imageUrl}
                   alt="image"
-                  className="rounded-lg shadow-sm max-h-[512px] object-contain"
+                  className="rounded-container shadow-sm max-h-[512px] object-contain"
                 />
               </div>
             )
@@ -354,7 +358,7 @@ export const ChatMessage = memo(function ChatMessage({
         dismissible
       >
         <Modal.Header>
-          <div className="text-lg font-medium">{t('Metadata')}</div>
+          <div className="text-heading font-medium">{t('Metadata')}</div>
         </Modal.Header>
         <Modal.Body className="max-h-[80vh] overflow-auto">
           {message.metadata && <MetadataViewer metadata={message.metadata} />}
@@ -362,7 +366,7 @@ export const ChatMessage = memo(function ChatMessage({
         <Modal.Footer>
           <button
             onClick={() => setShowMetadataModal(false)}
-            className="px-5 py-2.5 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all"
+            className="px-5 py-2.5 text-sm font-medium bg-accent text-accent-fg rounded-container hover:bg-accent-strong focus:ring-4 focus:ring-accent transition-all"
           >
             {t('Close')}
           </button>

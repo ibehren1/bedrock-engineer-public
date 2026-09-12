@@ -192,10 +192,10 @@ export default function ChatPage() {
   useEffect(() => {
     if (!todoFlash) return undefined
     const statusColors: Record<string, string> = {
-      pending: 'text-yellow-500 dark:text-yellow-400',
-      in_progress: 'text-blue-500 dark:text-blue-400',
-      completed: 'text-green-500 dark:text-green-400',
-      cancelled: 'text-red-500 dark:text-red-400'
+      pending: 'text-warning',
+      in_progress: 'text-accent',
+      completed: 'text-success',
+      cancelled: 'text-danger'
     }
     setTodoFlashColor(statusColors[todoFlash.status] ?? null)
     // Animation runs 0.5s x 2; clear slightly after so the class re-applies next time
@@ -544,10 +544,10 @@ export default function ChatPage() {
     >
       {/* Hidden DrawIO embed used to rasterize diagrams during markdown export */}
       <DrawioRasterizer ref={drawioRasterizerRef} />
-      <div className="flex p-3 h-screen">
+      <div className="flex px-4 py-3 h-screen">
         {/* チャット履歴サイドパネル - 全高。ヘッダーより上（ウィンドウ最上部）から始まる */}
         <div
-          className={`dark:bg-gray-900 flex-shrink-0 transition-all duration-300 ease-in-out ${
+          className={`bg-canvas flex-shrink-0 transition-all duration-300 ease-in-out ${
             isHistoryOpen ? 'w-96' : 'w-0'
           } overflow-y-auto overflow-x-hidden`}
         >
@@ -570,7 +570,7 @@ export default function ChatPage() {
           >
             <div
               onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-              className="w-4 h-16 dark:bg-gray-700 bg-gray-200 cursor-pointer flex items-center justify-center transition-colors duration-200 rounded-lg m-2"
+              className="w-4 h-16 bg-raised cursor-pointer flex items-center justify-center transition-colors duration-200 rounded-container m-2"
             >
               <FiChevronRight
                 className={`w-4 h-4 text-accent hover:text-accent-strong transition-transform duration-200 ${
@@ -593,7 +593,7 @@ export default function ChatPage() {
                   className={`cursor-pointer ${
                     todoFlashColor
                       ? `${todoFlashColor} animate-todo-flash`
-                      : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                      : 'text-ink-faint hover:text-ink'
                   }`}
                   onClick={() => handleOpenTodoModal()}
                   title={t('View TODO List')}
@@ -602,7 +602,7 @@ export default function ChatPage() {
               )}
               {messages.length > 0 && (
                 <span
-                  className="text-xs text-gray-400 font-medium cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
+                  className="text-xs text-ink-faint font-medium cursor-pointer hover:text-ink"
                   onClick={handleOpenTokenAnalyticsModal}
                   title={t('Conversation Cost')}
                 >
@@ -615,13 +615,13 @@ export default function ChatPage() {
                 </span>
               )}
               <FiBarChart2
-                className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer"
+                className="text-ink-faint hover:text-ink cursor-pointer"
                 onClick={handleOpenTokenAnalyticsModal}
                 title={t('View Token Analytics')}
                 size={16}
               />
               <span
-                className="text-xs text-gray-400 font-thin cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
+                className="text-xs text-ink-faint font-thin cursor-pointer hover:text-ink"
                 onClick={handleOpenSystemPromptModal}
               >
                 SYSTEM_PROMPT
@@ -664,10 +664,10 @@ export default function ChatPage() {
               }}
             >
               {messages.length === 0 ? (
-                <div className="flex flex-col pt-12 h-full w-full justify-center items-center content-center align-center gap-1">
+                <div className="flex flex-col pt-12 h-full w-full justify-center items-center content-center gap-1">
                   <div className="flex flex-row gap-3 items-center mb-2">
-                    <div className="bg-icon rounded-lg p-1.5 flex items-center justify-center">
-                      <div className="h-6 w-6">
+                    <div className="bg-icon rounded-container p-1.5 flex items-center justify-center">
+                      <div className="h-4 w-4">
                         <img
                           src={AILogo}
                           className="h-full w-full object-contain"
@@ -675,11 +675,11 @@ export default function ChatPage() {
                         />
                       </div>
                     </div>
-                    <h1 className="text-lg font-bold dark:text-white">
+                    <h1 className="text-title text-ink">
                       {isHelpSession ? t('help.chatTitle') : 'Agent Chat'}
                     </h1>
                   </div>
-                  <div className="text-gray-400">
+                  <div className="text-ink-faint">
                     {t((isHelpSession ? helpAgent?.description : currentAgent?.description) ?? '')}
                   </div>
                   {(isHelpSession ? helpAgent : currentAgent) && (
@@ -705,7 +705,7 @@ export default function ChatPage() {
             </div>
 
             {/* 入力フォーム - 固定 */}
-            <div className="mt-2 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div className="mt-2 border-subtle bg-surface">
               <InputFormContainer
                 ref={inputFormRef}
                 loading={loading}

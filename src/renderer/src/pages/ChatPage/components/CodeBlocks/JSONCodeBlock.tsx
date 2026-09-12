@@ -77,9 +77,7 @@ export const JSONCodeBlock: React.FC<{ json: any }> = ({ json }) => {
   if (json.name === 'think') {
     return (
       <div className="max-h-[50vh] overflow-y-auto">
-        <p className="text-gray-500 dark:text-gray-400 whitespace-pre-wrap">
-          {json?.result?.reasoning}
-        </p>
+        <p className="text-ink-muted whitespace-pre-wrap">{json?.result?.reasoning}</p>
       </div>
     )
   }
@@ -157,7 +155,7 @@ export const JSONCodeBlock: React.FC<{ json: any }> = ({ json }) => {
 
   const jsonStr = JSON.stringify(json, null, 2)
   return (
-    <pre className="bg-gray-800 text-white dark:bg-gray-900 dark:text-gray-100 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap max-h-[50vh] max-w-[90vw] shadow-sm border border-gray-700 dark:border-gray-800">
+    <pre className="bg-sunken text-ink p-2.5 rounded-container overflow-x-auto whitespace-pre-wrap max-h-[50vh] max-w-[90vw] shadow-raised border border-subtle">
       <code>{jsonStr}</code>
     </pre>
   )

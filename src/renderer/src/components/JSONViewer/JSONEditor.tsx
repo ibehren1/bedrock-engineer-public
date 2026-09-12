@@ -51,13 +51,13 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       <textarea
         value={jsonText}
         onChange={handleTextChange}
-        className={`w-full p-2 text-sm font-mono border rounded resize-vertical ${
-          localError || error ? 'border-red-500' : 'dark:bg-gray-800 dark:border-gray-700'
-        } dark:text-gray-200`}
+        className={`w-full p-2 text-sm font-mono border rounded-control resize-y ${
+          localError || error ? 'border-danger' : 'bg-surface border-subtle'
+        } text-ink`}
         style={{ height }}
         placeholder={t('Enter JSON schema here')}
       />
-      {(localError || error) && <p className="text-xs text-red-500 mt-1">{localError || error}</p>}
+      {(localError || error) && <p className="text-xs text-danger mt-1">{localError || error}</p>}
     </div>
   )
 }

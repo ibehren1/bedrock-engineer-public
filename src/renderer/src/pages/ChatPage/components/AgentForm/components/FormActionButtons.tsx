@@ -18,10 +18,10 @@ export const FormActionButtons: React.FC<{
       <button
         type="button"
         onClick={formEventUtils.createSafeHandler(onCancel)}
-        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800
-          border border-gray-300 dark:border-gray-600/50 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700/50
-          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400
-          dark:focus:ring-offset-gray-900 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+        className="px-2.5 py-1 text-sm font-medium text-ink bg-surface
+          border border-strong rounded-control shadow-sm hover:bg-surface-2
+          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent
+          focus:ring-offset-canvas transition-all duration-200 hover:border-strong"
       >
         {t('cancel')}
       </button>
@@ -31,12 +31,12 @@ export const FormActionButtons: React.FC<{
           e.stopPropagation()
         }}
         disabled={isGenerating}
-        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-md shadow-sm focus:outline-none focus:ring-2
-          focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900 transition-all duration-200
+        className={`flex items-center gap-2 px-2.5 py-1 text-sm font-medium border rounded-control shadow-sm focus:outline-none focus:ring-2
+          focus:ring-offset-2 focus:ring-accent focus:ring-offset-canvas transition-all duration-200
           ${
             isGenerating
-              ? 'text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 cursor-not-allowed opacity-70'
-              : 'text-white bg-blue-600 dark:bg-blue-500 border-transparent hover:bg-blue-700 dark:hover:bg-blue-400 hover:shadow-md'
+              ? 'text-ink-faint bg-raised border-strong cursor-not-allowed opacity-70'
+              : 'text-accent-fg bg-accent border-transparent hover:bg-accent-strong hover:shadow-md'
           }`}
       >
         {isGenerating ? (

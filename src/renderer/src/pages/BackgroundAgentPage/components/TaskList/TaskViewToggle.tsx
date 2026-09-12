@@ -17,16 +17,16 @@ export const TaskViewToggle: React.FC<TaskViewToggleProps> = ({
     <div
       className={`
         relative inline-flex items-center
-        bg-gray-100 dark:bg-gray-800
-        rounded p-1
-        border border-gray-200 dark:border-gray-700
+        bg-raised
+        rounded-control p-1
+        border border-subtle
         cursor-pointer
         ${className}
       `}
     >
       {/* アニメーション背景 */}
       <motion.div
-        className="absolute top-0.5 h-6 w-8 bg-white/60 dark:bg-gray-600/60 rounded shadow-sm"
+        className="absolute top-0.5 h-6 w-8 bg-surface/60 rounded-control shadow-sm"
         animate={{
           x: isTableView ? 32 : 0
         }}
@@ -43,17 +43,13 @@ export const TaskViewToggle: React.FC<TaskViewToggleProps> = ({
         onClick={() => onToggle(false)}
         className={`
           relative z-10 flex items-center justify-center
-          w-8 h-5 rounded
+          w-8 h-5 rounded-control
           transition-colors duration-200
-          ${
-            !isTableView
-              ? 'text-gray-700 dark:text-gray-200'
-              : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'
-          }
+          ${!isTableView ? 'text-ink' : 'text-ink-faint hover:text-ink-muted'}
         `}
         title="Switch to List View"
       >
-        <Squares2X2Icon className="w-5 h-5" />
+        <Squares2X2Icon className="w-4 h-4" />
       </button>
 
       {/* TABLE ボタン (テーブルアイコン) */}
@@ -61,17 +57,13 @@ export const TaskViewToggle: React.FC<TaskViewToggleProps> = ({
         onClick={() => onToggle(true)}
         className={`
           relative z-10 flex items-center justify-center
-          w-8 h-5 rounded
+          w-8 h-5 rounded-control
           transition-colors duration-200
-          ${
-            isTableView
-              ? 'text-gray-700 dark:text-gray-200'
-              : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'
-          }
+          ${isTableView ? 'text-ink' : 'text-ink-faint hover:text-ink-muted'}
         `}
         title="Switch to Table View"
       >
-        <TableCellsIcon className="w-5 h-5" />
+        <TableCellsIcon className="w-4 h-4" />
       </button>
     </div>
   )

@@ -17,22 +17,20 @@ export const GuardrailSection: React.FC = () => {
 
   return (
     <SettingSection title={t('Amazon Bedrock Guardrails')} icon={FaShieldAlt}>
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="space-y-2">
           <label className="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300
-                focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800
-                focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              className="form-checkbox h-4 w-4 text-accent rounded-control border-strong
+                focus:ring-accent ring-offset-surface
+                focus:ring-2 bg-raised border-subtle"
               checked={guardrailSettings.enabled}
               onChange={(e) => updateGuardrailSettings({ enabled: e.target.checked })}
             />
-            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-              {t('Enable Guardrails')}
-            </span>
+            <span className="ml-2 text-sm text-ink">{t('Enable Guardrails')}</span>
           </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-ink-muted">
             {t(
               'When enabled, guardrails will be applied to all model interactions to filter harmful content.'
             )}

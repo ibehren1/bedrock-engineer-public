@@ -158,16 +158,16 @@ function StepFunctionsGeneratorPage() {
   return (
     <div className={'flex flex-col p-3 h-[calc(100vh-11rem)] overflow-y-auto z-10'}>
       <SystemPromptModal header="SYSTEM PROMPT" size="7xl">
-        <div className="dark:text-white">
+        <div className="text-ink">
           <MD>{systemPrompt}</MD>
         </div>
       </SystemPromptModal>
       <div className="flex pb-2 justify-between">
         <span className="font-bold flex gap-2">
-          <h1 className="content-center dark:text-white">AWS Step Functions Generator</h1>
+          <h1 className="content-center text-ink">AWS Step Functions Generator</h1>
         </span>
         <span
-          className="text-xs text-gray-400 font-thin cursor-pointer hover:text-gray-700"
+          className="text-xs text-ink-faint font-thin cursor-pointer hover:text-ink"
           onClick={openSystemPromptModal}
         >
           SYSTEM_PROMPT
@@ -176,17 +176,17 @@ function StepFunctionsGeneratorPage() {
 
       <div className="grid grid-cols-2 gap-2">
         {/* LEFT */}
-        <div className="border h-[75vh] flex flex-col resize-x bg-white rounded-md dark:bg-gray-800 dark:border-black">
+        <div className="border border-subtle h-[75vh] flex flex-col resize-x bg-surface rounded-control">
           <div className="border-b p-1">
-            <h1 className="text-xs italic dark:text-gray-200">Editor</h1>
+            <h1 className="text-xs italic text-ink">Editor</h1>
           </div>
           <ASLEditor value={editorValue} setValue={setEditorValue} />
         </div>
 
         {/* RIGHT */}
-        <div className="border h-[75vh] flex flex-col resize-x bg-white rounded-md dark:bg-gray-800 dark:border-black">
+        <div className="border border-subtle h-[75vh] flex flex-col resize-x bg-surface rounded-control">
           <div className="border-b p-1 flex justify-between">
-            <h1 className="text-xs italic dark:text-gray-200">Visualizer</h1>
+            <h1 className="text-xs italic text-ink">Visualizer</h1>
           </div>
           <div>
             <div className="h-[80vh] w-full flex justify-center items-center">
@@ -215,12 +215,12 @@ function StepFunctionsGeneratorPage() {
                       border
                       p-2
                       text-xs
-                      text-gray-700
-                      dark:text-gray-200
-                      hover:border-gray-400
-                      hover:bg-gray-100
-                      dark:hover:bg-gray-700
-                      dark:hover:border-gray-500
+                      text-ink
+                      text-ink
+                      hover:border-strong
+                      hover:bg-raised
+                      hover:bg-raised
+                      hover:border-strong
                       transition-colors
                       duration-200
                       whitespace-nowrap

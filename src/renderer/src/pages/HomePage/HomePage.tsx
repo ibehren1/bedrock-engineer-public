@@ -54,7 +54,7 @@ const HomePage = () => {
   const { setIsOpen } = useTour()
 
   return (
-    <div className="flex flex-col gap-3 justify-center align-center items-center h-full">
+    <div className="flex flex-col gap-3 justify-center items-center h-full">
       {/* https://app.lottiefiles.com/animation/aae1bb98-eced-420a-99ea-022e281fb845?channel=web&source=public-animation&panel=download */}
       <Lottie animationData={robotAnimation} className="w-[12rem]" />
 
@@ -62,23 +62,23 @@ const HomePage = () => {
         onClick={() => {
           throw new Error('error')
         }}
-        className="text-gray-400 text-lg"
+        className="text-ink-faint text-heading"
       >
-        {textanimate(t('Welcome to Bedrock Engineer') + ' ' + '👋')}
+        {textanimate(t('Welcome to Bedrock Engineer'))}
       </span>
 
-      <div className="flex flex-col gap-2 justify-center align-center items-center">
-        <span className="text-gray-400 text-sm">
+      <div className="flex flex-col gap-2 justify-center items-center">
+        <span className="text-ink-faint text-sm">
           {textanimate(t(messageKeys[currentMessageIndex]), 0.5, currentMessageIndex)}
         </span>
         <motion.span
-          className="text-gray-400 text-xs"
+          className="text-ink-faint text-xs"
           initial={{ opacity: 0, scale: 1 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.5, duration: 1.0 }}
         >
-          {t('Start by the menu on the left or')} <Kbd className="bg-gray-200">⌘</Kbd> +{' '}
-          <Kbd className="bg-gray-200">K</Kbd>.
+          {t('Start by the menu on the left or')} <Kbd className="bg-raised">⌘</Kbd> +{' '}
+          <Kbd className="bg-raised">K</Kbd>.
         </motion.span>
       </div>
       {isInitLoad && (
@@ -86,7 +86,7 @@ const HomePage = () => {
           initial={{ opacity: 0, scale: 1 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.5, duration: 1.0 }}
-          className="text-sm bg-gradient-to-bl from-green-400 to-blue-700 bg-clip-text text-transparent leading-normal hover:text-blue-700"
+          className="text-sm text-accent hover:text-accent-strong leading-normal"
           onClick={() => setIsOpen(true)}
         >
           Open Tour

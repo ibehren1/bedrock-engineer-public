@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { FiFileText, FiBarChart2, FiFolder, FiAlertTriangle } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
 import { ExecutedCodeBlock } from './ExecutedCodeBlock'
 import { OutputDisplay } from './OutputDisplay'
@@ -49,26 +50,24 @@ export const CodeInterpreterResult: React.FC<CodeInterpreterResultProps> = ({ re
   const hasOutput = response.result.stdout || response.output
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-surface border border-subtle rounded-container shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-50 dark:bg-gray-900 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-surface-2 px-2.5 py-1.5 border-b border-subtle">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <FaCode className="text-green-600 size-5" />
-            <span className="font-semibold text-gray-900 dark:text-white">
+            <FaCode className="text-success size-4" />
+            <span className="font-semibold text-ink">
               {t('code interpreter display.Code Interpreter', 'Code Interpreter')}
             </span>
             <div className="flex items-center gap-2">
               {response.success ? (
-                <FaCheckCircle className="text-green-500 size-4" />
+                <FaCheckCircle className="text-success size-4" />
               ) : (
-                <FaExclamationCircle className="text-red-500 size-4" />
+                <FaExclamationCircle className="text-danger size-4" />
               )}
               <span
                 className={`text-xs px-2 py-1 rounded-full font-medium ${
-                  response.success
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                  response.success ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'
                 }`}
               >
                 {response.success
@@ -86,17 +85,17 @@ export const CodeInterpreterResult: React.FC<CodeInterpreterResultProps> = ({ re
       </div>
 
       {/* Content */}
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="divide-y divide-subtle">
         {/* Executed Code */}
         {response.code && (
-          <div className="p-4">
+          <div className="p-2.5">
             <button
               onClick={() => toggleSection('code')}
-              className="flex items-center gap-2 w-full text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white mb-3"
+              className="flex items-center gap-2 w-full text-left text-sm font-medium text-ink hover:text-ink mb-3"
             >
-              <span className="text-xs">📝</span>
+              <FiFileText className="w-3.5 h-3.5" />
               <span>{t('code interpreter display.Executed Code', 'Executed Code')}</span>
-              <span className="ml-auto text-xs text-gray-500">
+              <span className="ml-auto text-xs text-ink-muted">
                 {expandedSections.code ? '▼' : '▶'}
               </span>
             </button>
@@ -106,14 +105,14 @@ export const CodeInterpreterResult: React.FC<CodeInterpreterResultProps> = ({ re
 
         {/* Output */}
         {hasOutput && (
-          <div className="p-4">
+          <div className="p-2.5">
             <button
               onClick={() => toggleSection('output')}
-              className="flex items-center gap-2 w-full text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white mb-3"
+              className="flex items-center gap-2 w-full text-left text-sm font-medium text-ink hover:text-ink mb-3"
             >
-              <span className="text-xs">📊</span>
+              <FiBarChart2 className="w-3.5 h-3.5" />
               <span>{t('code interpreter display.Output', 'Output')}</span>
-              <span className="ml-auto text-xs text-gray-500">
+              <span className="ml-auto text-xs text-ink-muted">
                 {expandedSections.output ? '▼' : '▶'}
               </span>
             </button>
@@ -125,9 +124,9 @@ export const CodeInterpreterResult: React.FC<CodeInterpreterResultProps> = ({ re
 
         {/* Generated Files */}
         {hasFiles && (
-          <div className="p-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              <span className="text-xs">📁</span>
+          <div className="p-2.5">
+            <div className="flex items-center gap-2 text-sm font-medium text-ink mb-3">
+              <FiFolder className="w-3.5 h-3.5" />
               <span>
                 {t('code interpreter display.Generated Files', 'Generated Files')} (
                 {response.result.files.length})
@@ -139,14 +138,14 @@ export const CodeInterpreterResult: React.FC<CodeInterpreterResultProps> = ({ re
 
         {/* Errors */}
         {hasError && (
-          <div className="p-4">
+          <div className="p-2.5">
             <button
               onClick={() => toggleSection('errors')}
-              className="flex items-center gap-2 w-full text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white mb-3"
+              className="flex items-center gap-2 w-full text-left text-sm font-medium text-ink hover:text-ink mb-3"
             >
-              <span className="text-xs">⚠️</span>
+              <FiAlertTriangle className="w-3.5 h-3.5" />
               <span>{t('code interpreter display.Errors', 'Errors')}</span>
-              <span className="ml-auto text-xs text-gray-500">
+              <span className="ml-auto text-xs text-ink-muted">
                 {expandedSections.errors ? '▼' : '▶'}
               </span>
             </button>

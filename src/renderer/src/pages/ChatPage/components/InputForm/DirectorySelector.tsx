@@ -24,17 +24,17 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
     <div className="flex gap-2">
       <label
         onClick={onSelectDirectory}
-        className="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:text-gray-500"
+        className="block text-sm font-medium text-ink cursor-pointer hover:text-ink-muted"
       >
         <div className="flex gap-2 items-center">
-          <FcFolder className="text-lg" />
+          <FcFolder className="text-base" />
           <span>{projectPath}</span>
         </div>
       </label>
       {isProjectSelected && (
         <label
           onClick={onOpenIgnoreModal}
-          className="block text-sm font-medium text-gray-500 dark:text-white cursor-pointer hover:text-gray-500"
+          className="block text-sm font-medium text-ink-muted cursor-pointer hover:text-ink-muted"
         >
           .ignore
         </label>

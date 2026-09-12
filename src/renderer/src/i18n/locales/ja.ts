@@ -748,7 +748,7 @@ const BackgroundAgent = {
       agentRequired: 'エージェントの選択は必須です',
       modelRequired: 'モデルの選択は必須です',
       wakeWordRequired: 'ウェイクワードは必須です',
-      invalidMaxTokens: '無効な最大トークン数です（1-64000）'
+      invalidMaxTokens: '無効な最大トークン数です（1-{{max}}）'
     }
   },
 

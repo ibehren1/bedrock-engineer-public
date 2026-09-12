@@ -2,6 +2,7 @@ import { KnowledgeBase } from 'src/types/agent-chat'
 import { useState } from 'react'
 import { EditIcon, RemoveIcon } from '@renderer/components/icons/ToolIcons'
 import { useTranslation } from 'react-i18next'
+import { Button, Input, Label, Textarea } from '@renderer/components/ui'
 
 export const KnowledgeBaseSettingForm = ({
   knowledgeBases,
@@ -55,118 +56,94 @@ export const KnowledgeBaseSettingForm = ({
   }
 
   return (
-    <div className="mt-4 space-y-4">
+    <div className="mt-4 space-y-2">
       {/* ツールの説明 */}
-      <div className="prose dark:prose-invert max-w-none">
-        <p className="mb-4 text-gray-700 dark:text-gray-300">
-          {t('tool info.retrieve.description')}
-        </p>
+      <div className="max-w-none">
+        <p className="mb-4 text-ink">{t('tool info.retrieve.description')}</p>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md mb-5">
-          <h5 className="font-medium mb-2 dark:text-gray-200">
-            {t('tool info.retrieve.about title')}
-          </h5>
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            {t('tool info.retrieve.about description')}
-          </p>
+        <div className="bg-accent-tint p-2.5 rounded-control mb-5">
+          <h5 className="font-medium mb-2 text-ink">{t('tool info.retrieve.about title')}</h5>
+          <p className="text-sm text-ink">{t('tool info.retrieve.about description')}</p>
         </div>
       </div>
 
       {/* KnowledgeBase 追加フォーム */}
-      <div className="flex flex-col gap-2 p-4 border border-gray-200 dark:border-gray-700 rounded-md">
-        <h4 className="font-medium text-sm mb-2 dark:text-gray-200">
-          {t('Add New Knowledge Base')}
-        </h4>
+      <div className="flex flex-col gap-2 p-2.5 border border-subtle rounded-control">
+        <h4 className="font-medium text-sm mb-2 text-ink">{t('Add New Knowledge Base')}</h4>
         <div className="flex-grow">
-          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-            {t('Knowledge Base ID')}
-          </label>
-          <input
+          <Label>{t('Knowledge Base ID')}</Label>
+          <Input
             type="text"
             value={newKnowledgeBaseId}
             onChange={(e) => setKnowledgeBaseId(e.target.value)}
             placeholder="e.g., BM7GYFCKIA"
-            className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
           />
         </div>
         <div className="flex-grow">
-          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-            {t('Description')}
-          </label>
-          <textarea
+          <Label>{t('Description')}</Label>
+          <Textarea
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}
             placeholder="e.g., Stores in-house manuals and past inquiry history"
             rows={3}
-            className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 resize-vertical"
           />
         </div>
 
-        <button
+        <Button
           onClick={handleAddKB}
           disabled={!newKnowledgeBaseId.trim() || !newDescription.trim()}
-          className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          variant="primary"
         >
           {t('Add Knowledge Base')}
-        </button>
+        </Button>
       </div>
 
       {/* 登録済み KnowledgeBase リスト */}
-      <div className="space-y-3 mt-6">
-        <h4 className="font-medium text-sm dark:text-gray-200">
-          {t('Registered Knowledge Bases')}
-        </h4>
+      <div className="space-y-3 mt-3">
+        <h4 className="font-medium text-sm text-ink">{t('Registered Knowledge Bases')}</h4>
         {knowledgeBases.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-            {t('No knowledge bases registered yet')}
-          </p>
+          <p className="text-sm text-ink-muted italic">{t('No knowledge bases registered yet')}</p>
         ) : (
           knowledgeBases.map((kb) => (
             <div
               key={kb.knowledgeBaseId}
-              className="flex flex-col p-3 text-sm bg-gray-100 dark:bg-gray-900 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-700"
+              className="flex flex-col p-3 text-sm bg-canvas text-ink rounded-control border border-subtle"
             >
               {editMode === kb.knowledgeBaseId ? (
                 // 編集モード
                 <div className="flex flex-col gap-2">
                   <div className="flex-grow">
-                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                      {t('Knowledge Base ID')}
-                    </label>
-                    <input
+                    <Label>{t('Knowledge Base ID')}</Label>
+                    <Input
                       type="text"
                       value={editData.knowledgeBaseId}
                       onChange={(e) =>
                         setEditData({ ...editData, knowledgeBaseId: e.target.value })
                       }
-                      className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                     />
                   </div>
                   <div className="flex-grow">
-                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                      {t('Description')}
-                    </label>
-                    <textarea
+                    <Label>{t('Description')}</Label>
+                    <Textarea
                       value={editData.description}
                       onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                       rows={3}
-                      className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 resize-vertical"
                     />
                   </div>
                   <div className="flex justify-end gap-2 mt-2">
                     <button
                       onClick={handleCancelEdit}
-                      className="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                      className="px-3 py-1 text-sm text-ink-muted border border-strong rounded-control hover:bg-raised"
                     >
                       {t('Cancel')}
                     </button>
-                    <button
+                    <Button
                       onClick={handleSaveEdit}
                       disabled={!editData.knowledgeBaseId.trim() || !editData.description.trim()}
-                      className="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      variant="primary"
                     >
                       {t('Save')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -179,7 +156,7 @@ export const KnowledgeBaseSettingForm = ({
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEditKB(kb)}
-                        className="text-blue-500 hover:text-blue-600 p-1"
+                        className="text-accent hover:text-accent p-1"
                         title="Edit"
                         aria-label="Edit knowledge base"
                       >
@@ -187,7 +164,7 @@ export const KnowledgeBaseSettingForm = ({
                       </button>
                       <button
                         onClick={() => handleRemoveKB(kb.knowledgeBaseId)}
-                        className="text-red-500 hover:text-red-600 p-1"
+                        className="text-danger hover:text-danger-strong p-1"
                         title="Remove"
                         aria-label="Remove knowledge base"
                       >
@@ -195,7 +172,7 @@ export const KnowledgeBaseSettingForm = ({
                       </button>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 whitespace-pre-line">
+                  <p className="text-xs text-ink-muted mt-1 whitespace-pre-line">
                     {kb.description}
                   </p>
                 </>

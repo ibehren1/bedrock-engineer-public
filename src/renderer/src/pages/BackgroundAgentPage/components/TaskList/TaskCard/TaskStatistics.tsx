@@ -25,21 +25,19 @@ export const TaskStatistics: React.FC<TaskStatisticsProps> = ({
   return (
     <div className="mb-3">
       <div className="flex items-center justify-between text-sm">
-        <div className="flex items-center space-x-4 text-gray-600 dark:text-gray-400">
+        <div className="flex items-center space-x-4 text-ink-muted">
           <span className="flex items-center space-x-1">
-            <span className="font-medium text-gray-900 dark:text-white">{runCount}</span>
+            <span className="font-medium text-ink">{runCount}</span>
             <span>{executionCountLabel}</span>
           </span>
           <span className="flex items-center space-x-1">
             <span>{lastRunLabel}:</span>
-            <span className="font-medium text-gray-700 dark:text-gray-300">
-              {formatDate(lastRun)}
-            </span>
+            <span className="font-medium text-ink">{formatDate(lastRun)}</span>
           </span>
         </div>
         <button
           onClick={onViewHistory}
-          className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+          className="text-xs text-accent hover:text-accent transition-colors"
           title={historyButtonTitle}
         >
           {viewHistoryLabel}

@@ -191,14 +191,14 @@ const TaskExecutionHistoryPage: React.FC = () => {
 
     switch (messageType) {
       case 'tool_use':
-        return <WrenchIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+        return <WrenchIcon className="h-4 w-4 text-accent" />
       case 'tool_result':
-        return <ClipboardDocumentListIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+        return <ClipboardDocumentListIcon className="h-4 w-4 text-success" />
       default:
         return message.role === 'user' ? (
-          <UserIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <UserIcon className="h-4 w-4 text-accent" />
         ) : (
-          <CpuChipIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+          <CpuChipIcon className="h-4 w-4 text-success" />
         )
     }
   }
@@ -209,13 +209,11 @@ const TaskExecutionHistoryPage: React.FC = () => {
 
     switch (messageType) {
       case 'tool_use':
-        return 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400'
+        return 'bg-accent-tint border-l-4 border-accent'
       case 'tool_result':
-        return 'bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400'
+        return 'bg-success-soft border-l-4 border-success'
       default:
-        return message.role === 'user'
-          ? 'bg-blue-50 dark:bg-blue-900/20'
-          : 'bg-gray-50 dark:bg-gray-800'
+        return message.role === 'user' ? 'bg-accent-tint' : 'bg-surface-2'
     }
   }
 
@@ -234,7 +232,7 @@ const TaskExecutionHistoryPage: React.FC = () => {
         ) {
           return (
             <pre
-              className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded border overflow-auto whitespace-pre-wrap"
+              className="text-xs bg-raised p-2 rounded-control border overflow-auto whitespace-pre-wrap"
               style={{ maxHeight }}
             >
               {parsed.text}
@@ -246,7 +244,7 @@ const TaskExecutionHistoryPage: React.FC = () => {
         // JSON parse failed, display as plain text
         return (
           <pre
-            className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded border overflow-auto whitespace-pre-wrap"
+            className="text-xs bg-raised p-2 rounded-control border overflow-auto whitespace-pre-wrap"
             style={{ maxHeight }}
           >
             {value}
@@ -418,8 +416,8 @@ const TaskExecutionHistoryPage: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <ArrowPathIcon className="h-12 w-12 mx-auto mb-4 text-blue-600 dark:text-blue-400 animate-spin" />
-          <p className="text-gray-600 dark:text-gray-400">読み込み中...</p>
+          <ArrowPathIcon className="h-12 w-12 mx-auto mb-4 text-accent animate-spin" />
+          <p className="text-ink-muted">読み込み中...</p>
         </div>
       </div>
     )
@@ -430,14 +428,14 @@ const TaskExecutionHistoryPage: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
-          <p className="text-gray-500 dark:text-gray-400 mb-4">タスクが見つかりません</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">
+          <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-ink-faint" />
+          <p className="text-ink-muted mb-4">タスクが見つかりません</p>
+          <p className="text-sm text-ink-faint mb-3">
             タスクが削除されたか、まだ読み込み中の可能性があります
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="inline-flex items-center space-x-2 px-4 py-2 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="inline-flex items-center space-x-2 px-2.5 py-1 text-sm border border-strong rounded-control bg-surface hover:bg-surface-2 text-ink transition-colors"
           >
             <ArrowPathIcon className="h-4 w-4" />
             <span>ページを再読み込み</span>
@@ -448,29 +446,27 @@ const TaskExecutionHistoryPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900">
-        <div className="flex items-center justify-between p-6">
+      <div className="border-b border-subtle bg-surface">
+        <div className="flex items-center justify-between p-3">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {t('backgroundAgent.history.title')}
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{task.name}</p>
+            <h1 className="text-title text-ink">{t('backgroundAgent.history.title')}</h1>
+            <p className="text-sm text-ink-muted mt-1">{task.name}</p>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4 p-6 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+      <div className="flex flex-wrap items-center gap-4 p-3 border-b border-subtle bg-surface-2">
         <div className="flex items-center space-x-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="text-sm font-medium text-ink">
             {t('backgroundAgent.history.filterStatus')}:
           </label>
           <select
             value={filter.status}
             onChange={(e) => setFilter((prev) => ({ ...prev, status: e.target.value as any }))}
-            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            className="text-sm border border-strong rounded-control px-2 py-1 bg-surface text-ink"
           >
             <option value="all">{t('backgroundAgent.history.all')}</option>
             <option value="success">{t('backgroundAgent.history.successOnly')}</option>
@@ -479,13 +475,13 @@ const TaskExecutionHistoryPage: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="text-sm font-medium text-ink">
             {t('backgroundAgent.history.filterDate')}:
           </label>
           <select
             value={filter.dateRange}
             onChange={(e) => setFilter((prev) => ({ ...prev, dateRange: e.target.value as any }))}
-            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            className="text-sm border border-strong rounded-control px-2 py-1 bg-surface text-ink"
           >
             <option value="all">{t('backgroundAgent.history.allTime')}</option>
             <option value="today">{t('backgroundAgent.history.today')}</option>
@@ -497,7 +493,7 @@ const TaskExecutionHistoryPage: React.FC = () => {
         <button
           onClick={fetchHistory}
           disabled={isLoading}
-          className="flex items-center space-x-1 px-3 py-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
+          className="flex items-center space-x-1 px-3 py-1 text-sm border border-strong rounded-control bg-surface hover:bg-surface-2 text-ink disabled:opacity-50 transition-colors"
         >
           <ArrowPathIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           <span>{t('common.refresh')}</span>
@@ -507,18 +503,18 @@ const TaskExecutionHistoryPage: React.FC = () => {
       {/* Main Content - 2 Column Layout */}
       <div className="flex flex-1 min-h-0" style={{ height: 'calc(100vh - 200px)' }}>
         {/* Left Column - Execution History List */}
-        <div className="w-1/4 flex-shrink-0 border-r border-gray-200 dark:border-gray-600 overflow-y-auto">
-          <div className="p-4">
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+        <div className="w-1/4 flex-shrink-0 border-r border-subtle overflow-y-auto">
+          <div className="p-2.5">
+            <h2 className="text-heading font-medium text-ink mb-4">
               {t('backgroundAgent.history.executionHistoryList')} ({filteredHistory.length})
             </h2>
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <ArrowPathIcon className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+                <ArrowPathIcon className="h-8 w-8 animate-spin text-accent" />
               </div>
             ) : filteredHistory.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
+              <div className="text-center py-8 text-ink-muted">
+                <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-ink-faint" />
                 <p>{t('backgroundAgent.history.noHistory')}</p>
               </div>
             ) : (
@@ -527,21 +523,21 @@ const TaskExecutionHistoryPage: React.FC = () => {
                   <div
                     key={`${execution.taskId}-${execution.executedAt}`}
                     onClick={() => selectExecution(execution)}
-                    className={`p-2 rounded cursor-pointer transition-colors ${
+                    className={`p-2 rounded-control cursor-pointer transition-colors ${
                       selectedExecution?.executedAt === execution.executedAt
-                        ? 'bg-gray-100 dark:bg-gray-800'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        ? 'bg-raised'
+                        : 'hover:bg-sunken'
                     }`}
                   >
                     <div className="flex items-center space-x-1 mb-1">
                       {execution.status === 'running' ? (
-                        <ClockIcon className="h-3 w-3 text-blue-600 dark:text-blue-400 animate-pulse" />
+                        <ClockIcon className="h-3 w-3 text-accent animate-pulse" />
                       ) : execution.status === 'success' ? (
-                        <CheckCircleIcon className="h-3 w-3 text-green-600 dark:text-green-400" />
+                        <CheckCircleIcon className="h-3 w-3 text-success" />
                       ) : (
-                        <XCircleIcon className="h-3 w-3 text-red-600 dark:text-red-400" />
+                        <XCircleIcon className="h-3 w-3 text-danger" />
                       )}
-                      <span className="text-xs font-medium text-gray-900 dark:text-white">
+                      <span className="text-xs font-medium text-ink">
                         {execution.status === 'running'
                           ? t('backgroundAgent.history.running')
                           : execution.status === 'success'
@@ -549,7 +545,7 @@ const TaskExecutionHistoryPage: React.FC = () => {
                             : t('backgroundAgent.history.failure')}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className="text-xs text-ink-muted">
                       <div className="flex items-center space-x-2">
                         <span>{formatDateTime(execution.executedAt)}</span>
                         <span className="hidden md:inline">•</span>
@@ -568,16 +564,16 @@ const TaskExecutionHistoryPage: React.FC = () => {
           {selectedExecution ? (
             <>
               {/* Execution Details */}
-              <div className="p-6 border-b border-gray-200 dark:border-gray-600">
+              <div className="p-3 border-b border-subtle">
                 <div className="flex items-center space-x-2 mb-4">
                   {selectedExecution.status === 'running' ? (
-                    <ClockIcon className="h-6 w-6 text-blue-600 dark:text-blue-400 animate-pulse" />
+                    <ClockIcon className="h-4 w-4 text-accent animate-pulse" />
                   ) : selectedExecution.status === 'success' ? (
-                    <CheckCircleIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <CheckCircleIcon className="h-4 w-4 text-success" />
                   ) : (
-                    <XCircleIcon className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    <XCircleIcon className="h-4 w-4 text-danger" />
                   )}
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  <h3 className="text-heading font-medium text-ink">
                     {t('backgroundAgent.history.executionDetails')} -{' '}
                     {formatDateTime(selectedExecution.executedAt)}
                   </h3>
@@ -585,18 +581,18 @@ const TaskExecutionHistoryPage: React.FC = () => {
 
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center space-x-2">
-                    <ChatBubbleBottomCenterTextIcon className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                    <span className="text-gray-700 dark:text-gray-300">
+                    <ChatBubbleBottomCenterTextIcon className="h-4 w-4 text-ink-muted flex-shrink-0" />
+                    <span className="text-ink">
                       {t('backgroundAgent.history.messageCount')}: {selectedExecution.messageCount}
                     </span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <DocumentTextIcon className="h-4 w-4 text-gray-500 flex-shrink-0 mt-0.5" />
+                    <DocumentTextIcon className="h-4 w-4 text-ink-muted flex-shrink-0 mt-0.5" />
                     <div className="min-w-0 flex-1">
-                      <div className="text-gray-700 dark:text-gray-300 text-xs">
+                      <div className="text-ink text-xs">
                         {t('backgroundAgent.history.sessionId')}:
                       </div>
-                      <div className="text-gray-600 dark:text-gray-400 font-mono text-xs break-all">
+                      <div className="text-ink-muted font-mono text-xs break-all">
                         {selectedExecution.sessionId}
                       </div>
                     </div>
@@ -604,12 +600,10 @@ const TaskExecutionHistoryPage: React.FC = () => {
                 </div>
 
                 {selectedExecution.error && (
-                  <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/30 rounded border border-red-200 dark:border-red-800">
+                  <div className="mt-4 p-3 bg-danger-soft rounded-control border border-danger">
                     <div className="flex items-start space-x-2">
-                      <XCircleIcon className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
-                      <div className="text-sm text-red-800 dark:text-red-200">
-                        {selectedExecution.error}
-                      </div>
+                      <XCircleIcon className="h-4 w-4 text-danger mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-danger">{selectedExecution.error}</div>
                     </div>
                   </div>
                 )}
@@ -617,16 +611,16 @@ const TaskExecutionHistoryPage: React.FC = () => {
 
               {/* Messages */}
               <div className="flex-1 flex flex-col min-h-0">
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
-                  <h4 className="text-md font-medium text-gray-900 dark:text-white">
+                <div className="flex items-center justify-between p-2.5 border-b border-subtle">
+                  <h4 className="text-md font-medium text-ink">
                     {t('backgroundAgent.history.sessionHistory')}
                   </h4>
                   <button
                     onClick={() => setShowChatMode(!showChatMode)}
-                    className={`text-sm px-3 py-1 rounded border transition-colors ${
+                    className={`text-sm px-3 py-1 rounded-control border transition-colors ${
                       showChatMode
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white text-blue-600 border-blue-600 hover:bg-blue-50 dark:bg-gray-700 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-gray-600'
+                        ? 'bg-accent text-accent-fg border-accent'
+                        : 'bg-surface text-accent border-accent hover:bg-accent-tint'
                     }`}
                   >
                     {showChatMode
@@ -634,30 +628,30 @@ const TaskExecutionHistoryPage: React.FC = () => {
                       : t('backgroundAgent.history.continueConversation')}
                   </button>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-2.5">
                   {loadingSessions.has(selectedExecution.sessionId) ? (
                     <div className="flex items-center justify-center py-8">
-                      <ArrowPathIcon className="h-6 w-6 animate-spin text-blue-600 dark:text-blue-400" />
+                      <ArrowPathIcon className="h-4 w-4 animate-spin text-accent" />
                     </div>
                   ) : sessionHistories[selectedExecution.sessionId] ? (
                     sessionHistories[selectedExecution.sessionId].length === 0 ? (
-                      <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                        <ChatBubbleBottomCenterTextIcon className="h-8 w-8 mx-auto mb-2 text-gray-400 dark:text-gray-600" />
+                      <div className="text-center text-ink-muted py-8">
+                        <ChatBubbleBottomCenterTextIcon className="h-8 w-8 mx-auto mb-2 text-ink-faint" />
                         <p className="text-sm">{t('backgroundAgent.history.noMessages')}</p>
                       </div>
                     ) : (
-                      <div ref={messagesContainerRef} className="space-y-4">
+                      <div ref={messagesContainerRef} className="space-y-2">
                         {sessionHistories[selectedExecution.sessionId].map((message, index) => (
                           <div
                             key={index}
-                            className={`flex items-start space-x-3 p-4 rounded-lg ${getMessageBackgroundColor(message)}`}
+                            className={`flex items-start space-x-3 p-2.5 rounded-container ${getMessageBackgroundColor(message)}`}
                           >
                             <div className="flex-shrink-0 mt-1">{getMessageIcon(message)}</div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                              <div className="text-sm font-medium text-ink mb-2">
                                 {getMessageTitle(message)}
                               </div>
-                              <div className="text-sm text-gray-800 dark:text-gray-200 break-words">
+                              <div className="text-sm text-ink break-words">
                                 {formatMessageContent(message)}
                               </div>
                             </div>
@@ -668,7 +662,7 @@ const TaskExecutionHistoryPage: React.FC = () => {
                       </div>
                     )
                   ) : (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <div className="text-center py-8 text-ink-muted">
                       {t('backgroundAgent.history.loadingMessages')}
                     </div>
                   )}
@@ -676,21 +670,19 @@ const TaskExecutionHistoryPage: React.FC = () => {
 
                 {/* Chat Input Form */}
                 {showChatMode && (
-                  <div className="border-t border-gray-200 dark:border-gray-600 p-4 bg-gray-50 dark:bg-gray-800">
+                  <div className="border-t border-subtle p-2.5 bg-surface-2">
                     {/* Session Error Display */}
                     {sessionError && (
-                      <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 rounded border border-red-200 dark:border-red-800">
+                      <div className="mb-4 p-3 bg-danger-soft rounded-control border border-danger">
                         <div className="flex items-start space-x-2">
-                          <XCircleIcon className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                          <XCircleIcon className="h-4 w-4 text-danger mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm text-red-800 dark:text-red-200 break-words">
-                              {sessionError}
-                            </div>
+                            <div className="text-sm text-danger break-words">{sessionError}</div>
                             <button
                               onClick={() => setSessionError(null)}
-                              className="mt-2 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+                              className="mt-2 text-xs text-danger hover:text-danger-strong"
                             >
-                              ✕ エラーを閉じる
+                              エラーを閉じる
                             </button>
                           </div>
                         </div>
@@ -708,9 +700,9 @@ const TaskExecutionHistoryPage: React.FC = () => {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400">
+            <div className="flex-1 flex items-center justify-center text-ink-muted">
               <div className="text-center">
-                <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
+                <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-ink-faint" />
                 <p>{t('backgroundAgent.history.selectExecutionHistory')}</p>
               </div>
             </div>

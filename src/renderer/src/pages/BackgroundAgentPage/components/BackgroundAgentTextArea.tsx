@@ -133,14 +133,12 @@ export const BackgroundAgentTextArea: React.FC<BackgroundAgentTextAreaProps> = (
   return (
     <div className="relative w-full">
       {/* Container with border that wraps both textarea and controls */}
-      <div className="relative border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700">
+      <div className="relative border border-strong rounded-container bg-surface">
         <div className="relative textarea-container">
           {/* Resize bar at the top */}
           <div
-            className={`resize-bar h-2 w-full cursor-ns-resize rounded-t-lg transition-opacity duration-200 ${
-              isHovering
-                ? 'opacity-100 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                : 'opacity-0'
+            className={`resize-bar h-2 w-full cursor-ns-resize rounded-t-container transition-opacity duration-200 ${
+              isHovering ? 'opacity-100 bg-raised hover:bg-sunken' : 'opacity-0'
             }`}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
@@ -190,7 +188,7 @@ export const BackgroundAgentTextArea: React.FC<BackgroundAgentTextAreaProps> = (
             ref={textareaRef}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
-            className="block w-full p-4 pb-16 text-sm text-gray-900 border-none bg-transparent dark:text-white resize-none focus:outline-none focus:ring-0"
+            className="block w-full p-2.5 pb-16 text-sm text-ink border-none bg-transparent resize-none focus:outline-none focus:ring-0"
             placeholder={placeholderText}
             value={value}
             onChange={(e) => {
@@ -205,25 +203,25 @@ export const BackgroundAgentTextArea: React.FC<BackgroundAgentTextAreaProps> = (
         </div>
 
         {/* Controls at the bottom */}
-        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-end px-4 py-2 bg-white dark:bg-gray-800 rounded-b-lg">
+        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-end px-2.5 py-1 bg-surface rounded-b-container">
           <button
             onClick={handleSubmit}
             disabled={disabled || !value.trim()}
-            className={`rounded-lg px-3 py-2 flex items-center space-x-2 transition-colors ${
+            className={`rounded-container px-3 py-2 flex items-center space-x-2 transition-colors ${
               disabled || !value.trim()
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20'
+                ? 'text-ink-faint cursor-not-allowed'
+                : 'text-accent hover:bg-accent-tint'
             }`}
             aria-label={disabled ? t('textarea.aria.sending') : t('textarea.aria.sendMessage')}
           >
             {disabled ? (
               <>
-                <FiLoader className="text-lg animate-spin" />
+                <FiLoader className="text-base animate-spin" />
                 <span className="text-sm font-medium">{t('Sending...')}</span>
               </>
             ) : (
               <>
-                <FiSend className="text-lg" />
+                <FiSend className="text-base" />
                 <span className="text-sm font-medium">{t('Send')}</span>
               </>
             )}
@@ -232,7 +230,7 @@ export const BackgroundAgentTextArea: React.FC<BackgroundAgentTextAreaProps> = (
       </div>
 
       {/* Help text */}
-      <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+      <div className="mt-2 text-xs text-ink-muted">
         <span>{t('backgroundAgent.history.sendInstruction')}</span>
       </div>
     </div>

@@ -37,7 +37,7 @@ export const RecognizeImageResult: React.FC<{ response: RecognizeImageResponse }
   ) => (
     <div
       key={`image-${index}`}
-      className="flex flex-col md:flex-row gap-4 bg-gray-800 text-white dark:bg-gray-900 dark:text-gray-100 p-4 rounded-lg overflow-hidden shadow-sm border border-gray-700 dark:border-gray-800 mb-4"
+      className="flex flex-col md:flex-row gap-3 bg-surface-2 text-ink p-2.5 rounded-container overflow-hidden shadow-raised border border-subtle mb-2"
     >
       {/* 左側：画像表示 */}
       <div className="flex-shrink-0 md:w-1/3">
@@ -46,25 +46,25 @@ export const RecognizeImageResult: React.FC<{ response: RecognizeImageResponse }
           alt={'Analyzed image'}
           className="aspect-auto h-[25vh] object-contain"
         />
-        <div className="mt-2 text-xs text-gray-400 truncate" title={image.path}>
+        <div className="mt-2 text-xs text-ink-faint truncate" title={image.path}>
           {image.path}
         </div>
       </div>
 
       {/* 右側：解析結果 */}
       <div className="flex-1 h-[25vh] overflow-y-auto">
-        <h3 className="text-lg font-medium mb-2">
+        <h3 className="text-heading font-medium mb-2">
           {!isSingleImage && `Image ${index + 1}: `}
           {t('Image Analysis')}
         </h3>
 
         {!image.success ? (
-          <div className="bg-red-900/20 text-red-400 p-3 rounded-md">
+          <div className="bg-danger/20 text-danger p-3 rounded-control">
             <p className="whitespace-pre-wrap">Error analyzing this image: {image.description}</p>
           </div>
         ) : (
-          <div className="bg-gray-900 dark:bg-gray-800 p-3 rounded-md">
-            <p className="text-gray-300 whitespace-pre-wrap">{image.description}</p>
+          <div className="bg-sunken p-2 rounded-control">
+            <p className="text-ink-faint whitespace-pre-wrap">{image.description}</p>
           </div>
         )}
       </div>
@@ -81,10 +81,10 @@ export const RecognizeImageResult: React.FC<{ response: RecognizeImageResponse }
               {result.images.map((_, index) => (
                 <button
                   key={`tab-${index}`}
-                  className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                  className={`px-3 py-1 rounded-control text-sm transition-colors ${
                     activeImageIndex === index && !showAllImages
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                      ? 'bg-accent text-accent-fg'
+                      : 'bg-raised hover:bg-sunken text-ink'
                   }`}
                   onClick={() => {
                     setActiveImageIndex(index)
@@ -93,16 +93,14 @@ export const RecognizeImageResult: React.FC<{ response: RecognizeImageResponse }
                   disabled={showAllImages}
                 >
                   Image {index + 1}
-                  {!result.images[index].success && ' ⚠️'}
+                  {!result.images[index].success && ' '}
                 </button>
               ))}
             </div>
 
             <button
-              className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                showAllImages
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+              className={`px-3 py-1 rounded-control text-sm transition-colors ${
+                showAllImages ? 'bg-accent text-accent-fg' : 'bg-raised hover:bg-sunken text-ink'
               }`}
               onClick={() => setShowAllImages(!showAllImages)}
             >
@@ -122,7 +120,7 @@ export const RecognizeImageResult: React.FC<{ response: RecognizeImageResponse }
       )}
 
       {/* モデル情報（共通フッター） */}
-      <div className="mt-2 text-xs text-gray-400 text-right">
+      <div className="mt-2 text-xs text-ink-faint text-right">
         {t('Analyzed with')}: <span className="font-mono">{result.modelUsed}</span>
       </div>
     </div>

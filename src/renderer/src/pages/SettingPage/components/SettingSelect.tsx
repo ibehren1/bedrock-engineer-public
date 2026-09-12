@@ -30,19 +30,19 @@ export const SettingSelect: React.FC<SettingSelectProps> = ({
 }) => {
   return (
     <div className="space-y-1">
-      <label className="block text-sm font-medium text-gray-900 dark:text-white">{label}</label>
-      {description && <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>}
+      <label className="block text-sm font-medium text-ink">{label}</label>
+      {description && <p className="text-xs text-ink-muted">{description}</p>}
       <select
         {...selectProps}
         className={`
-          bg-white dark:bg-gray-800
-          border border-gray-300 dark:border-gray-600
-          text-gray-900 dark:text-white
-          text-sm rounded-lg
-          focus:ring-blue-500 dark:focus:ring-blue-500
-          focus:border-blue-500 dark:focus:border-blue-500
+          bg-surface
+          border border-strong
+          text-ink
+          text-sm rounded-container
+          focus:ring-accent
+          focus:border-accent
           block w-full p-2.5
-          ${error ? 'border-red-500 dark:border-red-500' : ''}
+          ${error ? 'border-danger' : ''}
           ${className || ''}
         `}
       >
@@ -61,7 +61,7 @@ export const SettingSelect: React.FC<SettingSelectProps> = ({
           </optgroup>
         ))}
       </select>
-      {error && <p className="text-xs text-red-500 dark:text-red-400 mt-1">{error}</p>}
+      {error && <p className="text-xs text-danger mt-1">{error}</p>}
     </div>
   )
 }

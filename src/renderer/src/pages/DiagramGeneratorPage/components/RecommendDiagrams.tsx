@@ -25,11 +25,9 @@ export const RecommendDiagrams: React.FC<RecommendDiagramsProps> = ({
   const defaultLoadingText = t('generatingRecommendations', 'Generating recommendations...')
   if (loading) {
     return (
-      <div className="flex gap-1 justify-start items-center text-gray-700 dark:text-gray-200">
+      <div className="flex gap-1 justify-start items-center text-ink">
         <LoadingDotsLottie className="h-[2rem]" />
-        <span className="text-gray-700 dark:text-gray-200">
-          {loadingText || defaultLoadingText}
-        </span>
+        <span className="text-ink">{loadingText || defaultLoadingText}</span>
       </div>
     )
   }
@@ -48,12 +46,12 @@ export const RecommendDiagrams: React.FC<RecommendDiagramsProps> = ({
             border
             p-2
             text-xs
-            text-gray-700
-            dark:text-gray-200
-            hover:border-gray-400
-            hover:bg-gray-100
-            dark:hover:bg-gray-700
-            dark:hover:border-gray-500
+            text-ink
+            text-ink
+            hover:border-strong
+            hover:bg-raised
+            hover:bg-raised
+            hover:border-strong
             transition-colors
             duration-200
             whitespace-nowrap

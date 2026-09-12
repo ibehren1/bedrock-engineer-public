@@ -29,7 +29,7 @@ export const AgentFormSidebar: React.FC<{
     {
       id: 'basic' as AgentFormTabId,
       label: t('Basic Settings'),
-      icon: <FiSettings className="w-5 h-5" />,
+      icon: <FiSettings className="w-4 h-4" />,
       onClick: (e: React.MouseEvent) => {
         formEventUtils.preventPropagation(e)
         onTabChange('basic')
@@ -38,7 +38,7 @@ export const AgentFormSidebar: React.FC<{
     {
       id: 'mcp-servers' as AgentFormTabId,
       label: t('MCP Servers'),
-      icon: <FiServer className="w-5 h-5" />,
+      icon: <FiServer className="w-4 h-4" />,
       onClick: (e: React.MouseEvent) => {
         formEventUtils.preventPropagation(e)
         onTabChange('mcp-servers')
@@ -47,14 +47,14 @@ export const AgentFormSidebar: React.FC<{
     {
       id: 'tools' as AgentFormTabId,
       label: t('Tools'),
-      icon: <FiTool className="w-5 h-5" />,
+      icon: <FiTool className="w-4 h-4" />,
       onClick: handleToolsTabClick
     }
   ]
 
   return (
     <div
-      className="py-4 flex flex-col h-full bg-gray-50 dark:bg-gray-900/50"
+      className="py-4 flex flex-col h-full bg-surface-2"
       onClick={formEventUtils.preventPropagation}
     >
       <ul className="space-y-1 px-2">
@@ -62,10 +62,10 @@ export const AgentFormSidebar: React.FC<{
           <li key={tab.id}>
             <button
               type="button"
-              className={`relative flex items-center w-full px-3 py-2.5 rounded-lg text-left transition-all duration-200 ease-in-out ${
+              className={`relative flex items-center w-full px-3 py-2.5 rounded-container text-left transition-all duration-200 ease-in-out ${
                 activeTab === tab.id
-                  ? 'bg-blue-50 text-blue-600 dark:bg-gray-700/50 dark:text-gray-100'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100'
+                  ? 'bg-accent-tint text-accent'
+                  : 'text-ink hover:bg-raised hover:text-ink'
               }`}
               onClick={tab.onClick}
               title={tab.label}

@@ -4,10 +4,10 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus, prism } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { FiCopy, FiCheck } from 'react-icons/fi'
 import toast from 'react-hot-toast'
+import { isDarkAppearance } from '@renderer/lib/appearance'
 
 // Constants
 const COPY_FEEDBACK_TIMEOUT = 2000
-const MAX_CODE_HEIGHT = '40vh'
 const LANGUAGE = 'python'
 
 // Style constants
@@ -36,15 +36,16 @@ const CODE_TAG_STYLE = {
 
 // CSS class constants
 const CSS_CLASSES = {
-  container:
-    'relative bg-white dark:bg-gray-900 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700',
-  header:
-    'flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700',
-  languageLabel: 'text-xs text-gray-600 dark:text-gray-400 font-medium',
+  container: 'relative bg-surface rounded-container overflow-hidden border border-subtle',
+  header: 'flex items-center justify-between px-2.5 py-1 bg-surface-2 border-b border-subtle',
+  languageLabel: 'text-xs text-ink-muted font-medium',
   copyButton:
-    'flex items-center gap-1 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors',
+    'flex items-center gap-1 px-2 py-1 text-xs text-ink-muted hover:text-ink hover:bg-raised rounded-control transition-colors',
   icon: 'size-3',
-  codeContent: `relative max-h-[${MAX_CODE_HEIGHT}] overflow-auto`
+  // Written literally, never interpolated. Tailwind scans source text, so
+  // building this from a constant produced a class that was never generated and
+  // left the block with no height cap at all.
+  codeContent: 'relative max-h-[40vh] overflow-auto'
 } as const
 
 interface ExecutedCodeBlockProps {
@@ -61,15 +62,14 @@ export const ExecutedCodeBlock: React.FC<ExecutedCodeBlockProps> = ({ code }) =>
   const [copied, setCopied] = useState<boolean>(false)
 
   /**
-   * Detects if the user prefers dark mode
-   * Uses document class and system preference as fallback
+   * Whether this block should render on a dark canvas.
+   *
+   * Was `classList.contains('dark') || prefers-color-scheme`, which was wrong
+   * twice over: no `dark` class is ever set, so the first test was always false,
+   * and the OS fallback then made the block follow the desktop rather than the
+   * appearance chosen in the app.
    */
-  const isDarkMode = useMemo(
-    () =>
-      document.documentElement.classList.contains('dark') ||
-      window.matchMedia('(prefers-color-scheme: dark)').matches,
-    []
-  )
+  const isDarkMode = useMemo(() => isDarkAppearance(), [])
 
   /**
    * Handles copying code to clipboard with user feedback

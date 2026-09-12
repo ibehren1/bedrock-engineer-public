@@ -1,4 +1,7 @@
 import mermaid from 'mermaid'
+// mermaid はシングルトン。配色の初期化はこのモジュールの読み込み時に走るので、
+// エクスポート経路が Mermaid コンポーネントを経由しなくても図の色が揃う。
+import '@renderer/lib/mermaidTheme'
 import { IdentifiableMessage } from '@/types/chat/message'
 import { extractDrawioXml, isDrawioXml } from '@renderer/lib/drawio/xmlParser'
 

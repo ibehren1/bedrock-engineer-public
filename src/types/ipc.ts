@@ -632,6 +632,34 @@ export interface IPCChannelDefinitions {
       error?: string
     }
   }
+  'delete-shared-agent': {
+    params: { filePath: string }
+    result: {
+      success: boolean
+      canceled?: boolean
+      filePath?: string
+      error?: string
+    }
+  }
+  'export-agent-yaml': {
+    params: { agent: any }
+    result: {
+      success: boolean
+      canceled?: boolean
+      filePath?: string
+      error?: string
+    }
+  }
+  'import-agent-file': {
+    params: void
+    result: {
+      success: boolean
+      canceled?: boolean
+      agent?: any
+      filePath?: string
+      error?: string
+    }
+  }
 
   // ログ関連
   'logger:log': {

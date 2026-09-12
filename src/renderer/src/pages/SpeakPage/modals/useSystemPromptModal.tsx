@@ -53,10 +53,10 @@ const SystemPromptModal = React.memo(
     return (
       <Modal dismissible show={isOpen} onClose={onClose} size="7xl">
         <Modal.Header>SYSTEM PROMPT</Modal.Header>
-        <Modal.Body className="dark:text-white">
+        <Modal.Body className="text-ink">
           {isConnected ? (
             <div>
-              <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mb-4 text-sm text-ink-muted">
                 {t('Disconnect to edit the system prompt')}. {t('Current prompt')}:
               </p>
               <MD>{systemPrompt}</MD>
@@ -66,10 +66,10 @@ const SystemPromptModal = React.memo(
               <textarea
                 value={editedPrompt}
                 onChange={(e) => setEditedPrompt(e.target.value)}
-                className="w-full h-64 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full h-64 px-3 py-2 text-sm border border-strong rounded-control bg-surface text-ink focus:ring-2 focus:ring-accent focus:border-accent"
                 placeholder={t('Enter system prompt for the AI assistant...')}
               />
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-xs text-ink-muted">
                 {t('This prompt will be sent when you connect to start the conversation')}
               </p>
             </div>
@@ -80,13 +80,13 @@ const SystemPromptModal = React.memo(
             <div className="flex justify-end space-x-2">
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                className="px-2.5 py-1 text-sm font-medium text-ink bg-surface border border-strong rounded-control hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
               >
                 {t('Cancel')}
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-2.5 py-1 text-sm font-medium text-accent-fg bg-accent border border-transparent rounded-control hover:bg-accent-strong focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
               >
                 {t('Save')}
               </button>

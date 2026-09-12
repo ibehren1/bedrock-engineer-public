@@ -28,7 +28,7 @@ export const ExampleScenarios: React.FC<ExampleScenariosProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: index * 0.15 }}
           key={scenario.title}
-          className="px-4 py-2 border border-accent-soft rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-accent"
+          className="px-2.5 py-1 border border-accent-soft rounded-control text-ink-muted hover:text-ink hover:border-accent"
           onClick={() =>
             onSelectScenario(
               replacePlaceholders(

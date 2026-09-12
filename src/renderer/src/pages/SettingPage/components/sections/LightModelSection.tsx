@@ -40,10 +40,8 @@ export const LightModelSection: React.FC = () => {
 
   return (
     <SettingSection title={t('settings.lightModel.title')} icon={FcIdea}>
-      <div className="space-y-4">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {t('settings.lightModel.description')}
-        </p>
+      <div className="space-y-2">
+        <p className="text-sm text-ink-muted">{t('settings.lightModel.description')}</p>
 
         <SettingSelect
           label={t('settings.lightModel.title')}
@@ -52,9 +50,7 @@ export const LightModelSection: React.FC = () => {
           onChange={(e) => handleLightModelChange(e.target.value)}
         />
 
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {t('settings.lightModel.info')}
-        </p>
+        <p className="text-xs text-ink-muted mt-1">{t('settings.lightModel.info')}</p>
       </div>
     </SettingSection>
   )

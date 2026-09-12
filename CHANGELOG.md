@@ -7,6 +7,163 @@ dated section here for anything user-visible.
 See the [README](./README.md#whats-different-in-this-fork) for a feature-by-feature
 overview of the fork with screenshots.
 
+### 2026-09-09
+
+- OpenAI's **GPT-6 Astra** is now in the model dropdown, as **(Global)** and **(US)**. It is OpenAI's
+  most capable model — aimed at complex reasoning, coding, computer use, research and document
+  creation — and takes a 1.05M-token context window with up to 128K tokens of output. Like the
+  GPT-5.6 models it works in reasoning-effort levels rather than a thinking budget, so **Deeper**
+  asks it for the highest effort it offers. The price shown in the dropdown, $11.00 in and $55.00 per
+  million tokens out, is the rate for prompts under 272K tokens; the **(Global)** variant bills
+  slightly less and prompts longer than that bill at roughly double, so treat the figure as a floor.
+- **Max Tokens no longer has to be re-tuned for each model.** Every request now sends whichever is
+  smaller, your Max Tokens setting or the output ceiling of the model you are using. Set it to
+  128,000 for Claude Opus 5 and it stays there when you switch to Haiku 4.5, which quietly uses its
+  own limit of 64,000 instead of refusing the request. The Background Agent task form follows the
+  same rule: its Max Output Tokens field is now bounded by the model you picked for that task rather
+  than a fixed 64,000, so models that can write more are no longer held back.
+- Corrected the output limits the app had recorded for three models, which were lower than what the
+  models actually allow: Amazon Nova 2 Lite now goes up to 64,000 tokens rather than 5,120, and both
+  GPT-OSS 120B and GPT-OSS 20B up to 16,384 rather than 8,192. Every other model's limit was checked
+  against its AWS model card and against the service itself, and was already right.
+- **The app now has its own typeface, and you can choose it.** Text is set in Inter and code, file
+  paths and identifiers in JetBrains Mono by default. Until now the app simply borrowed whatever font
+  the operating system offered, which meant it looked meaningfully different on macOS, Windows and
+  Linux. Inter is used with its optical-sizing axis switched on, so the many small labels around the
+  interface get letterforms drawn for that size rather than shrunken-down large ones.
+- **Settings → Appearance now has an Interface font and a Code font picker.** Both offer Inter or
+  Geist for interface text, JetBrains Mono or Geist Mono for code, or your system font. They are
+  deliberately two separate settings rather than one: JetBrains Mono makes 1, l and I — and 0 and O —
+  much easier to tell apart, which matters when you are reading a tool-use ID, an ARN or a file path,
+  so preferring Geist for the interface does not force it on code as well. All four typefaces are
+  bundled with the app, so every combination works offline and looks the same on every platform. Your
+  choice applies to all appearances and is remembered between sessions.
+- Every text size now carries a line height and letter spacing chosen for it, instead of leaving both
+  to browser defaults. Body text has more room to breathe, larger text is set slightly tighter, and
+  numbers are fixed-width throughout — so a running token count or dollar cost no longer shifts
+  sideways as the digits change.
+- **Chat answers have been retypeset.** The styling for everything the model writes was largely
+  inherited from browser defaults, and has been rebuilt: text is more readable at the same size
+  because it finally has a line height, headings follow a real six-step scale rather than jumping
+  from oversized to tiny, and inline `code` is now visibly set apart instead of looking like ordinary
+  text. Code blocks scroll sideways rather than wrapping, so indented code keeps its shape, and their
+  harsh black outline is now a soft rule that follows your chosen appearance. Tables size their
+  columns to fit the content — previously every cell was locked to the same width, which cut off
+  wider headings and wasted space on short ones — and numeric columns line up on their digits. Images
+  render at their natural size instead of always being squeezed to half the width.
+- Fixed: code blocks and table headings in chat followed your **operating system's** light or dark
+  setting rather than the appearance chosen in the app. If you used the Dim appearance on a dark
+  desktop, code blocks appeared as pale grey panels in otherwise dark surroundings.
+- **Fixed: several parts of the app never went dark at all.** The Token Usage Analytics charts, the
+  Mermaid diagrams rendered in chat, and the code interpreter's syntax highlighting were all checking
+  for dark mode in a way that could never be true, so they stayed light no matter which appearance you
+  chose. The side-by-side diff viewer had the opposite problem — it was pinned to a dark theme, so it
+  showed a dark panel even in the Light appearance. All of them now follow your chosen appearance.
+- Fixed: the to-do panel had no height limit, so a long list could run off the bottom of the window.
+  The code interpreter's code panel had the same problem.
+- Fixed: numbers in the JSON viewer were meant to be colour-highlighted and never were.
+- Smaller corrections with visible effect: text areas that were meant to resize only vertically were
+  resizing in both directions, and the chat input box sat a few pixels lower than intended because two
+  conflicting positions were applied to it.
+- **New appearance: Newspaper.** A flat, monochrome view in the spirit of newsprint or an e-ink reader
+  — square corners, hairline rules and no shadows anywhere. The page is a toned grey rather than white,
+  so it does not glare, with the faintest warm cast that newsprint has; it stops well short of sepia.
+  Status colour is the one exception: success and error stay green and red, which makes them the only
+  colour on screen and easier to spot than in any other appearance. Pick it under
+  Settings → Appearance.
+- **New appearance: Charcoal.** A warm grey rather than the blue-black of the existing Dark view,
+  with amber as its accent — used for links, the active sidebar item, focus outlines and selected
+  states. One thing to be aware of: because amber is the accent here, it no longer signals a warning,
+  so warnings in this appearance are shown in a different colour and always carry an icon and wording
+  rather than relying on colour alone.
+- There are now five appearances, listed from lightest to darkest — Light, Newspaper, Dim, Charcoal
+  and Dark — and an unrecognised saved value falls back to Dim instead of leaving the window unstyled.
+- **Every appearance now reaches the whole window.** Previously an appearance only changed the parts
+  of the interface that had been converted to use it; the rest fell back to a fixed grey palette, which
+  is why Charcoal looked like the Dark view with patches and why Newspaper was the only appearance
+  whose corners actually squared off. Colour, corner radius and shadow are now defined in one place per
+  appearance and every surface reads from it — including dialogs, dropdowns, toggles, tooltips, tables,
+  the command palette, notifications and the guided tour, all of which previously ignored your choice.
+- **The interface is considerably tighter.** Interface text is 12.5px, the size used by editors and
+  other dense professional tools, with 11px labels; corners are 3px on controls and 5px on panels
+  instead of 6 and 8; icons are 16px rather than 20–24px; table rows are about 26px tall instead of
+  roughly 56; the sidebar is 40px wide rather than 56; and vertical spacing throughout is about half
+  what it was. Considerably more fits on screen, and the result reads as an instrument rather than a
+  consumer app. Text the model writes is deliberately left at its previous, larger size — that is
+  reading material, not interface.
+- Empty screens, code editors and diagram panes are deliberately left roomy; shrinking those makes an
+  intentionally empty screen look broken.
+- **Tool calls in the transcript take up far less room.** Each collapsed tool row was carrying 20px of
+  padding above and below and a 24px chevron around 12px of text, so a turn with twenty tool calls
+  spent roughly 800 pixels on framing before any content appeared. Rows are now about a third of their
+  previous height, which means much more of a long agent run fits on screen at once.
+- Dialogs, tooltips, buttons, inputs, dropdowns and tables now share one set of corner radii, paddings
+  and text sizes. Previously each was using the UI library's stock styling, which was never configured
+  for this app, so spacing and rounding varied noticeably from one dialog to the next.
+- **The interface is less decorated and more consistent.** Emoji that were standing in for interface
+  icons have been replaced with real icons at sensible sizes — including a 48-pixel emoji as the
+  tool-settings placeholder, a spinning hourglass emoji used as a loading indicator, and an emoji
+  serving as an error icon. The waving hand has gone from the welcome message. The "Thinking" and
+  "Reasoning" labels no longer use animated colour-shifting gradient text, which also stops seven
+  continuously repainting animations; they are now simply drawn in the accent colour. Gradient fills on
+  the sidebar's selected item and on several buttons are replaced by solid accent colour. Page and
+  dialog titles were set at 30 or 24 pixels in heavy bold over 14-pixel body text and are now a
+  calmer 20 pixels. Tool results show a small status dot and a quiet badge instead of a large
+  saturated tick on every single call, and the token breakdown no longer tints four adjacent figures
+  blue, teal, yellow and orange. The one emoji that stays is the one you choose for your own avatar.
+- Fixed: the guided tour's highlight colour was a hardcoded orange that matched nothing else in the
+  app; it now uses the current appearance's accent colour.
+- **Buttons, text fields and form labels are consistent everywhere.** There were two different primary
+  button designs in use — differing in colour, padding, corner radius and whether they showed a focus
+  outline at all — plus three text-field designs and two label designs. All of them now come from one
+  shared set, so every text field takes the same focus outline and every button is keyboard-focusable
+  with a visible ring. Corners follow one rule too: 6px on controls like buttons and inputs, 8px on
+  containers like cards and dialogs, and fully round reserved for avatars and count badges. Previously
+  four different corner radii were used interchangeably across roughly 850 places.
+- **The app now respects "Reduce motion".** If you have that turned on in your operating system's
+  accessibility settings, spinners, pulses and transitions no longer animate. Previously the setting
+  was ignored entirely.
+- The tile behind an agent's icon is now a neutral shade rather than a tint of the accent colour,
+  everywhere it appears — the My Agents list, the agent editor's Name & Icon row, and the Agent
+  Directory's cards and detail panel. In the Charcoal appearance that tint was a
+  wash of amber, which sat awkwardly behind icons in whatever colour the agent uses. Built-in and your
+  own agents are still told apart by the tile, just by light and dark rather than by hue.
+- Buttons and chips with a tinted background had a hover state that changed nothing — 45 of them, where
+  the fill and the hover had ended up as the same colour. They now visibly respond again.
+- **Mermaid diagrams are now greyscale and follow your appearance.** They previously used the diagram
+  library's own blue-purple-pink palette, which matched none of the five appearances — and looked
+  especially out of place in Newspaper. Nodes, subgraphs, sequence boxes, Gantt bands and pie slices are
+  now drawn in shades of the current appearance's own grey, so a diagram reads as part of the app rather
+  than pasted into it. They are shades rather than one flat tone, so the different parts of a diagram
+  are still told apart, and each label's colour is picked for contrast against the shade behind it.
+  Diagrams also redraw when you switch appearance, instead of keeping the colours they were first drawn
+  with, and exported Word and PDF copies use the same greyscale.
+- **Toggle switches were hard to read in the dark appearances.** The moving part of the switch was
+  drawn in the panel colour, which on Charcoal is darker than the switch itself — so the knob
+  effectively disappeared, and the switch had an outline that looked correct on light appearances and
+  wrong on dark ones. Knobs are now always light, the outline is gone, and the knob travels evenly
+  between the two ends instead of stopping short. The switches are also smaller, in line with the rest
+  of the interface.
+- **Fixed: generated chat titles could come back as Markdown.** Titles were arriving with asterisks,
+  backticks, quotes or a "Title:" prefix, and occasionally as a whole sentence or several lines. The
+  instructions given to the model are now explicit that a title is short plain text, and — since an
+  instruction is only a request — anything that still comes back formatted is stripped before the title
+  is saved. Titles are capped at 60 characters, cut on a word boundary. Existing titles are left as they
+  are; use Generate Title on a chat to replace one.
+- **Fixed: the assistant's replies were not being saved to chat history.** Since the 3 September build,
+  reopening a past conversation showed your own messages and the tool results, but none of the answers
+  — they were dropped on the way to disk. Prompts, tool results and errors were all saved correctly,
+  which is why the sessions looked superficially intact. This is now fixed, and the code is arranged so
+  the same mistake cannot happen again silently.
+  **Conversations recorded between 3 September and this build are missing their replies permanently**;
+  the text was never written, so there is nothing to recover. Older conversations are unaffected.
+
+### 2026-09-08
+
+- Agents can now be moved between machines as files. Every agent's ⋮ menu has a **Download YAML** option that saves its configuration wherever you choose — the Downloads folder and the agent's name are filled in for you. The file is written to be portable: the internal id and the flags recording where this particular copy came from are left out, so the same file can be handed to anyone.
+- New **Import Agent** button on the My Agents page, next to Add New Agent. Pick a YAML or JSON agent file and it becomes one of your own agents: fully editable, not read-only like an agent shared through a project folder. It gets a fresh id, so importing the same file twice gives you two separate agents rather than overwriting anything, and a name that already exists is numbered instead of being duplicated silently. A file missing the pieces an agent cannot work without — name, description or system prompt — is refused with a message naming what is absent, rather than being added half-broken.
+- Sharing an agent is now reversible. Once an agent has been saved to a project's `.bedrock-engineer/agents/` folder, its ⋮ menu offers **Delete Shared File**, which removes that file after showing you its full path to confirm. Your own copy of the agent is untouched — this only stops the agent appearing for everyone who opens the project. Agents shared to an organization's S3 bucket are unaffected and do not show the option.
+
 ### 2026-09-04
 
 - On Windows, a Docker sandbox that mounts a folder from your project no longer writes that path with backslashes into its compose file. Docker Compose expects forward slashes there, so the mount could fail to resolve; sandbox paths are now always written in the form Compose understands.

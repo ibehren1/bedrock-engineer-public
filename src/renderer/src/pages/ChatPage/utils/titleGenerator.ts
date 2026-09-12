@@ -1,5 +1,6 @@
 import { converse } from '@renderer/lib/api'
 import toast from 'react-hot-toast'
+import { sanitizeGeneratedTitle } from './sanitizeTitle'
 
 export async function generateSessionTitle(
   session: { id: string; messages: any[] },
@@ -28,15 +29,31 @@ export async function generateSessionTitle(
       content: m.content
     }))
 
+    // The rules are explicit about plain text because models summarising a
+    // technical conversation otherwise reach for `backticks` and **bold**, and a
+    // title is rendered as raw text in the sidebar and reused as a folder name.
+    // sanitizeGeneratedTitle() below is the guarantee; this is just the request.
+    //
+    // The previous version asked for "up to 15 characters", which is unreachable
+    // in English, and had a missing newline that ran two rules together into one
+    // unreadable line.
     const system = [
       {
         text:
-          'You are an assistant who summarizes the contents of the conversation and gives it a title.' +
-          'Generate a title according to the following conditions:\n' +
-          '- !Important: Up to 15 characters long\n' +
-          '- !Important: Output the title only (no explanation required)' +
-          '- Do not use decorative words\n' +
-          '- Express the essence of the conversation succinctly\n'
+          'You name chat conversations. Reply with nothing but the title.\n' +
+          '\n' +
+          'Rules:\n' +
+          '- Plain text only. No Markdown, no backticks, no asterisks, no quotes, no heading marks.\n' +
+          '- A short label, not a sentence. No trailing full stop.\n' +
+          '- At most 6 words, or about 15 characters for Japanese and Chinese.\n' +
+          '- Name the subject of the conversation, not the fact that it is a conversation.\n' +
+          '- No preamble, no explanation, no "Title:" prefix.\n' +
+          '\n' +
+          'Good: Monthly sales summary\n' +
+          'Good: Fixing the failing build\n' +
+          'Bad: **Monthly Sales Summary**\n' +
+          'Bad: "A conversation about monthly sales."\n' +
+          'Bad: Title: Monthly sales summary'
       }
     ]
 
@@ -68,8 +85,10 @@ export async function generateSessionTitle(
       system,
       disableThinking: true,
       inferenceConfig: {
-        maxTokens: 4096,
-        temperature: 0.5
+        // A title is a handful of words. The old 4096 left room for the model to
+        // return a paragraph, which then had to be salvaged.
+        maxTokens: 64,
+        temperature: 0.2
       },
       messages: [
         {
@@ -95,12 +114,20 @@ export async function generateSessionTitle(
 
     // レスポンスからテキスト要素のみを抽出
     const textContent = message.content.find((item) => 'text' in item)
-    if (textContent && 'text' in textContent) {
-      return textContent.text
-    } else {
+    if (!textContent || !('text' in textContent)) {
       console.warn('No text content found in response:', response)
       return null
     }
+
+    // Never trust the raw string: the prompt asks for plain text, but only this
+    // guarantees it. Returns null when nothing usable is left, and the caller
+    // keeps the existing default title.
+    const title = sanitizeGeneratedTitle(textContent.text)
+    if (!title) {
+      console.warn('Generated title was empty after sanitising:', textContent.text)
+      return null
+    }
+    return title
   } catch (error: any) {
     // エラーの詳細をログ出力
     console.error('Failed to generate AI title:', {

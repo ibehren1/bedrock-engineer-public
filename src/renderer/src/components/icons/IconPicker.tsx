@@ -112,9 +112,9 @@ export const IconPicker: React.FC<IconPickerProps> = ({ selectedIcon, onSelect }
         <select
           value={scope}
           onChange={(event) => setScope(event.target.value as PickerScope)}
-          className="w-[45%] rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700
-            text-sm py-2 pl-2 pr-6 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
-            dark:text-gray-100"
+          className="w-[45%] rounded-control border border-strong bg-surface-2
+            text-sm py-2 pl-2 pr-6 focus:outline-none focus:ring-2 focus:ring-accent
+            text-ink"
         >
           <option value="curated">{t('iconLibraryCurated')}</option>
           <option value="all">{t('iconLibraryAll')}</option>
@@ -129,9 +129,9 @@ export const IconPicker: React.FC<IconPickerProps> = ({ selectedIcon, onSelect }
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
           placeholder={t('searchIcons')}
-          className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md
-            bg-gray-50 dark:bg-gray-700 text-sm focus:outline-none focus:ring-2
-            focus:ring-blue-500 dark:focus:ring-blue-400 dark:text-gray-100"
+          className="flex-1 min-w-0 px-3 py-2 border border-strong rounded-control
+            bg-surface-2 text-sm focus:outline-none focus:ring-2
+            focus:ring-accent text-ink"
         />
       </div>
 
@@ -142,7 +142,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({ selectedIcon, onSelect }
           ) : (
             curatedGroups.map((group) => (
               <div key={group.category} className="mb-4 last:mb-0">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2 px-1">
+                <h3 className="text-sm font-medium text-ink mb-2 px-1">
                   {t(`iconCategory.${group.category}`)}
                 </h3>
                 <IconGrid>
@@ -183,7 +183,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({ selectedIcon, onSelect }
               ))}
             </IconGrid>
             {searchResults.total > searchResults.results.length && (
-              <p className="mt-2 px-1 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-2 px-1 text-xs text-ink-muted">
                 {t('iconResultsTruncated', {
                   shown: searchResults.results.length,
                   total: searchResults.total
@@ -198,7 +198,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({ selectedIcon, onSelect }
 }
 
 const PickerMessage: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="p-2 text-sm text-gray-500 dark:text-gray-400">{children}</p>
+  <p className="p-2 text-sm text-ink-muted">{children}</p>
 )
 
 const IconGrid: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -217,12 +217,8 @@ const IconButton: React.FC<IconButtonProps> = ({ title, isSelected, onClick, chi
     type="button"
     onClick={onClick}
     title={title}
-    className={`flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-100
-      dark:hover:bg-gray-700 ${
-        isSelected
-          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-          : 'dark:text-gray-400'
-      }`}
+    className={`flex items-center justify-center p-1.5 rounded-container hover:bg-raised
+      hover:bg-raised ${isSelected ? 'bg-accent-tint text-accent' : 'text-ink-muted'}`}
   >
     <div className="w-6 h-6 flex items-center justify-center">{children}</div>
   </button>

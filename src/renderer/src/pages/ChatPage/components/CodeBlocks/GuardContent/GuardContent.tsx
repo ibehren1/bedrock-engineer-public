@@ -24,8 +24,8 @@ export const GuardContent: React.FC<GuardContentProps> = ({ content }) => {
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className="flex items-center gap-2">
-        <FaShieldAlt className="text-blue-500" />
-        <span className="text-sm font-medium text-blue-500">Guardrail Protected Content</span>
+        <FaShieldAlt className="text-accent" />
+        <span className="text-sm font-medium text-accent">Guardrail Protected Content</span>
       </div>
 
       <div className="text-content">
@@ -48,7 +48,7 @@ export const GuardContentCollapsible: React.FC<GuardContentProps> = ({ content }
       <Accordion.Panel>
         <Accordion.Title>
           <div className="flex gap-2 items-center">
-            <FaShieldAlt className="text-blue-500" />
+            <FaShieldAlt className="text-accent" />
             <span className="text-sm font-medium">Guard Protected Content</span>
           </div>
         </Accordion.Title>

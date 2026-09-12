@@ -8,7 +8,7 @@ interface AgentIconProps {
 }
 
 export const AgentIcon: React.FC<AgentIconProps> = ({ agent, size = 'sm' }) => {
-  const iconSize = size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'
+  const iconSize = size === 'sm' ? 'h-4 w-4' : 'h-4 w-4'
 
   if (!agent?.icon) {
     return <CogIcon className={`${iconSize} flex-shrink-0`} />

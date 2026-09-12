@@ -41,10 +41,10 @@ export const GenerateVideoSettingForm: React.FC = () => {
   }, [generateVideoS3Uri])
 
   return (
-    <div className="prose dark:prose-invert max-w-none w-full">
+    <div className="max-w-none w-full">
       {/* ツールの説明 */}
-      <div className="mb-6 w-full">
-        <p className="mb-4 text-gray-700 dark:text-gray-300">
+      <div className="mb-3 w-full">
+        <p className="mb-4 text-ink">
           {t(
             'tool info.generateVideo.description',
             'The generateVideo tool uses Amazon Nova Reel to create high-quality videos from text descriptions. Videos are generated asynchronously and require S3 configuration for output storage.'
@@ -52,9 +52,9 @@ export const GenerateVideoSettingForm: React.FC = () => {
         </p>
 
         {/* ツールグループの説明 */}
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 dark:border dark:border-blue-700 rounded-md">
-          <h5 className="font-medium mb-2 dark:text-blue-300">{t('Tool Group', 'Tool Group')}</h5>
-          <p className="text-sm text-gray-700 dark:text-gray-200">
+        <div className="mt-4 p-3 bg-accent-tint border border-accent rounded-control">
+          <h5 className="font-medium mb-2 text-accent">{t('Tool Group', 'Tool Group')}</h5>
+          <p className="text-sm text-ink">
             {t(
               'tool info.generateVideo.group',
               'When you enable this tool, the following related tools will also be automatically enabled: checkVideoStatus (to monitor video generation progress) and downloadVideo (to download completed videos). These tools work together to provide a complete video generation workflow.'
@@ -64,7 +64,7 @@ export const GenerateVideoSettingForm: React.FC = () => {
       </div>
 
       {/* 設定フォーム */}
-      <div className="flex flex-col gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-md mb-6 w-full">
+      <div className="flex flex-col gap-4 p-2.5 border border-subtle rounded-control mb-3 w-full">
         {/* S3 URI設定 */}
         <div className="w-full">
           <Label
@@ -82,14 +82,14 @@ export const GenerateVideoSettingForm: React.FC = () => {
             color={!isValidUri ? 'failure' : 'gray'}
             helperText={
               !isValidUri ? (
-                <span className="text-red-600 dark:text-red-400">
+                <span className="text-danger">
                   {t(
                     'S3 URI must start with s3:// and include a bucket name',
                     'S3 URI must start with s3:// and include a bucket name'
                   )}
                 </span>
               ) : (
-                <span className="text-gray-500 dark:text-gray-400">
+                <span className="text-ink-muted">
                   {t(
                     'Example: s3://my-bucket/nova-reel-videos/',
                     'Example: s3://my-bucket/nova-reel-videos/'
@@ -101,11 +101,11 @@ export const GenerateVideoSettingForm: React.FC = () => {
         </div>
 
         {/* モデル情報 */}
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 dark:border dark:border-blue-700 rounded-md">
-          <h5 className="font-medium mb-2 dark:text-blue-300">
+        <div className="mt-4 p-3 bg-accent-tint border border-accent rounded-control">
+          <h5 className="font-medium mb-2 text-accent">
             {t('Model Information', 'Model Information')}
           </h5>
-          <ul className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
+          <ul className="text-sm text-ink space-y-1">
             <li>
               •{' '}
               {t(

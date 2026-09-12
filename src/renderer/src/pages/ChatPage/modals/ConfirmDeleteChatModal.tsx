@@ -53,26 +53,26 @@ export const ConfirmDeleteChatModal: React.FC<ConfirmDeleteChatModalProps> = ({
     <Modal show={!!request} onClose={onCancel} size="md">
       <Modal.Header>{t('deleteChat.title')}</Modal.Header>
       <Modal.Body>
-        <div className="space-y-4">
-          <p className="text-sm text-gray-700 dark:text-gray-300">{message()}</p>
+        <div className="space-y-2">
+          <p className="text-sm text-ink">{message()}</p>
 
           {request?.hasSandbox && (
-            <div className="rounded-md bg-gray-100 dark:bg-gray-900 p-3 space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+            <div className="rounded-control bg-canvas p-3 space-y-2">
+              <div className="flex items-center gap-2 text-sm text-ink">
                 <FaDocker className="text-[#2496ED]" />
                 {t('deleteChat.sandboxNotice')}
               </div>
 
-              <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+              <label className="flex items-start gap-2 text-sm text-ink cursor-pointer">
                 <input
                   type="checkbox"
                   checked={deleteSandboxData}
                   onChange={(e) => setDeleteSandboxData(e.target.checked)}
-                  className="mt-0.5 rounded border-gray-300 dark:border-gray-600"
+                  className="mt-0.5 rounded-control border-strong"
                 />
                 <span>
                   {t('deleteChat.deleteSandboxData')}
-                  <span className="block text-xs text-gray-500 dark:text-gray-400">
+                  <span className="block text-xs text-ink-muted">
                     {t('deleteChat.deleteSandboxDataHint')}
                   </span>
                 </span>
@@ -85,13 +85,13 @@ export const ConfirmDeleteChatModal: React.FC<ConfirmDeleteChatModalProps> = ({
         <div className="flex w-full justify-end gap-2">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="px-2.5 py-1 text-sm rounded-control border border-strong text-ink hover:bg-raised"
           >
             {t('deleteChat.cancel')}
           </button>
           <button
             onClick={() => onConfirm(deleteSandboxData)}
-            className="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700"
+            className="px-2.5 py-1 text-sm rounded-control bg-danger text-canvas hover:bg-danger-strong"
           >
             {t('deleteChat.delete')}
           </button>

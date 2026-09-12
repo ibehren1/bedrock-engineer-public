@@ -10,17 +10,17 @@ const getStatusColor = (status: SpeakChatStatus): string => {
   switch (status) {
     case 'connected':
     case 'ready':
-      return 'text-green-500'
+      return 'text-success'
     case 'connecting':
     case 'processing':
-      return 'text-yellow-500'
+      return 'text-warning'
     case 'recording':
-      return 'text-blue-500'
+      return 'text-accent'
     case 'error':
-      return 'text-red-500'
+      return 'text-danger'
     case 'disconnected':
     default:
-      return 'text-gray-500'
+      return 'text-ink-muted'
   }
 }
 

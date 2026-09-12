@@ -32,7 +32,7 @@ export const Avatar: React.FC<{ role?: ConversationRole; modelId?: string }> = (
       return (
         <div
           title={modelName}
-          className="h-8 w-8 flex justify-center items-center border border-black dark:border-white rounded-lg"
+          className="h-8 w-8 flex justify-center items-center border border-strong rounded-container"
         >
           <div
             className={`flex items-center justify-center pointer-events-none ${
@@ -40,7 +40,7 @@ export const Avatar: React.FC<{ role?: ConversationRole; modelId?: string }> = (
               // A wide wordmark gets the full width inside the 32px frame instead of a
               // 20px square, so it renders about 1.5x larger. The frame is unchanged, so
               // this doesn't shift the message layout.
-              modelId && isWideModelIcon(modelId) ? 'w-[30px] h-[12px]' : 'h-5 w-5 text-[20px]'
+              modelId && isWideModelIcon(modelId) ? 'w-[30px] h-[12px]' : 'h-4 w-4 text-[20px]'
             }`}
           >
             {modelId ? (
@@ -62,15 +62,13 @@ export const Avatar: React.FC<{ role?: ConversationRole; modelId?: string }> = (
     } else {
       return (
         <div className="flex justify-center items-center">
-          <LiaUserCircleSolid className="h-6 w-6" />
+          <LiaUserCircleSolid className="h-4 w-4" />
         </div>
       )
     }
   }
 
   return (
-    <div className="flex items-center justify-center w-10 h-10 dark:text-white">
-      {renderAvatar(role)}
-    </div>
+    <div className="flex items-center justify-center w-10 h-10 text-ink">{renderAvatar(role)}</div>
   )
 }

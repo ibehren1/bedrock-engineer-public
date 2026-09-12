@@ -11,21 +11,17 @@ export const KnowledgeBaseConnectButton: React.FC<KnowledgeBaseConnectButtonProp
   return (
     <button
       onClick={() => handleOpenDataSourceConnectModal()}
-      className={`flex items-center justify-center p-[2px] overflow-hidden text-xs text-gray-900 rounded-lg group
+      className={`flex items-center justify-center p-[2px] overflow-hidden text-xs text-ink rounded-container group
         ${
           enableKnowledgeBase
-            ? 'bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200'
-            : 'border border-gray-200 dark:border-gray-700'
+            ? 'bg-gradient-to-br from-danger via-danger to-warning group-hover:from-danger group-hover:via-danger group-hover:to-warning'
+            : 'border border-subtle'
         }
-        dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400`}
+        text-ink hover:text-ink focus:ring-4 focus:outline-none focus:ring-danger`}
     >
       <span
-        className={`items-center px-3 py-1.5 transition-all ease-in duration-75 rounded-md flex gap-2
-          ${
-            enableKnowledgeBase
-              ? 'bg-white dark:bg-gray-900 group-hover:bg-opacity-0'
-              : 'bg-transparent'
-          }`}
+        className={`items-center px-3 py-1.5 transition-all ease-in duration-75 rounded-control flex gap-2
+          ${enableKnowledgeBase ? 'bg-surface group-hover:bg-opacity-0' : 'bg-transparent'}`}
       >
         {enableKnowledgeBase ? (
           <BsDatabaseCheck className="text-sm" />

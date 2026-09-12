@@ -12,7 +12,7 @@ export const InferenceParametersSection: React.FC = () => {
 
   return (
     <SettingSection title={t('Inference Parameters')} icon={FcMindMap}>
-      <div className="space-y-4">
+      <div className="space-y-2">
         <SettingInput
           label={t('Max Tokens')}
           type="number"

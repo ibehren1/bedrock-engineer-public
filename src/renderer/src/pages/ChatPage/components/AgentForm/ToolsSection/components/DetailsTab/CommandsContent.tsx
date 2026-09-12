@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CommandsContentProps } from '../../types'
 import { preventEventPropagation } from '../../utils/eventUtils'
+import { Button, Input, Label, Textarea } from '@renderer/components/ui'
 
 /**
  * コマンド設定コンポーネント
@@ -53,16 +54,14 @@ export const CommandsContent: React.FC<CommandsContentProps> = ({ commands = [],
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-600 dark:text-gray-400">
+    <div className="space-y-2">
+      <p className="text-sm text-ink-muted">
         {t('Configure which system commands the agent is allowed to execute.')}
       </p>
 
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-md">
-        <h5 className="font-medium mb-1 text-yellow-800 dark:text-yellow-300 text-sm">
-          {t('Security Warning')}
-        </h5>
-        <p className="text-xs text-gray-700 dark:text-gray-300">
+      <div className="bg-warning-soft p-3 rounded-control">
+        <h5 className="font-medium mb-1 text-warning text-sm">{t('Security Warning')}</h5>
+        <p className="text-xs text-ink">
           {t(
             'Only allow commands that you trust this agent to execute. Use wildcards (*) to define patterns.'
           )}
@@ -73,84 +72,69 @@ export const CommandsContent: React.FC<CommandsContentProps> = ({ commands = [],
       <div className="flex flex-col gap-2 mt-4">
         <h4 className="font-medium text-sm mb-2">{t('Add New Command Pattern')}</h4>
         <div>
-          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-            {t('Command Pattern')}
-          </label>
-          <input
+          <Label>{t('Command Pattern')}</Label>
+          <Input
             type="text"
             value={newCommand}
             onChange={(e) => setNewCommand(e.target.value)}
             placeholder="e.g., ls *"
-            className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
           />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-ink-muted mt-1">
             {t('Use * as a wildcard (e.g., "npm *" allows all npm commands)')}
           </p>
         </div>
         <div className="mt-2">
-          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-            {t('Description')}
-          </label>
-          <textarea
+          <Label>{t('Description')}</Label>
+          <Textarea
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}
             placeholder="e.g., List directory contents"
             rows={2}
-            className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 resize-vertical"
           />
         </div>
-        <button
+        <Button
           onClick={(e) => {
             preventEventPropagation(e)
             handleAddCommand()
           }}
           disabled={!newCommand.trim() || !newDescription.trim()}
-          className="px-4 py-1.5 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed mt-2 w-fit"
+          variant="primary"
+          className="mt-2 w-fit"
         >
           {t('Add Command Pattern')}
-        </button>
+        </Button>
       </div>
 
       {/* 登録済みコマンドリスト */}
-      <div className="space-y-3 mt-6">
+      <div className="space-y-3 mt-3">
         <h4 className="font-medium text-sm">{t('Allowed Commands')}</h4>
         <div className="grid grid-cols-1 gap-2">
           {commands.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-              {t('No commands allowed yet')}
-            </p>
+            <p className="text-sm text-ink-muted italic">{t('No commands allowed yet')}</p>
           ) : (
             commands.map((cmd) => (
               <div
                 key={cmd.pattern}
-                className="flex flex-col p-3 text-sm bg-gray-100 dark:bg-gray-900 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-700"
+                className="flex flex-col p-3 text-sm bg-canvas text-ink rounded-control border border-subtle"
               >
                 {editMode === cmd.pattern ? (
                   // 編集モード
                   <div className="flex flex-col gap-2">
                     <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        {t('Command Pattern')}
-                      </label>
-                      <input
+                      <Label>{t('Command Pattern')}</Label>
+                      <Input
                         type="text"
                         value={editData.pattern}
                         onChange={(e) => setEditData({ ...editData, pattern: e.target.value })}
-                        className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                       />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {t('Use * as a wildcard')}
-                      </p>
+                      <p className="text-xs text-ink-muted mt-1">{t('Use * as a wildcard')}</p>
                     </div>
                     <div className="mt-2">
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        {t('Description')}
-                      </label>
-                      <textarea
+                      <Label>{t('Description')}</Label>
+                      <Textarea
                         value={editData.description}
                         onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                         rows={2}
-                        className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 resize-vertical"
                       />
                     </div>
                     <div className="flex justify-end gap-2 mt-2">
@@ -159,20 +143,20 @@ export const CommandsContent: React.FC<CommandsContentProps> = ({ commands = [],
                           preventEventPropagation(e)
                           handleCancelEdit()
                         }}
-                        className="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                        className="px-3 py-1 text-sm text-ink-muted border border-strong rounded-control hover:bg-raised"
                       >
                         {t('Cancel')}
                       </button>
-                      <button
+                      <Button
                         onClick={(e) => {
                           preventEventPropagation(e)
                           handleSaveEdit()
                         }}
                         disabled={!editData.pattern.trim() || !editData.description.trim()}
-                        className="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        variant="primary"
                       >
                         {t('Save')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -181,7 +165,7 @@ export const CommandsContent: React.FC<CommandsContentProps> = ({ commands = [],
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="font-medium">{cmd.description}</span>
-                        <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        <div className="text-xs text-ink-muted mt-1">
                           <div>
                             <span className="font-mono">Pattern:</span> {cmd.pattern}
                           </div>
@@ -193,7 +177,7 @@ export const CommandsContent: React.FC<CommandsContentProps> = ({ commands = [],
                             preventEventPropagation(e)
                             handleEditCommand(cmd)
                           }}
-                          className="text-blue-500 hover:text-blue-600 p-1"
+                          className="text-accent hover:text-accent p-1"
                           title={t('Edit')}
                           aria-label={t('Edit command')}
                         >
@@ -217,7 +201,7 @@ export const CommandsContent: React.FC<CommandsContentProps> = ({ commands = [],
                             preventEventPropagation(e)
                             handleRemoveCommand(cmd.pattern)
                           }}
-                          className="text-red-500 hover:text-red-600 p-1"
+                          className="text-danger hover:text-danger-strong p-1"
                           title={t('Remove')}
                           aria-label={t('Remove command')}
                         >

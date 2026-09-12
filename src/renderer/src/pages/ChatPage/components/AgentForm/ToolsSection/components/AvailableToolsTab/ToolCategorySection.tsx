@@ -31,11 +31,9 @@ export const ToolCategorySection: React.FC<ToolCategorySectionProps> = ({
   return (
     <div key={category.id} className="mb-4">
       {/* カテゴリヘッダー */}
-      <div className="p-3 bg-gray-100 dark:bg-gray-800/50 font-medium sticky top-0 z-10 rounded-t-md border border-gray-200 dark:border-gray-700/50">
-        <div className="text-sm text-gray-800 dark:text-gray-200">
-          {t(`Tool Categories.${category.name}`)}
-        </div>
-        <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+      <div className="p-3 bg-raised font-medium sticky top-0 z-10 rounded-t-control border border-subtle">
+        <div className="text-sm text-ink">{t(`Tool Categories.${category.name}`)}</div>
+        <div className="text-xs text-ink-muted mt-1">
           {t(`Tool Categories.${category.name} Description`)}
         </div>
       </div>
@@ -45,19 +43,19 @@ export const ToolCategorySection: React.FC<ToolCategorySectionProps> = ({
         <>
           {isLoadingMcpTools ? (
             // MCPツール取得中のローディング表示
-            <div className="p-3 mt-2 bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 rounded-md border border-gray-200 dark:border-gray-700/50">
+            <div className="p-3 mt-2 bg-raised text-ink rounded-control border border-subtle">
               <div className="flex items-center">
-                <div className="w-5 h-5 mr-2 border-t-2 border-r-2 border-gray-500 rounded-full animate-spin"></div>
+                <div className="w-4 h-4 mr-2 border-t-2 border-r-2 border-strong rounded-full animate-spin"></div>
                 <span className="font-medium">{t('MCPサーバーからツールを取得中...')}</span>
               </div>
             </div>
           ) : category.hasMcpServers === false ? (
             // サーバーが設定されていない場合の警告表示
-            <div className="p-3 mt-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 rounded-md">
+            <div className="p-3 mt-2 bg-warning-soft text-warning rounded-control">
               <div className="flex items-center mb-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
+                  className="h-4 w-4 mr-2"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -79,11 +77,11 @@ export const ToolCategorySection: React.FC<ToolCategorySectionProps> = ({
             </div>
           ) : category.toolsData.length === 0 ? (
             // サーバーがあってもツールがなければ情報表示
-            <div className="p-3 mt-2 bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 rounded-md border border-gray-200 dark:border-gray-700/50">
+            <div className="p-3 mt-2 bg-raised text-ink rounded-control border border-subtle">
               <div className="flex items-center mb-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
+                  className="h-4 w-4 mr-2"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -117,11 +115,11 @@ export const ToolCategorySection: React.FC<ToolCategorySectionProps> = ({
           ) : (
             category.toolsData.length > 0 && (
               // サーバーとツールが両方ある場合は情報バナー表示
-              <div className="p-3 mt-2 bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-300 rounded-md">
+              <div className="p-3 mt-2 bg-success-soft text-success rounded-control">
                 <div className="flex items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
+                    className="h-4 w-4 mr-2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -138,7 +136,7 @@ export const ToolCategorySection: React.FC<ToolCategorySectionProps> = ({
                   </span>
                 </div>
                 <div className="mt-2 ml-7 text-sm flex items-center">
-                  <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 font-medium mr-2">
+                  <span className="bg-raised text-ink px-2 py-0.5 rounded-control font-medium mr-2">
                     {t('Note')}
                   </span>
                   <span>{t('MCP tools are always enabled and cannot be disabled')}</span>
@@ -172,7 +170,7 @@ export const ToolCategorySection: React.FC<ToolCategorySectionProps> = ({
           })}
         </div>
       ) : (
-        <div className="py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
+        <div className="py-3 text-center text-ink-muted text-sm">
           {t('No tools in this category')}
         </div>
       )}

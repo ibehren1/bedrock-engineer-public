@@ -279,18 +279,14 @@ export const ReasoningContent: React.FC<ReasoningContentProps> = ({
 
   const ReasoningText = useCallback(() => {
     if (!isLoading) {
-      return <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Reasoning</span>
+      return <span className="text-xs font-medium text-ink-muted">Reasoning</span>
     }
 
     return (
       <div className="flex items-center space-x-2">
-        <span className="text-xs font-medium bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 bg-[length:200%_100%] animate-gradient-x bg-clip-text text-transparent">
-          Reasoning
-        </span>
+        <span className="text-xs font-medium text-accent">Reasoning</span>
         {showThinkingCounter && (
-          <span
-            className={`text-xs text-gray-500 dark:text-gray-400 transition-opacity duration-150 ease-in-out`}
-          >
+          <span className={`text-xs text-ink-muted transition-opacity duration-150 ease-in-out`}>
             {formatElapsedSeconds(elapsedSeconds)}
           </span>
         )}
@@ -306,24 +302,24 @@ export const ReasoningContent: React.FC<ReasoningContentProps> = ({
       >
         <ReasoningText />
         <MdExpandMore
-          className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''} text-gray-500 text-xs`}
+          className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''} text-ink-muted text-xs`}
           size={14}
         />
       </div>
 
       {/* 展開可能なコンテンツ */}
       <div
-        className={`transition-all duration-300 rounded-lg overflow-hidden ${
+        className={`transition-all duration-300 rounded-container overflow-hidden ${
           isExpanded
-            ? 'max-h-[25rem] opacity-100 bg-gray-50/50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 backdrop-blur-sm'
+            ? 'max-h-[25rem] opacity-100 bg-surface-2/50 border border-subtle backdrop-blur-sm'
             : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-4 py-3">
+        <div className="px-2.5 py-1.5">
           {textContent && (
             <div
               ref={textAreaRef}
-              className="pb-5 text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-light overflow-y-auto pr-2 max-h-[25rem] will-change-scroll transform-gpu"
+              className="pb-5 text-sm text-ink leading-relaxed whitespace-pre-wrap font-light overflow-y-auto pr-2 max-h-[25rem] will-change-scroll transform-gpu"
             >
               {textContent}
             </div>

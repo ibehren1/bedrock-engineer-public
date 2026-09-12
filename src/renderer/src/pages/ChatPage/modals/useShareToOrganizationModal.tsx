@@ -61,19 +61,17 @@ const ShareToOrganizationModal: React.FC<ShareToOrganizationModalProps> = ({
   if (!agent) return null
 
   return (
-    <Modal show={isOpen} onClose={handleClose} size="md" className="dark:bg-gray-900">
-      <div className="border-[0.5px] border-white dark:border-gray-100 rounded-lg shadow-xl dark:shadow-gray-900/80">
-        <Modal.Header className="border-b border-gray-200 dark:border-gray-700/50 dark:bg-gray-900 rounded-t-lg">
+    <Modal show={isOpen} onClose={handleClose} size="md" className="bg-canvas">
+      <div className="border-[0.5px] border-surface rounded-container shadow-xl">
+        <Modal.Header className="border-b border-subtle bg-canvas rounded-t-container">
           {t('shareAgentToOrganization', 'Share Agent to Organization')}
         </Modal.Header>
-        <Modal.Body className="p-0 bg-white dark:bg-gray-900">
-          <div className="space-y-4 p-6">
+        <Modal.Body className="p-0 bg-surface">
+          <div className="space-y-2 p-3">
             {/* エージェント情報 */}
-            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                {t('agentToShare', 'Agent to Share')}
-              </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="p-3 bg-surface-2 rounded-container">
+              <h4 className="font-medium text-ink mb-1">{t('agentToShare', 'Agent to Share')}</h4>
+              <p className="text-sm text-ink-muted">
                 <strong>{agent.name}</strong>
                 {agent.description && ` - ${agent.description}`}
               </p>
@@ -81,19 +79,19 @@ const ShareToOrganizationModal: React.FC<ShareToOrganizationModalProps> = ({
 
             {/* エラー表示 */}
             {error && (
-              <div className="p-3 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-md">
-                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+              <div className="p-3 bg-danger-soft border border-danger rounded-control">
+                <p className="text-danger text-sm">{error}</p>
               </div>
             )}
 
             {/* 組織選択 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-ink mb-2">
                 {t('selectOrganization', 'Select Organization')}
               </label>
 
               {organizations.length === 0 ? (
-                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                <div className="p-2.5 text-center text-ink-muted">
                   <HiOfficeBuilding className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">
                     {t('noOrganizationsConfigured', 'No organizations configured')}
@@ -110,11 +108,11 @@ const ShareToOrganizationModal: React.FC<ShareToOrganizationModalProps> = ({
                   {organizations.map((org) => (
                     <label
                       key={org.id}
-                      className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors
+                      className={`flex items-center p-3 border rounded-container cursor-pointer transition-colors
                         ${
                           selectedOrgId === org.id
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                            : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            ? 'border-accent bg-accent-tint'
+                            : 'border-strong hover:bg-surface-2'
                         }`}
                     >
                       <input
@@ -126,22 +124,20 @@ const ShareToOrganizationModal: React.FC<ShareToOrganizationModalProps> = ({
                         className="sr-only"
                         disabled={isSharing}
                       />
-                      <HiOfficeBuilding className="w-5 h-5 mr-3 text-gray-400" />
+                      <HiOfficeBuilding className="w-4 h-4 mr-3 text-ink-faint" />
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900 dark:text-white">{org.name}</div>
+                        <div className="font-medium text-ink">{org.name}</div>
                         {org.description && (
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {org.description}
-                          </div>
+                          <div className="text-sm text-ink-muted">{org.description}</div>
                         )}
-                        <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        <div className="text-xs text-ink-faint mt-1">
                           S3: {org.s3Config.bucket}
                           {org.s3Config.prefix && `/${org.s3Config.prefix}`}
                         </div>
                       </div>
                       {selectedOrgId === org.id && (
-                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-4 h-4 bg-accent-tint rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-surface rounded-full"></div>
                         </div>
                       )}
                     </label>
@@ -152,8 +148,8 @@ const ShareToOrganizationModal: React.FC<ShareToOrganizationModalProps> = ({
 
             {/* 注意事項 */}
             {organizations.length > 0 && (
-              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
-                <p className="text-yellow-800 dark:text-yellow-200 text-xs">
+              <div className="p-3 bg-warning-soft border border-warning rounded-control">
+                <p className="text-warning text-xs">
                   <strong>{t('note', 'Note')}:</strong>{' '}
                   {t(
                     'shareToOrganizationNote',
@@ -164,7 +160,7 @@ const ShareToOrganizationModal: React.FC<ShareToOrganizationModalProps> = ({
             )}
           </div>
         </Modal.Body>
-        <Modal.Footer className="border-t border-gray-200 dark:border-gray-700/50 dark:bg-gray-900 rounded-b-lg">
+        <Modal.Footer className="border-t border-subtle bg-canvas rounded-b-container">
           <Button
             onClick={handleShare}
             disabled={isSharing || !selectedOrgId || organizations.length === 0}

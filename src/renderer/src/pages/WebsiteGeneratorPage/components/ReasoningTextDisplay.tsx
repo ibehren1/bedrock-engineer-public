@@ -20,27 +20,25 @@ const ReasoningTextDisplayComponent = ({ text }: ReasoningTextDisplayProps) => {
         className="flex justify-center items-center space-x-1 cursor-pointer mb-1"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span className="text-xs font-medium bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 bg-[length:200%_100%] animate-gradient-x bg-clip-text text-transparent">
-          Reasoning
-        </span>
+        <span className="text-xs font-medium text-accent">Reasoning</span>
         <MdExpandMore
-          className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''} text-gray-500 text-xs`}
+          className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''} text-ink-muted text-xs`}
           size={14}
         />
       </div>
 
       {/* 展開可能なコンテンツ部分 */}
       <div
-        className={`transition-all duration-300 rounded-lg overflow-hidden ${
+        className={`transition-all duration-300 rounded-container overflow-hidden ${
           isExpanded
-            ? 'max-h-[30rem] opacity-100 bg-gray-50/50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 backdrop-blur-sm'
+            ? 'max-h-[30rem] opacity-100 bg-surface-2/50 border border-subtle backdrop-blur-sm'
             : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-4 py-3">
+        <div className="px-2.5 py-1.5">
           <div
             ref={textAreaRef}
-            className="pb-5 text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-light overflow-y-auto pr-2 max-h-[25rem] break-words overflow-wrap-anywhere"
+            className="pb-5 text-sm text-ink leading-relaxed whitespace-pre-wrap font-light overflow-y-auto pr-2 max-h-[25rem] break-words overflow-wrap-anywhere"
           >
             {text || 'Thinking...'}
           </div>

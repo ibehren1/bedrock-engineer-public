@@ -70,16 +70,14 @@ export const McpServerSection: React.FC<McpServerSectionProps> = ({
   }
 
   return (
-    <div className="space-y-4" onClick={preventModalClose}>
-      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
-        {t('MCP Server Settings')}
-      </h3>
+    <div className="space-y-2" onClick={preventModalClose}>
+      <h3 className="text-heading font-semibold text-ink mb-4">{t('MCP Server Settings')}</h3>
 
-      <div className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-md mb-4 border border-gray-200 dark:border-gray-700/50">
-        <p className="text-sm text-gray-700 dark:text-gray-300">
+      <div className="bg-raised p-3 rounded-control mb-4 border border-subtle">
+        <p className="text-sm text-ink">
           {t('Configure MCP servers for this agent to use MCP tools.')}
         </p>
-        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-xs text-ink-muted mt-1">
           {t(
             'Register MCP servers first, then you can enable MCP tools in the Available Tools tab.'
           )}

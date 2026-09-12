@@ -35,13 +35,10 @@ export const SidebarSection = () => {
                 id={inputId}
                 checked={visible}
                 onChange={(e) => toggleItem(route.href, e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded-control border-strong text-accent focus:ring-accent"
               />
-              <label
-                htmlFor={inputId}
-                className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2"
-              >
-                <route.icon className="text-lg" />
+              <label htmlFor={inputId} className="text-sm text-ink flex items-center gap-2">
+                <route.icon className="text-base" />
                 {t(`sidebar.items.${route.name}`, route.name)}
               </label>
             </div>

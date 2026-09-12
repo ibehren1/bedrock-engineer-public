@@ -20,20 +20,20 @@ export const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolExecut
         <Accordion.Panel>
           <Accordion.Title>
             <div className="flex gap-4 items-center">
-              <span className="rounded-md">
-                <FaCheck className="size-6 text-green-500" />
+              <span className="rounded-control">
+                <FaCheck className="size-4 text-success" />
               </span>
               <div className="flex gap-2">
                 <span>完了:</span>
-                <span className="rounded-md px-2 py-1 bg-green-500 text-white text-xs">
+                <span className="rounded-control px-2 py-1 bg-success-soft text-success text-xs">
                   {lastResult.toolName}
                 </span>
               </div>
             </div>
           </Accordion.Title>
           <Accordion.Content className="w-full">
-            <div className="text-xs bg-white dark:bg-gray-800 p-2 rounded border">
-              <pre className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+            <div className="text-xs bg-surface p-2 rounded-control border">
+              <pre className="whitespace-pre-wrap text-ink">
                 {JSON.stringify(lastResult.result, null, 2)}
               </pre>
             </div>

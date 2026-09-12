@@ -23,14 +23,12 @@ const ProgressBarComponent = ({
   return (
     <div className={`w-full max-w-md ${className}`}>
       {/* メッセージ表示 */}
-      {message && (
-        <div className="mb-2 text-sm text-gray-600 dark:text-gray-300 text-center">{message}</div>
-      )}
+      {message && <div className="mb-2 text-sm text-ink-muted text-center">{message}</div>}
 
       {/* 進捗バー */}
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 relative overflow-hidden">
+      <div className="w-full bg-raised rounded-full h-2.5 relative overflow-hidden">
         <div
-          className="bg-blue-300 dark:bg-blue-300 h-2.5 rounded-full transition-all duration-300 ease-out"
+          className="bg-accent-tint h-2.5 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${clampedProgress}%` }}
         />
 
@@ -48,9 +46,7 @@ const ProgressBarComponent = ({
       {/* パーセンテージ表示 */}
       {showPercentage && (
         <div className="mt-2 text-center">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-            {Math.round(clampedProgress)}%
-          </span>
+          <span className="text-sm font-medium text-ink">{Math.round(clampedProgress)}%</span>
         </div>
       )}
     </div>

@@ -30,7 +30,7 @@ export const isWideModelIcon = (modelId: string): boolean =>
  */
 export const getModelIcon = (modelId: string, isInferenceProfile?: boolean) => {
   // Show group icon for inference profiles
-  if (isInferenceProfile) return <LuBrainCircuit className="size-4 text-blue-600" />
+  if (isInferenceProfile) return <LuBrainCircuit className="size-4 text-accent" />
 
   if (modelId.includes('claude')) return <ClaudeLogo />
   if (modelId.includes('nova')) return <NovaLogo />

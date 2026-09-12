@@ -17,8 +17,8 @@ const WebsiteGenerator = () => {
   const [prompt, setPrompt] = useState('');
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-      <h1 className="text-5xl font-light text-gray-900 mb-12">
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-4">
+      <h1 className="text-5xl font-light text-ink mb-12">
         Website Generator
       </h1>
       <span>
@@ -52,11 +52,11 @@ export const DEFAULT_VUE_INDEX_HTML = `<!DOCTYPE html>
 </html>
 `
 export const DEFAULT_APP_VUE = `<template>
-  <div class="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-    <h1 class="text-5xl font-light text-gray-900 mb-12">
+  <div class="min-h-screen bg-surface flex flex-col items-center justify-center p-4">
+    <h1 class="text-5xl font-light text-ink mb-12">
       Website Generator
     </h1>
-    <span class="text-lg text-gray-700 mb-6">
+    <span class="text-lg text-ink mb-6">
       What can I help you build?
     </span>
   </div>
@@ -86,8 +86,8 @@ export const DEFAULT_SVELTE_INDEX_HTML = `<!DOCTYPE html>
 export const DEFAULT_SVELTE_APP_SVELTE = `<script>
   let prompt = '';
 </script>
-<main class="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-  <h1 class="text-5xl font-light text-gray-900 mb-12">
+<main class="min-h-screen bg-surface flex flex-col items-center justify-center p-4">
+  <h1 class="text-5xl font-light text-ink mb-12">
     Website Generator
   </h1>
   <span>

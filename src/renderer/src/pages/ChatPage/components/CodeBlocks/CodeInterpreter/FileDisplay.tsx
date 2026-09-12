@@ -81,8 +81,8 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({ files }) => {
 
   if (!files || files.length === 0) {
     return (
-      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+      <div className="bg-surface-2 border border-subtle rounded-container p-2.5">
+        <p className="text-ink-muted text-sm italic">
           {t('code interpreter display.No files generated', 'No files generated')}
         </p>
       </div>
@@ -105,7 +105,7 @@ export const FileDisplay: React.FC<FileDisplayProps> = ({ files }) => {
       })}
 
       {/* Summary */}
-      <div className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2 border-t border-gray-200 dark:border-gray-700">
+      <div className="text-xs text-ink-muted text-center pt-2 border-t border-subtle">
         {t('code interpreter display.Total files generated', 'Total files generated')}:{' '}
         {files.length}
       </div>
