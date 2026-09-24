@@ -2,6 +2,7 @@ import { ChildProcess, spawn } from 'child_process'
 import { createCategoryLogger } from '../../../common/logger'
 import { detectErrors, detectServerReady, detectWaitingForInput } from '../command/outputPatterns'
 import { composeArgv, ComposeContext, run } from './composeRunner'
+import { recordExit, recordSettled, recordStart, recordStdin } from './sandboxActivity'
 import { SandboxExecOptions, SandboxExecResult, WORKSPACE_MOUNT } from './types'
 
 const logger = createCategoryLogger('docker:sandbox-exec')
@@ -15,6 +16,8 @@ interface RunningExec {
   stderr: string
   exitCode: number | null
   isRunning: boolean
+  /** Row in the sandbox activity log, updated as the command progresses. */
+  activityId: string
 }
 
 /**
@@ -39,6 +42,10 @@ export interface ExecTarget {
  * `-i` keeps stdin open so interactive prompts can be answered. `-t` is deliberately
  * omitted: a TTY injects ANSI escape sequences into the output that the prompt and
  * server-ready matchers read, which makes detection unreliable.
+ *
+ * The user-facing interactive terminal is a separate path that *does* allocate a TTY —
+ * see `sandboxTerminal.ts`. The two must stay separate: its output must never be fed to
+ * the matchers above, and nothing it does belongs in `runningExecs`.
  */
 const buildExecArgv = (
   target: ExecTarget,
@@ -106,6 +113,7 @@ export const execInSandbox = (
     }
 
     const pid = child.pid
+    const startedAt = Date.now()
     const state: RunningExec = {
       sessionId: target.sessionId,
       service: target.service,
@@ -114,7 +122,14 @@ export const execInSandbox = (
       stdout: '',
       stderr: '',
       exitCode: null,
-      isRunning: true
+      isRunning: true,
+      activityId: recordStart({
+        sessionId: target.sessionId,
+        service: target.service,
+        command,
+        cwd: options.cwd ?? WORKSPACE_MOUNT,
+        pid
+      })
     }
     runningExecs.set(pid, state)
 
@@ -124,6 +139,12 @@ export const execInSandbox = (
     const timer = setTimeout(() => {
       if (settled) return
       settled = true
+      recordSettled({
+        sessionId: target.sessionId,
+        id: state.activityId,
+        outcome: 'timeout',
+        durationMs: Date.now() - startedAt
+      })
       // Leave the process alone but stop waiting on it; a long build should not be
       // killed just because the model's turn needs an answer.
       resolve({
@@ -135,10 +156,24 @@ export const execInSandbox = (
       })
     }, timeoutMs)
 
-    const settle = (result: SandboxExecResult) => {
+    /**
+     * Record how the command resolved for the caller, which is not the same as the
+     * process ending: the two early-resolve paths below deliberately leave it running.
+     */
+    const settle = (
+      result: SandboxExecResult,
+      outcome: 'completed' | 'requires-input' | 'detached'
+    ) => {
       if (settled) return
       settled = true
       clearTimeout(timer)
+      recordSettled({
+        sessionId: target.sessionId,
+        id: state.activityId,
+        outcome,
+        exitCode: outcome === 'completed' ? result.exitCode : undefined,
+        durationMs: Date.now() - startedAt
+      })
       resolve(result)
     }
 
@@ -147,24 +182,30 @@ export const execInSandbox = (
 
       const waiting = detectWaitingForInput(state.stdout)
       if (waiting.isWaiting) {
-        settle({
-          stdout: state.stdout,
-          stderr: state.stderr,
-          exitCode: 0,
-          processInfo: { pid, command, detached: false },
-          requiresInput: true,
-          prompt: waiting.prompt
-        })
+        settle(
+          {
+            stdout: state.stdout,
+            stderr: state.stderr,
+            exitCode: 0,
+            processInfo: { pid, command, detached: false },
+            requiresInput: true,
+            prompt: waiting.prompt
+          },
+          'requires-input'
+        )
         return
       }
 
       if (detectServerReady(state.stdout) && !detectErrors(state.stdout, state.stderr)) {
-        settle({
-          stdout: state.stdout,
-          stderr: state.stderr,
-          exitCode: 0,
-          processInfo: { pid, command, detached: true }
-        })
+        settle(
+          {
+            stdout: state.stdout,
+            stderr: state.stderr,
+            exitCode: 0,
+            processInfo: { pid, command, detached: true }
+          },
+          'detached'
+        )
       }
     })
 
@@ -173,14 +214,17 @@ export const execInSandbox = (
 
       const waiting = detectWaitingForInput(state.stderr)
       if (waiting.isWaiting) {
-        settle({
-          stdout: state.stdout,
-          stderr: state.stderr,
-          exitCode: 0,
-          processInfo: { pid, command, detached: false },
-          requiresInput: true,
-          prompt: waiting.prompt
-        })
+        settle(
+          {
+            stdout: state.stdout,
+            stderr: state.stderr,
+            exitCode: 0,
+            processInfo: { pid, command, detached: false },
+            requiresInput: true,
+            prompt: waiting.prompt
+          },
+          'requires-input'
+        )
       }
     })
 
@@ -188,6 +232,12 @@ export const execInSandbox = (
       state.isRunning = false
       runningExecs.delete(pid)
       clearTimeout(timer)
+      recordSettled({
+        sessionId: target.sessionId,
+        id: state.activityId,
+        outcome: 'failed',
+        durationMs: Date.now() - startedAt
+      })
       if (!settled) {
         settled = true
         reject(error)
@@ -199,12 +249,25 @@ export const execInSandbox = (
       state.exitCode = code ?? 1
       runningExecs.delete(pid)
 
-      settle({
-        stdout: state.stdout,
-        stderr: state.stderr,
+      // Fires whether or not the promise already resolved, so a row that settled as
+      // detached or requires-input is upgraded with the real exit code.
+      recordExit({
+        sessionId: target.sessionId,
+        id: state.activityId,
         exitCode: code ?? 1,
-        detached: options.detach
+        stdoutBytes: Buffer.byteLength(state.stdout),
+        stderrBytes: Buffer.byteLength(state.stderr)
       })
+
+      settle(
+        {
+          stdout: state.stdout,
+          stderr: state.stderr,
+          exitCode: code ?? 1,
+          detached: options.detach
+        },
+        'completed'
+      )
     })
 
     if (options.detach) {
@@ -277,7 +340,10 @@ export const sendInputToSandbox = (
       })
     })
 
-    state.child.stdin?.write(stdin.endsWith('\n') ? stdin : `${stdin}\n`)
+    const payload = stdin.endsWith('\n') ? stdin : `${stdin}\n`
+    // Length only: a model answering a prompt may be typing a credential.
+    recordStdin(state.sessionId, state.activityId, Buffer.byteLength(payload))
+    state.child.stdin?.write(payload)
   })
 
 /**

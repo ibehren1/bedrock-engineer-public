@@ -40,6 +40,7 @@ type InputFormProps = {
     onStart: () => void
     onRemove: (deleteData: boolean) => void
     onOpenFolder: () => void
+    onOpenPanel: () => void
   }
   attachments?: {
     files: ChatAttachment[]
@@ -84,6 +85,9 @@ export const InputForm: React.FC<InputFormProps> = ({
   // The form is fixed-positioned (offset past the app nav sidebar at 5rem).
   // When the history panel (w-96 = 24rem) opens, shift its left edge to match
   // so the input slides right in step with the message area above it.
+  //
+  // It keeps the full width when the sandbox panel is open: the panel stops above this
+  // area instead, the same way the message list reserves room for it.
   return (
     <div
       className={`flex gap-2 fixed bottom-3 right-5 pt-3 transition-all duration-300 ease-in-out ${
@@ -141,6 +145,7 @@ export const InputForm: React.FC<InputFormProps> = ({
                     onStart={sandbox.onStart}
                     onRemove={sandbox.onRemove}
                     onOpenFolder={sandbox.onOpenFolder}
+                    onOpenPanel={sandbox.onOpenPanel}
                   />
                 )}
                 {onExportChat && (

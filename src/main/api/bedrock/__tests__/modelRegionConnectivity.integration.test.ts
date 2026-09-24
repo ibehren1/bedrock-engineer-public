@@ -83,18 +83,29 @@ async function testModel(
     // Prepare inference config
     // Some models (Claude Sonnet 4.5, Nova models) don't support both temperature and topP
     const inferenceConfig: any = {
-      maxTokens: 10,
-      temperature: 1
+      maxTokens: 10
     }
 
-    // Only add topP if the model doesn't have restrictions
-    const skipTopP =
-      modelId.includes('claude-sonnet-4-5') ||
-      modelId.includes('nova-') ||
-      modelId.includes('nova.')
+    // Some models (OpenAI GPT-5.x/GPT-6, xAI Grok, Kimi K3) reject both
+    // sampling fields and take maxTokens alone
+    const skipSampling =
+      modelId.includes('openai.gpt-5') ||
+      modelId.includes('openai.gpt-6') ||
+      modelId.includes('xai.grok') ||
+      modelId.includes('kimi-k3')
 
-    if (!skipTopP) {
-      inferenceConfig.topP = 0.9
+    if (!skipSampling) {
+      inferenceConfig.temperature = 1
+
+      // Only add topP if the model doesn't have restrictions
+      const skipTopP =
+        modelId.includes('claude-sonnet-4-5') ||
+        modelId.includes('nova-') ||
+        modelId.includes('nova.')
+
+      if (!skipTopP) {
+        inferenceConfig.topP = 0.9
+      }
     }
 
     // Call Converse API directly

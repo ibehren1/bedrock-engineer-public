@@ -36,6 +36,7 @@ type InputFormContainerProps = {
     onStart: () => void
     onRemove: (deleteData: boolean) => void
     onOpenFolder: () => void
+    onOpenPanel: () => void
   }
   attachments?: {
     files: ChatAttachment[]

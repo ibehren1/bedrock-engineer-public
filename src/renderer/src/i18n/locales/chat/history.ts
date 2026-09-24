@@ -14,7 +14,12 @@ export const history = {
     'Delete selected': 'Delete selected',
     '{{count}} selected': '{{count}} selected',
     'Are you sure you want to delete {{count}} selected chat(s)?':
-      'Are you sure you want to delete {{count}} selected chat(s)?'
+      'Are you sure you want to delete {{count}} selected chat(s)?',
+    // Dotted keys, unlike the English-as-key entries above, which are older.
+    history: {
+      hasAttachments: 'Has attached files',
+      hasSandbox: 'Has a Docker sandbox'
+    }
   },
   ja: {
     'Chat History': 'チャット履歴',
@@ -31,6 +36,10 @@ export const history = {
     'Delete selected': '選択項目を削除',
     '{{count}} selected': '{{count}} 件選択中',
     'Are you sure you want to delete {{count}} selected chat(s)?':
-      '選択した {{count}} 件のチャットを削除してもよろしいですか？'
+      '選択した {{count}} 件のチャットを削除してもよろしいですか？',
+    history: {
+      hasAttachments: '添付ファイルあり',
+      hasSandbox: 'Docker サンドボックスあり'
+    }
   }
 }

@@ -3,12 +3,14 @@ import { FiLoader } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
 import { FiMoreHorizontal, FiEdit2, FiTrash2, FiZap, FiCheckSquare, FiX } from 'react-icons/fi'
 import { RiArchiveStackLine } from 'react-icons/ri'
+import { FaDocker, FaPaperclip } from 'react-icons/fa'
 import { SessionMetadata } from '@/types/chat/history'
 import { useChatHistory } from '@renderer/contexts/ChatHistoryContext'
 import { generateSessionTitle } from '../../utils/titleGenerator'
 import { useLightProcessingModel } from '@renderer/lib/modelSelection'
 import { useRunningSessions } from '../../runners/useRunningSessions'
 import { ConfirmDeleteChatModal, DeleteChatRequest } from '../../modals/ConfirmDeleteChatModal'
+import { useSessionResources } from './useSessionResources'
 
 interface ChatHistoryProps {
   onSessionSelect: (sessionId: string) => void
@@ -25,6 +27,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedSessionIds, setSelectedSessionIds] = useState<Set<string>>(new Set())
   const [deleteRequest, setDeleteRequest] = useState<DeleteChatRequest | null>(null)
+
   const { getLightModelId } = useLightProcessingModel()
   const { t } = useTranslation()
   // A turn keeps running after you switch away from its chat, so mark the ones still working.
@@ -40,6 +43,10 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
     deleteAllSessions,
     getSessionsWithSandbox
   } = useChatHistory()
+
+  // Sandbox / attachment indicators for the rows below.
+  const { withSandbox: sessionsWithSandbox, withAttachments: sessionsWithAttachments } =
+    useSessionResources(sessions.map((session) => session.id))
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -370,9 +377,28 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSessionSelect, curre
               ) : (
                 <div className="flex items-center justify-between w-full">
                   <div className="relative flex-1 min-w-0 pr-2">
-                    <h3 className="font-medium text-ink text-sm truncate" title={session.title}>
-                      {session.title}
-                    </h3>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <h3 className="font-medium text-ink text-sm truncate" title={session.title}>
+                        {session.title}
+                      </h3>
+                      {/* Both icons inherit the row's text colour. The whale is Docker blue
+                          everywhere it is an action, but here it is one of several bits of
+                          metadata on a dense row, so it stays quiet like the paperclip. */}
+                      {sessionsWithAttachments.has(session.id) && (
+                        <FaPaperclip
+                          className="size-2.5 shrink-0 text-ink-faint"
+                          title={t('history.hasAttachments')}
+                          aria-label={t('history.hasAttachments')}
+                        />
+                      )}
+                      {sessionsWithSandbox.has(session.id) && (
+                        <FaDocker
+                          className="size-3 shrink-0 text-ink-faint"
+                          title={t('history.hasSandbox')}
+                          aria-label={t('history.hasSandbox')}
+                        />
+                      )}
+                    </div>
                     {runningSessionIds.includes(session.id) ? (
                       <p className="text-xs text-accent whitespace-nowrap flex items-center gap-1.5">
                         <span className="relative flex h-1.5 w-1.5 flex-shrink-0">

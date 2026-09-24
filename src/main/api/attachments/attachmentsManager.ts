@@ -270,6 +270,33 @@ export const removeAllAttachments = (sessionId: string): { removed: boolean } =>
  * "Delete all chats" has to reach folders belonging to chats the sidebar hides, so this works
  * off the folders on disk rather than a list of session ids.
  */
+/**
+ * Of the given chats, which ones have at least one attached file.
+ *
+ * Takes the ids rather than enumerating folders and mapping back: folder names carry only
+ * the chat's short id (a hash), so the session id cannot be recovered from a folder name.
+ * Answering for a whole sidebar in one call keeps this to a single IPC round trip.
+ */
+export const listSessionIdsWithAttachments = (sessionIds: string[]): string[] => {
+  const withFiles: string[] = []
+
+  for (const sessionId of sessionIds) {
+    try {
+      // resolveAttachmentsDir renames a stale folder to follow the chat title, which is
+      // wanted here anyway: the sidebar is usually the first thing to notice a rename.
+      const directory = resolveAttachmentsDir(sessionId)
+      if (!fs.existsSync(directory)) continue
+      if (fs.readdirSync(directory).some((name) => !name.startsWith('.'))) {
+        withFiles.push(sessionId)
+      }
+    } catch {
+      // No project directory, or a folder that vanished mid-scan: not an error here.
+    }
+  }
+
+  return withFiles
+}
+
 export const removeEveryAttachmentsFolder = (): { removed: number } => {
   let root: string
   try {

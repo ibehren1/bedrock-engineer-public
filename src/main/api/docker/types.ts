@@ -133,6 +133,11 @@ export interface DockerSandboxConfig {
   cpuLimit: number
   /** Per-command timeout in seconds. */
   timeout: number
+  /**
+   * Set once the user has acknowledged what the interactive terminal is: a real root
+   * shell with their project folder mounted read-write, subject to no allowlist.
+   */
+  terminalAcknowledged?: boolean
 }
 
 export const DEFAULT_SANDBOX_CONFIG: DockerSandboxConfig = {

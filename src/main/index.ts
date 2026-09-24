@@ -37,7 +37,7 @@ import { mcpHandlers, cleanupMcpHandlers } from './handlers/mcp-handlers'
 import { dockerSandboxHandlers } from './handlers/docker-sandbox-handlers'
 import { chatAttachmentsHandlers } from './handlers/chat-attachments-handlers'
 import { helpHandlers } from './handlers/help-handlers'
-import { stopAllSandboxes } from './api/docker'
+import { closeAllTerminals, stopAllSandboxes } from './api/docker'
 import { cleanupMcpClients } from './mcp/index'
 
 // 動的インポートを使用してfix-pathパッケージを読み込む
@@ -526,6 +526,18 @@ app.whenReady().then(async () => {
       log.info('Task history window force close completed')
     } catch (error) {
       log.error('Failed to force close task history window', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+    }
+
+    // 対話型ターミナルのクローズ処理
+    // コンテナ停止より先に閉じる。逆順だとコンテナが消えたソケットに対して
+    // エラーが出るだけで、ユーザーには何の情報にもならない。
+    try {
+      closeAllTerminals()
+      log.info('Sandbox terminals closed')
+    } catch (error) {
+      log.error('Failed to close sandbox terminals', {
         error: error instanceof Error ? error.message : String(error)
       })
     }

@@ -7,6 +7,96 @@ dated section here for anything user-visible.
 See the [README](./README.md#whats-different-in-this-fork) for a feature-by-feature
 overview of the fork with screenshots.
 
+### 2026-09-24
+
+- OpenAI's **GPT-6 Sol** and **GPT-6 Luna** are now in the model dropdown, as **(Global)** and
+  **(US)**. They are the mid-priced and cheap tiers of the GPT-6 family that GPT-6 Astra tops: Sol
+  for everyday reasoning and coding at $2.00 in and $10.00 per million tokens out, Luna for
+  high-volume classification, summarization and routing at $0.10 in and $0.50 per million out. Both
+  take tool use, output up to 128,000 tokens per response, and work in reasoning-effort levels rather
+  than a thinking budget, so **Deeper** asks them for the highest effort they offer. Bedrock serves
+  them only through cross-region inference, so there is no single-region variant. **The prices above
+  are provisional** — they are OpenAI's own published rates, and the figures shown in the dropdown
+  will be corrected once AWS publishes Bedrock pricing for these two models, which may differ.
+- **Chats with a Docker sandbox now have a sandbox panel**, opened from the tab on the right-hand edge
+  of the chat or from the whale menu. It shows what the container actually is — image, how long it has
+  been up, CPU and memory against their limits — lists each service with its published ports as links
+  that open in your browser, and keeps an **Activity** log of every command the agent ran in there:
+  when it started, how long it took, and whether it finished, failed, stopped for input, was left
+  running in the background, or outlived its timeout. Until now the only way to see any of this was to
+  ask the agent or open a terminal of your own. The log lives in the sandbox's own folder, so it is
+  still there after a restart, and rows are tagged so a command the agent ran is never confused with
+  something you did.
+- **A Compose tab** shows sandboxes that use Docker Compose as a diagram: every service with its
+  image and whether it is up, the published ports that reach it from your browser, the folders mounted
+  into it, and a note that services can reach each other by service name. The compose file itself is
+  below the diagram, with buttons to copy it or open its folder. Single-container sandboxes say so
+  instead.
+- **The chat history now shows which chats have files or a sandbox**, as a paperclip and a Docker
+  whale beside the title. Both are drawn in the row's own text colour rather than Docker blue: on a
+  dense list they are metadata, not something to click.
+- **Network and disk joined CPU and memory** in the panel's Overview, as throughput with running
+  totals. The disk figure covers the container's own filesystem only: work in `/workspace` or `/data`
+  is your own disk through a mount and Docker does not count it, which the panel now says. Hosts that
+  report no block IO at all — Docker Desktop on macOS among them — say that instead of showing zero.
+- **The stack diagram opens full window** when you click it, with zoom controls and Esc to close.
+- **The sandbox panel now stops above the message box** instead of running to the bottom of the
+  window, so the input keeps its full width and none of its icons are covered.
+- **A terminal tab per container.** A compose stack gets a row of tabs in the Terminal view, one for
+  each service, each with its own shell and scrollback. Switching between them is free — the shells
+  live in the background and replay their recent output when you come back.
+- **The panel also carries a real terminal inside the container.** Colours, `vim` and `htop`,
+  tab completion, history, Ctrl-C, and it resizes with the panel — the quickest way to see what the
+  agent left behind or fix something by hand. It is a genuine root shell with your project folder
+  mounted at `/workspace`, so nothing you type is filtered or checked against the allowed-commands
+  list; the app explains that once before the first time you open it. The model cannot reach this
+  shell — there is no tool for it, so agents and background tasks have no way in. A shell you open
+  keeps running while you look at other tabs or switch chats, and ends when the sandbox stops, the
+  chat is deleted, or you quit. It needs Docker to be local: Docker Desktop, OrbStack, Colima and
+  rootless installs all work, but a context pointing at a remote daemon disables the tab and says why.
+- Sandbox state in the chat now updates the moment it changes rather than on a timer, so a sandbox
+  appears as soon as the agent's first command creates one instead of up to fifteen seconds later.
+- The whale menu is now just the actions — open panel, open folder, start, stop, remove — since the
+  panel shows the state, services and ports it used to repeat.
+- **The terminal is set in your chosen code font**, JetBrains Mono by default, and follows the Code
+  font picker in Settings → Appearance while it is open. It was falling back to whatever plain
+  monospace font the system offered.
+- **Fixed the message box and its icons being hidden underneath the sandbox panel.** The input area
+  now pulls in from the right while the panel is open, so the terminal can use the full height of the
+  window without covering anything.
+- **Fixed the terminal opening in a loop and never showing a prompt.** The terminal was being rebuilt
+  as fast as it could be created, so it never lived long enough to draw anything, and the Activity log
+  filled with "Interactive terminal opened" rows several times a second. Opening a terminal in a
+  container that has stopped now says so and offers to reconnect, instead of retrying forever, and a
+  terminal session is a single entry in the log that ends rather than two rows.
+
+### 2026-09-22
+
+- **Claude Opus 5.5** is now in the model dropdown, as **(Global)**, **(US)**, **(EU)** and
+  **(JP)**. It is Anthropic's most capable Opus model — better at coding, knowledge work and
+  long-running tasks than Opus 5 — with a 1M-token context window, output up to 128,000 tokens per
+  response, images as input, and prompt caching. Adaptive thinking is always on for it and cannot be
+  turned off. Bedrock serves it only through cross-region inference, so there is no single-region
+  variant; Australian users can reach it through the **(Global)** entry. It costs $4 per million
+  tokens in and $20 per million out — cheaper than Opus 5 at $5/$25.
+- **Fixed pricing and model details being read from the wrong model** when one model's ID is the
+  start of another's — Fable 5.1 was showing Fable 5's settings, and Opus 5.5 would have shown Opus
+  5's.
+
+### 2026-09-19
+
+- Moonshot AI's **Kimi K3** is now in the model dropdown, as **(Global)** and **(US)**. It is
+  Moonshot's most capable open-weight model, takes text and images, and has a 1M-token context
+  window, which suits long coding sessions over a large repository. Bedrock serves it only through
+  cross-region inference, so there is no single-region variant. Pricing shown in the dropdown is
+  $3.30 in and $16.50 per million tokens out, the US rate; the **(Global)** variant bills about 10%
+  less. Output is capped at 16,384 tokens per response, and thinking is left off for it: the model
+  reasons internally, but Bedrock's Converse API errors out when reasoning from an earlier turn is
+  sent back, so the app does not hold on to it between turns.
+- **Fixed Kimi K3 failing on every request** with "This model doesn't support the temperature field".
+  The model accepts neither Temperature nor Top P, so those two settings are now left out of its
+  requests; both are ignored while Kimi K3 is selected, and Max Tokens still applies.
+
 ### 2026-09-09
 
 - OpenAI's **GPT-6 Astra** is now in the model dropdown, as **(Global)** and **(US)**. It is OpenAI's

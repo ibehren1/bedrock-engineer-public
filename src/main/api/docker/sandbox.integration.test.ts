@@ -414,3 +414,296 @@ describe('teardown', () => {
     expect(manager.listSandboxSessionIds()).not.toContain(sessionId)
   }, 600_000)
 })
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const terminal = require('./sandboxTerminal') as typeof import('./sandboxTerminal')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const activity = require('./sandboxActivity') as typeof import('./sandboxActivity')
+
+/** Collect terminal output by subscribing to the pubsub channel the panel would use. */
+const captureTerminal = (channel: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { pubSubManager } = require('../../lib/pubsub-manager') as {
+    pubSubManager: { publish: (channel: string, data: unknown) => void }
+  }
+  const chunks: Buffer[] = []
+  let exitCode: number | null | undefined
+  const original = pubSubManager.publish.bind(pubSubManager)
+
+  pubSubManager.publish = (publishedChannel: string, data: any) => {
+    if (publishedChannel === channel) {
+      if (data?.type === 'data') chunks.push(Buffer.from(data.bytes))
+      if (data?.type === 'exit') exitCode = data.exitCode
+    }
+    return original(publishedChannel, data)
+  }
+
+  return {
+    text: () => Buffer.concat(chunks).toString('utf-8'),
+    exitCode: () => exitCode,
+    restore: () => {
+      pubSubManager.publish = original
+    }
+  }
+}
+
+const waitFor = async (predicate: () => boolean, timeoutMs = 10_000): Promise<void> => {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    if (predicate()) return
+    await new Promise((resolve) => setTimeout(resolve, 60))
+  }
+  throw new Error('Timed out waiting for terminal output')
+}
+
+describe('interactive terminal', () => {
+  const sessionId = `session_${Date.now()}_term`
+  let capture: ReturnType<typeof captureTerminal> | undefined
+
+  afterAll(async () => {
+    if (!dockerReady) return
+    capture?.restore()
+    terminal.closeSessionTerminals(sessionId)
+    await manager.removeSandbox(sessionId, { deleteData: true }).catch(() => {})
+  }, 120_000)
+
+  it('delivers a shell prompt without any input being sent', async () => {
+    if (!dockerReady) return
+
+    // The panel showed an empty black pane at first. The cause was in the renderer, but
+    // this pins the contract the renderer relies on: the prompt is produced on open, and
+    // reaches a subscriber that attaches a moment later.
+    await manager.createSandbox(sessionId)
+    const target = await manager.resolveTerminalTarget(sessionId)
+    const opened = await terminal.openTerminal(target, 80, 24)
+    const watch = captureTerminal(opened.channel)
+
+    try {
+      const { backlog } = terminal.attachTerminal(opened.terminalId)
+      await waitFor(() => (Buffer.from(backlog).toString() + watch.text()).includes('#'))
+
+      const seen = Buffer.from(backlog).toString() + watch.text()
+      expect(seen).toMatch(/root@[0-9a-f]+:\/workspace#/)
+    } finally {
+      watch.restore()
+      terminal.closeSessionTerminals(sessionId)
+    }
+  }, 600_000)
+
+  it('refuses to open a shell when the container is not running', async () => {
+    if (!dockerReady) return
+
+    // This is what spun: Docker accepts an exec against a stopped container, the stream
+    // carries "OCI runtime exec failed" and exits 128, and the caller retried at once.
+    await manager.createSandbox(sessionId)
+    const target = await manager.resolveTerminalTarget(sessionId)
+    await manager.stopSandbox(sessionId)
+
+    await expect(terminal.openTerminal(target, 80, 24)).rejects.toThrow(/not running|exited/i)
+    expect(terminal.findSessionTerminal(sessionId)).toBeUndefined()
+
+    await manager.startSandbox(sessionId)
+  }, 600_000)
+
+  it('runs a command, honours resize, and handles Ctrl-C without killing the shell', async () => {
+    if (!dockerReady) return
+
+    await manager.createSandbox(sessionId)
+    const target = await manager.resolveTerminalTarget(sessionId)
+    const opened = await terminal.openTerminal(target, 80, 24)
+
+    capture = captureTerminal(opened.channel)
+    terminal.attachTerminal(opened.terminalId)
+
+    terminal.writeToTerminal(opened.terminalId, 'echo terminal-works\n')
+    await waitFor(() => capture!.text().includes('terminal-works'))
+
+    // A Tty exec can be resized, and the shell inside sees the new size.
+    await terminal.resizeTerminal(opened.terminalId, 40, 10)
+    terminal.writeToTerminal(opened.terminalId, 'stty size\n')
+    await waitFor(() => /10\s+40/.test(capture!.text()))
+
+    // Ctrl-C must interrupt the running command, not end the session.
+    terminal.writeToTerminal(opened.terminalId, 'sleep 30\n')
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    terminal.writeToTerminal(opened.terminalId, '\x03')
+    terminal.writeToTerminal(opened.terminalId, 'echo still-alive\n')
+    await waitFor(() => capture!.text().includes('still-alive'))
+
+    expect(capture!.exitCode()).toBeUndefined()
+  }, 600_000)
+
+  it('reports an exit when the shell ends', async () => {
+    if (!dockerReady) return
+
+    const target = await manager.resolveTerminalTarget(sessionId)
+    const opened = await terminal.openTerminal(target, 80, 24)
+    const watch = captureTerminal(opened.channel)
+    terminal.attachTerminal(opened.terminalId)
+
+    try {
+      terminal.writeToTerminal(opened.terminalId, 'exit\n')
+      await waitFor(() => watch.exitCode() !== undefined, 15_000)
+      expect(watch.exitCode()).toBe(0)
+    } finally {
+      watch.restore()
+    }
+  }, 600_000)
+
+  it('closes the terminal when the sandbox is stopped', async () => {
+    if (!dockerReady) return
+
+    await manager.startSandbox(sessionId)
+    const target = await manager.resolveTerminalTarget(sessionId)
+    const opened = await terminal.openTerminal(target, 80, 24)
+    expect(terminal.findSessionTerminal(sessionId)?.terminalId).toBe(opened.terminalId)
+
+    await manager.stopSandbox(sessionId)
+
+    expect(terminal.findSessionTerminal(sessionId)).toBeUndefined()
+  }, 600_000)
+
+  it('refuses a service that is not part of the sandbox', async () => {
+    if (!dockerReady) return
+
+    await expect(manager.resolveTerminalTarget(sessionId, 'not-a-service')).rejects.toThrow(
+      /not part of this sandbox/
+    )
+  }, 120_000)
+})
+
+describe('insights and activity', () => {
+  const sessionId = `session_${Date.now()}_insights`
+
+  afterAll(async () => {
+    if (!dockerReady) return
+    await manager.removeSandbox(sessionId, { deleteData: true }).catch(() => {})
+  }, 120_000)
+
+  it('reports the image, uptime and resource use of a running container', async () => {
+    if (!dockerReady) return
+
+    await manager.execCommand(sessionId, 'echo warm')
+
+    const first = await manager.getInsights(sessionId)
+    expect(first.image).toBe(DEFAULT_SANDBOX_IMAGE)
+    expect(first.status).toBe('running')
+    expect(Date.parse(first.startedAt ?? '')).not.toBeNaN()
+    expect(first.memoryLimit).toBeGreaterThan(0)
+    // A CPU percentage needs two samples, so the first call cannot report one.
+    expect(first.cpuPercent).toBeUndefined()
+
+    const second = await manager.getInsights(sessionId)
+    expect(second.cpuPercent).toBeGreaterThanOrEqual(0)
+  }, 600_000)
+
+  it('reports network counters, and disk counters where the host provides them', async () => {
+    if (!dockerReady) return
+
+    await manager.execCommand(sessionId, 'echo warm')
+    // Written to /tmp, i.e. the container's own writable layer, deliberately: IO against a
+    // bind mount like /workspace or /data is the host's filesystem and is not attributed to
+    // the container's cgroup, so it never appears in these counters.
+    await manager.execCommand(
+      sessionId,
+      'dd if=/dev/zero of=/tmp/probe.bin bs=1M count=20 2>/dev/null; sync; cat /tmp/probe.bin > /dev/null'
+    )
+
+    await manager.getInsights(sessionId)
+    // Rates need two samples, and bytes need a moment to be accounted.
+    await new Promise((resolve) => setTimeout(resolve, 1200))
+    const insights = await manager.getInsights(sessionId)
+
+    expect(insights.netRx).toBeGreaterThanOrEqual(0)
+    expect(insights.netTx).toBeGreaterThanOrEqual(0)
+    expect(insights.netRxPerSecond).toBeGreaterThanOrEqual(0)
+
+    if (insights.blockWrite === undefined) {
+      // Some hosts (Docker Desktop on macOS among them) report no block IO at all; the
+      // panel says so rather than showing a misleading zero.
+      expect(insights.blockRead).toBeUndefined()
+      return
+    }
+    expect(insights.blockWrite).toBeGreaterThan(0)
+    expect(insights.blockWritePerSecond).toBeGreaterThanOrEqual(0)
+  }, 600_000)
+
+  it('records each command as start, settled and exit, and persists it', async () => {
+    if (!dockerReady) return
+
+    await manager.execCommand(sessionId, 'echo recorded-command')
+    await activity.flushActivityWrites()
+
+    const entries = await activity.getActivity(sessionId)
+    const entry = entries.find((item) => item.command === 'echo recorded-command')
+    expect(entry).toBeDefined()
+    expect(entry?.outcome).toBe('completed')
+    expect(entry?.exitCode).toBe(0)
+    expect(entry?.endedAt).toBeDefined()
+    expect(entry?.source).toBe('agent')
+
+    // The same rows are on disk in the sandbox folder.
+    const file = path.join(manager.getSandboxDir(sessionId), activity.ACTIVITY_FILENAME)
+    expect(fs.readFileSync(file, 'utf-8')).toContain('echo recorded-command')
+  }, 600_000)
+})
+
+describe('multi-service compose stacks', () => {
+  const sessionId = `session_${Date.now()}_stack`
+
+  afterAll(async () => {
+    if (!dockerReady) return
+    terminal.closeSessionTerminals(sessionId)
+    await manager.removeSandbox(sessionId, { deleteData: true }).catch(() => {})
+  }, 180_000)
+
+  it('gives every service in the stack its own shell, and exposes the compose file', async () => {
+    if (!dockerReady) return
+
+    await manager.createSandbox(sessionId, {
+      services: [
+        { name: 'main', image: DEFAULT_SANDBOX_IMAGE },
+        { name: 'sidecar', image: DEFAULT_SANDBOX_IMAGE }
+      ]
+    })
+
+    const compose = await manager.getComposeFile(sessionId)
+    expect(compose.composeless).toBe(false)
+    expect(compose.contents).toContain('main:')
+    expect(compose.contents).toContain('sidecar:')
+    expect(compose.path).toMatch(/docker-compose\.yml$/)
+
+    // One shell per container, each attached to its own.
+    const mainTarget = await manager.resolveTerminalTarget(sessionId, 'main')
+    const sidecarTarget = await manager.resolveTerminalTarget(sessionId, 'sidecar')
+    expect(mainTarget.containerName).not.toBe(sidecarTarget.containerName)
+
+    const mainTerminal = await terminal.openTerminal(mainTarget, 80, 24)
+    const sidecarTerminal = await terminal.openTerminal(sidecarTarget, 80, 24)
+    expect(sidecarTerminal.terminalId).not.toBe(mainTerminal.terminalId)
+
+    const watchMain = captureTerminal(mainTerminal.channel)
+    const watchSidecar = captureTerminal(sidecarTerminal.channel)
+
+    try {
+      terminal.attachTerminal(mainTerminal.terminalId)
+      terminal.attachTerminal(sidecarTerminal.terminalId)
+
+      // `hostname` is the container id, so this proves the two shells are in different
+      // containers rather than both attached to the same one.
+      terminal.writeToTerminal(mainTerminal.terminalId, 'hostname\n')
+      terminal.writeToTerminal(sidecarTerminal.terminalId, 'hostname\n')
+      await waitFor(() => watchMain.text().length > 0 && watchSidecar.text().length > 0, 15_000)
+      await new Promise((resolve) => setTimeout(resolve, 600))
+
+      const mainHost = /([0-9a-f]{12})/.exec(watchMain.text())?.[1]
+      const sidecarHost = /([0-9a-f]{12})/.exec(watchSidecar.text())?.[1]
+      expect(mainHost).toBeDefined()
+      expect(sidecarHost).toBeDefined()
+      expect(mainHost).not.toBe(sidecarHost)
+    } finally {
+      watchMain.restore()
+      watchSidecar.restore()
+    }
+  }, 900_000)
+})

@@ -221,3 +221,56 @@ describe('without a project directory', () => {
     ).rejects.toThrow(/project directory/i)
   })
 })
+
+describe('listSessionIdsWithAttachments', () => {
+  it('returns only the chats that actually have a file', async () => {
+    const withFile = 'session_1756900000001'
+    const emptyFolder = 'session_1756900000002'
+    const noFolder = 'session_1756900000003'
+
+    await manager.addAttachments(withFile, [{ name: 'notes.txt', bytes: bytes('hello') }])
+    // A folder that exists but holds nothing must not light up the indicator.
+    fs.mkdirSync(manager.ensureAttachmentsDir(emptyFolder), { recursive: true })
+
+    const result = manager.listSessionIdsWithAttachments([withFile, emptyFolder, noFolder])
+
+    expect(result).toEqual([withFile])
+  })
+
+  it('ignores dotfiles, so a stray .DS_Store does not count as an attachment', async () => {
+    const sessionId = 'session_1756900000004'
+    const directory = manager.ensureAttachmentsDir(sessionId)
+    fs.writeFileSync(path.join(directory, '.DS_Store'), 'junk', 'utf-8')
+
+    expect(manager.listSessionIdsWithAttachments([sessionId])).toEqual([])
+  })
+
+  it('answers for many chats in one call, preserving the order asked for', async () => {
+    const first = 'session_1756900000005'
+    const second = 'session_1756900000006'
+    await manager.addAttachments(second, [{ name: 'b.txt', bytes: bytes('b') }])
+    await manager.addAttachments(first, [{ name: 'a.txt', bytes: bytes('a') }])
+
+    expect(manager.listSessionIdsWithAttachments([first, second])).toEqual([first, second])
+  })
+
+  it('returns nothing rather than throwing when no project directory is set', () => {
+    storeValues.projectPath = undefined
+
+    expect(manager.listSessionIdsWithAttachments(['session_1'])).toEqual([])
+  })
+
+  it('finds a chat whose folder still carries an old title', async () => {
+    const sessionId = 'session_1756900000007'
+    setChatTitle(sessionId, 'Old title')
+    await manager.addAttachments(sessionId, [{ name: 'a.txt', bytes: bytes('a') }])
+
+    // Renamed chat, stale folder: the lookup keys on the short id, so it still matches.
+    setChatTitle(sessionId, 'New title')
+
+    expect(manager.listSessionIdsWithAttachments([sessionId])).toEqual([sessionId])
+    expect(fs.existsSync(path.join(attachmentsRoot(), `new-title-${toShortId(sessionId)}`))).toBe(
+      true
+    )
+  })
+})

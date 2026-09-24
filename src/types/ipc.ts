@@ -519,11 +519,61 @@ export interface IPCChannelDefinitions {
     params: { sessionId: string }
     result: { success: boolean; path?: string; error?: string }
   }
+  'docker-sandbox-open-port': {
+    params: { sessionId: string; port: number }
+    result: { success: boolean; url?: string; error?: string }
+  }
+  'docker-sandbox-insights': {
+    params: { sessionId: string; service?: string }
+    result: any // SandboxInsights
+  }
+  'docker-sandbox-compose': {
+    params: { sessionId: string }
+    result: any // SandboxComposeFile
+  }
+  'docker-sandbox-activity': {
+    params: { sessionId: string }
+    result: { entries: any[] } // SandboxActivityEntry[]
+  }
+
+  // Docker サンドボックスの対話型ターミナル（PTY）
+  'docker-sandbox-terminal-capability': {
+    params: void
+    result: { supported: boolean; reason?: string; endpoint?: string }
+  }
+  'docker-sandbox-terminal-open': {
+    params: { sessionId: string; service?: string; cols?: number; rows?: number }
+    result: { terminalId: string; channel: string; service: string; cols: number; rows: number }
+  }
+  'docker-sandbox-terminal-attach': {
+    params: { terminalId: string }
+    result: { backlog: Uint8Array }
+  }
+  'docker-sandbox-terminal-input': {
+    params: { terminalId: string; data: string }
+    result: { success: boolean }
+  }
+  'docker-sandbox-terminal-resize': {
+    params: { terminalId: string; cols: number; rows: number }
+    result: { success: boolean }
+  }
+  'docker-sandbox-terminal-backlog': {
+    params: { terminalId: string }
+    result: { backlog: Uint8Array }
+  }
+  'docker-sandbox-terminal-close': {
+    params: { terminalId: string }
+    result: { success: boolean }
+  }
 
   // チャット添付ファイル関連（チャットごとのフォルダ）
   'chat-attachments-list': {
     params: { sessionId: string }
     result: any // AttachmentListing
+  }
+  'chat-attachments-with-files': {
+    params: { sessionIds: string[] }
+    result: { sessionIds: string[] }
   }
   'chat-attachments-add': {
     params: { sessionId: string; files: { name: string; bytes: Uint8Array }[] }

@@ -5,6 +5,7 @@ import {
   buildAttachmentContext,
   ensureAttachmentsDir,
   listAttachments,
+  listSessionIdsWithAttachments,
   removeAllAttachments,
   removeAttachment,
   removeEveryAttachmentsFolder,
@@ -20,6 +21,14 @@ import {
 export const chatAttachmentsHandlers = {
   'chat-attachments-list': async (_event: IpcMainInvokeEvent, params: { sessionId: string }) => {
     return listAttachments(params.sessionId)
+  },
+
+  // Which of the sidebar's chats have files, for the paperclip indicator.
+  'chat-attachments-with-files': async (
+    _event: IpcMainInvokeEvent,
+    params: { sessionIds: string[] }
+  ) => {
+    return { sessionIds: listSessionIdsWithAttachments(params.sessionIds ?? []) }
   },
 
   'chat-attachments-add': async (

@@ -1,18 +1,31 @@
 import fs from 'fs'
 import { IpcMainInvokeEvent, shell } from 'electron'
 import {
+  attachTerminal,
+  closeTerminal,
   createSandbox,
   execCommand,
+  findSessionTerminal,
+  getActivity,
   getAvailability,
+  getComposeFile,
+  getInsights,
   getLogs,
   getStatus,
+  getTerminalBacklog,
+  getTerminalCapability,
+  isPublishedPort,
   isTrackedSandboxPid,
   listSandboxSessionIds,
+  openTerminal,
   removeSandbox,
   renameSandbox,
+  resizeTerminal,
+  resolveTerminalTarget,
   sendInput,
   startSandbox,
-  stopSandbox
+  stopSandbox,
+  writeToTerminal
 } from '../api/docker'
 import type {
   CreateSandboxOptions,
@@ -128,5 +141,110 @@ export const dockerSandboxHandlers = {
     }
 
     return { success: true, path: directory }
+  },
+
+  // Open one of the sandbox's published ports in the default browser.
+  //
+  // Takes a port number, never a URL: the renderer must not be able to ask the main
+  // process to open an arbitrary address, and the port has to be one this sandbox
+  // actually publishes.
+  'docker-sandbox-open-port': async (
+    _event: IpcMainInvokeEvent,
+    params: { sessionId: string; port: number }
+  ) => {
+    if (!Number.isInteger(params.port) || params.port < 1 || params.port > 65535) {
+      return { success: false, error: 'Not a valid port number.' }
+    }
+    if (!isPublishedPort(params.sessionId, params.port)) {
+      return {
+        success: false,
+        error: `Port ${params.port} is not published by this sandbox.`
+      }
+    }
+
+    const url = `http://localhost:${params.port}`
+    await shell.openExternal(url)
+    return { success: true, url }
+  },
+
+  // Identity and resource use for the panel's Overview tab.
+  'docker-sandbox-insights': async (
+    _event: IpcMainInvokeEvent,
+    params: { sessionId: string; service?: string }
+  ) => {
+    return getInsights(params.sessionId, params.service)
+  },
+
+  // The generated compose file, for the panel's Compose tab.
+  'docker-sandbox-compose': async (_event: IpcMainInvokeEvent, params: { sessionId: string }) => {
+    return getComposeFile(params.sessionId)
+  },
+
+  // Command history for the panel's Activity tab.
+  'docker-sandbox-activity': async (_event: IpcMainInvokeEvent, params: { sessionId: string }) => {
+    return { entries: await getActivity(params.sessionId) }
+  },
+
+  // Whether an interactive terminal is possible at all, and why not when it isn't.
+  'docker-sandbox-terminal-capability': async (_event: IpcMainInvokeEvent) => {
+    return getTerminalCapability()
+  },
+
+  // Open a shell, or hand back the one this chat already has.
+  //
+  // Note the parameters: a session id and at most a service name. Resolving the container
+  // name in the main process is what keeps this from being a way to get a root shell in
+  // any container on the machine.
+  'docker-sandbox-terminal-open': async (
+    _event: IpcMainInvokeEvent,
+    params: { sessionId: string; service?: string; cols?: number; rows?: number }
+  ) => {
+    // Reuse is per service: each container in a compose stack gets its own shell.
+    const existing = findSessionTerminal(params.sessionId, params.service)
+    if (existing) return existing
+
+    const target = await resolveTerminalTarget(params.sessionId, params.service)
+    return openTerminal(target, params.cols ?? 80, params.rows ?? 24)
+  },
+
+  // Start publishing. Called after the renderer has subscribed to the channel, because
+  // pubsub drops anything published while nobody is listening.
+  'docker-sandbox-terminal-attach': async (
+    _event: IpcMainInvokeEvent,
+    params: { terminalId: string }
+  ) => {
+    const { backlog } = attachTerminal(params.terminalId)
+    return { backlog }
+  },
+
+  'docker-sandbox-terminal-input': async (
+    _event: IpcMainInvokeEvent,
+    params: { terminalId: string; data: string }
+  ) => {
+    writeToTerminal(params.terminalId, params.data)
+    return { success: true }
+  },
+
+  'docker-sandbox-terminal-resize': async (
+    _event: IpcMainInvokeEvent,
+    params: { terminalId: string; cols: number; rows: number }
+  ) => {
+    await resizeTerminal(params.terminalId, params.cols, params.rows)
+    return { success: true }
+  },
+
+  'docker-sandbox-terminal-backlog': async (
+    _event: IpcMainInvokeEvent,
+    params: { terminalId: string }
+  ) => {
+    return { backlog: getTerminalBacklog(params.terminalId) }
+  },
+
+  'docker-sandbox-terminal-close': async (
+    _event: IpcMainInvokeEvent,
+    params: { terminalId: string }
+  ) => {
+    closeTerminal(params.terminalId)
+    return { success: true }
   }
 } as const

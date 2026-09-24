@@ -140,6 +140,13 @@ export class ConverseService {
     const isGrokReasoningModel = modelId.includes('xai.grok')
     const isReasoningEffortModel = isOpenAiReasoningModel || isGrokReasoningModel
 
+    // Kimi K3 accepts only maxTokens in inferenceConfig: Converse answers a
+    // request carrying either sampling field with "This model doesn't support
+    // the temperature field" / "... the topP field". It is not a
+    // reasoning-effort model (reasoning is internal and not configurable
+    // through additionalModelRequestFields), so it gets its own check.
+    const isKimiK3 = modelId.includes('kimi-k3')
+
     // Claude系モデル（anthropic）の場合、temperatureとtop_pの両方が設定されていたらtop_pを削除
     // これはClaude Sonnet 4.5などの新しいモデルでtemperatureとtop_pを同時に指定できない制約に対応
     if (modelId.includes('anthropic') || modelId.includes('claude')) {
@@ -271,6 +278,13 @@ export class ConverseService {
         modelId,
         reasoningEffort: (additionalModelRequestFields?.reasoning as { effort?: string })?.effort
       })
+    }
+
+    if (isKimiK3) {
+      delete inferenceConfig.temperature
+      delete inferenceConfig.topP
+
+      converseLogger.debug('Removed temperature/topP (unsupported by Kimi K3)', { modelId })
     }
 
     if (modelId.includes('nova')) {

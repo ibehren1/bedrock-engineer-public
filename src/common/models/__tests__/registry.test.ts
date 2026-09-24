@@ -14,6 +14,8 @@ import { PricingCalculator } from '../pricing'
 // resolution, and pricing.
 const OPENAI_GPT_MODELS = [
   { base: 'gpt-6-astra', name: 'GPT-6 Astra' },
+  { base: 'gpt-6-sol', name: 'GPT-6 Sol' },
+  { base: 'gpt-6-luna', name: 'GPT-6 Luna' },
   { base: 'gpt-5.6-sol', name: 'GPT-5.6 Sol' },
   { base: 'gpt-5.6-terra', name: 'GPT-5.6 Terra' },
   { base: 'gpt-5.6-luna', name: 'GPT-5.6 Luna' }
@@ -83,8 +85,77 @@ describe('OpenAI GPT model registry integration', () => {
     expect(calc.calculateOutputCost(1_000_000)).toBeCloseTo(55.0, 5)
   })
 
+  test('pricing calculator uses per-1K rates (GPT-6 Sol: $2/$10 per 1M)', () => {
+    const calc = new PricingCalculator('us.openai.gpt-6-sol')
+    expect(calc.calculateInputCost(1_000_000)).toBeCloseTo(2.0, 5)
+    expect(calc.calculateOutputCost(1_000_000)).toBeCloseTo(10.0, 5)
+  })
+
+  test('pricing calculator uses per-1K rates (GPT-6 Luna: $0.10/$0.50 per 1M)', () => {
+    const calc = new PricingCalculator('us.openai.gpt-6-luna')
+    expect(calc.calculateInputCost(1_000_000)).toBeCloseTo(0.1, 5)
+    expect(calc.calculateOutputCost(1_000_000)).toBeCloseTo(0.5, 5)
+  })
+
+  // The GPT-6 and GPT-5.6 tiers share suffixes (`sol`, `luna`), so config
+  // resolution must not cross them over — GPT-5.6 Sol costs 2.75x GPT-6 Sol.
+  test('GPT-6 and GPT-5.6 tiers with shared suffixes resolve distinctly', () => {
+    expect(getModelConfig('us.openai.gpt-6-sol')?.name).toBe('GPT-6 Sol')
+    expect(getModelConfig('us.openai.gpt-5.6-sol')?.name).toBe('GPT-5.6 Sol')
+    expect(getModelConfig('us.openai.gpt-6-luna')?.name).toBe('GPT-6 Luna')
+    expect(getModelConfig('us.openai.gpt-5.6-luna')?.name).toBe('GPT-5.6 Luna')
+    expect(getModelConfig('us.openai.gpt-6-sol')?.pricing?.input).toBe(0.002)
+    expect(getModelConfig('us.openai.gpt-6-luna')?.pricing?.input).toBe(0.0001)
+  })
+
   test('GPT-6 Astra allows 128K max output tokens', () => {
     expect(getModelConfig('us.openai.gpt-6-astra')?.maxTokensLimit).toBe(128000)
+  })
+})
+
+// Claude Opus 5.5 uses an unsuffixed base ID (`anthropic.claude-opus-5-5`) that
+// contains Opus 5's base ID, so config resolution has to prefer the longest
+// match. Bedrock offers no in-region invocation, only global + US/EU/JP geos.
+describe('Claude Opus 5.5 registry integration', () => {
+  test('is exposed as global/US/EU/JP profiles and no bare model ID', () => {
+    const ids = allModels.map((m) => m.modelId)
+    expect(ids).toContain('global.anthropic.claude-opus-5-5')
+    expect(ids).toContain('us.anthropic.claude-opus-5-5')
+    expect(ids).toContain('eu.anthropic.claude-opus-5-5')
+    expect(ids).toContain('jp.anthropic.claude-opus-5-5')
+    expect(ids).not.toContain('anthropic.claude-opus-5-5')
+  })
+
+  test('display names carry the routing suffix and capabilities are set', () => {
+    const usModel = allModels.find((m) => m.modelId === 'us.anthropic.claude-opus-5-5')
+    expect(usModel?.modelName).toBe('Claude Opus 5.5 (US)')
+    expect(usModel?.toolUse).toBe(true)
+    expect(usModel?.supportsThinking).toBe(true)
+    expect(usModel?.supportedThinkingTypes).toEqual(['adaptive'])
+    expect(usModel?.maxTokensLimit).toBe(128000)
+  })
+
+  test('pricing uses per-1K rates ($4/$20 per 1M, cache read a tenth of input)', () => {
+    const calc = new PricingCalculator('us.anthropic.claude-opus-5-5')
+    expect(calc.calculateInputCost(1_000_000)).toBeCloseTo(4.0, 5)
+    expect(calc.calculateOutputCost(1_000_000)).toBeCloseTo(20.0, 5)
+    expect(calc.calculateCacheReadCost(1_000_000)).toBeCloseTo(0.4, 5)
+  })
+
+  test('prompt caching is declared on messages, system and tools', () => {
+    const cache = getModelConfig('us.anthropic.claude-opus-5-5')?.cache
+    expect(cache?.supported).toBe(true)
+    expect(cache?.cacheableFields).toEqual(['messages', 'system', 'tools'])
+  })
+
+  // A base ID that is a prefix of another must not swallow the longer model.
+  test('config resolution does not confuse Opus 5.5 with Opus 5', () => {
+    expect(getModelConfig('us.anthropic.claude-opus-5-5')?.name).toBe('Claude Opus 5.5')
+    expect(getModelConfig('global.anthropic.claude-opus-5-5')?.name).toBe('Claude Opus 5.5')
+    expect(getModelConfig('us.anthropic.claude-opus-5')?.name).toBe('Claude Opus 5')
+    // Same shape one generation earlier: Fable 5 vs Fable 5.1.
+    expect(getModelConfig('us.anthropic.claude-fable-5-1')?.name).toBe('Claude Fable 5.1')
+    expect(getModelConfig('global.anthropic.claude-fable-5')?.name).toBe('Claude Fable 5')
   })
 })
 
@@ -193,16 +264,20 @@ describe('model output ceilings', () => {
     ['us.anthropic.claude-sonnet-4-5-20250929-v1:0', 64000],
     ['us.anthropic.claude-opus-4-1-20250805-v1:0', 32000],
     ['us.anthropic.claude-opus-5', 128000],
+    ['us.anthropic.claude-opus-5-5', 128000],
     ['us.anthropic.claude-sonnet-5', 128000],
     ['us.amazon.nova-premier-v1:0', 32000],
     ['us.amazon.nova-pro-v1:0', 5120],
     ['us.amazon.nova-2-lite-v1:0', 64000],
     ['us.deepseek.r1-v1:0', 32768],
     ['us.openai.gpt-6-astra', 128000],
+    ['us.openai.gpt-6-sol', 128000],
+    ['us.openai.gpt-6-luna', 128000],
     ['us.openai.gpt-5.6-sol', 128000],
     ['openai.gpt-oss-120b-1:0', 16384],
     ['openai.gpt-oss-20b-1:0', 16384],
     ['moonshotai.kimi-k2.5', 16384],
+    ['us.moonshotai.kimi-k3', 16384],
     ['us.xai.grok-4.6', 32768]
   ])('%s caps output at %i tokens', (modelId, expected) => {
     expect(getModelConfig(modelId as string)?.maxTokensLimit).toBe(expected)

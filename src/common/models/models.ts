@@ -628,6 +628,99 @@ const MODEL_REGISTRY: ModelConfig[] = [
     }
   },
 
+  // Claude Opus 5.5
+  // Anthropic's most capable Opus model (launched 2026-09-22): better at coding,
+  // knowledge work and long-running tasks, and cheaper to run than Opus 5. 1M
+  // context window, 128K max output, adaptive thinking always on and not
+  // disableable. Model ID carries no version suffix: invoked as e.g.
+  // `global.anthropic.claude-opus-5-5`.
+  // Bedrock offers no in-region invocation of the bare model ID, so there is no
+  // `base` profile — only the global endpoint and the US/EU/JP geo profiles. The
+  // model card also lists an `au.` geo (Sydney/Melbourne), which this registry
+  // has no profile type for; Australian users can reach the model through the
+  // global endpoint.
+  // Pricing: $4 in / $20 out per 1M tokens, stored per 1K. Cache read is the
+  // standard Anthropic 10% of the input rate; a 5-minute cache write is 1.25x it.
+  {
+    baseId: 'claude-opus-5-5',
+    name: 'Claude Opus 5.5',
+    provider: 'anthropic',
+    category: 'text',
+    toolUse: true,
+    maxTokensLimit: 128000,
+    supportsThinking: true,
+    supportedThinkingTypes: ['adaptive'],
+    inferenceProfiles: [
+      {
+        type: 'global',
+        prefix: 'global',
+        regions: [
+          'us-east-1',
+          'us-east-2',
+          'us-west-1',
+          'us-west-2',
+          'ca-central-1',
+          'eu-central-1',
+          'eu-central-2',
+          'eu-north-1',
+          'eu-south-1',
+          'eu-south-2',
+          'eu-west-1',
+          'eu-west-2',
+          'eu-west-3',
+          'ap-northeast-1',
+          'ap-northeast-2',
+          'ap-northeast-3',
+          'ap-south-1',
+          'ap-south-2',
+          'ap-southeast-1',
+          'ap-southeast-2',
+          'ap-southeast-3',
+          'ap-southeast-4',
+          'sa-east-1'
+        ],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2', 'ca-central-1'],
+        displaySuffix: '(US)'
+      },
+      {
+        type: 'regional-eu',
+        prefix: 'eu',
+        regions: [
+          'eu-central-1',
+          'eu-central-2',
+          'eu-north-1',
+          'eu-south-1',
+          'eu-south-2',
+          'eu-west-1',
+          'eu-west-2',
+          'eu-west-3'
+        ],
+        displaySuffix: '(EU)'
+      },
+      {
+        type: 'jp',
+        prefix: 'jp',
+        regions: ['ap-northeast-1', 'ap-northeast-3'],
+        displaySuffix: '(JP)'
+      }
+    ],
+    pricing: {
+      input: 0.004,
+      output: 0.02,
+      cacheRead: 0.0004,
+      cacheWrite: 0.005
+    },
+    cache: {
+      supported: true,
+      cacheableFields: ['messages', 'system', 'tools']
+    }
+  },
+
   // Claude Fable 5
   {
     baseId: 'claude-fable-5',
@@ -978,6 +1071,84 @@ const MODEL_REGISTRY: ModelConfig[] = [
     }
   },
 
+  // OpenAI GPT-6 Sol
+  // Invoked through the Bedrock Converse API via a cross-region inference
+  // profile (`us.openai.gpt-6-sol` / `global.openai.gpt-6-sol`); on-demand
+  // invocation of the bare model ID is not supported. Mid-tier GPT-6: the
+  // everyday reasoning/coding model below Astra.
+  // Pricing: $2.00/$10.00 per 1M in/out, $0.20 cache read, $2.50 cache write
+  // (stored per 1K). TBD — these are OpenAI's direct rates, used until AWS
+  // publishes Bedrock pricing for this model; revisit then.
+  {
+    baseId: 'gpt-6-sol',
+    name: 'GPT-6 Sol',
+    provider: 'openai',
+    category: 'text',
+    toolUse: true,
+    maxTokensLimit: 128000,
+    supportsThinking: true,
+    supportedThinkingTypes: ['enabled'],
+    inferenceProfiles: [
+      {
+        type: 'global',
+        prefix: 'global',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(US)'
+      }
+    ],
+    pricing: {
+      input: 0.002,
+      output: 0.01,
+      cacheRead: 0.0002,
+      cacheWrite: 0.0025
+    }
+  },
+
+  // OpenAI GPT-6 Luna
+  // Invoked through the Bedrock Converse API via a cross-region inference
+  // profile (`us.openai.gpt-6-luna` / `global.openai.gpt-6-luna`); on-demand
+  // invocation of the bare model ID is not supported. Fast/affordable tier of
+  // GPT-6: high-volume classification, summarization, routing.
+  // Pricing: $0.10/$0.50 per 1M in/out, $0.01 cache read, $0.125 cache write
+  // (stored per 1K). TBD — these are OpenAI's direct rates, used until AWS
+  // publishes Bedrock pricing for this model; revisit then.
+  {
+    baseId: 'gpt-6-luna',
+    name: 'GPT-6 Luna',
+    provider: 'openai',
+    category: 'text',
+    toolUse: true,
+    maxTokensLimit: 128000,
+    supportsThinking: true,
+    supportedThinkingTypes: ['enabled'],
+    inferenceProfiles: [
+      {
+        type: 'global',
+        prefix: 'global',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1', 'us-east-2', 'us-west-2'],
+        displaySuffix: '(US)'
+      }
+    ],
+    pricing: {
+      input: 0.0001,
+      output: 0.0005,
+      cacheRead: 0.00001,
+      cacheWrite: 0.000125
+    }
+  },
+
   // OpenAI GPT-5.6 Sol
   // Invoked through the Bedrock Converse API via a cross-region inference
   // profile (`us.openai.gpt-5.6-sol` / `global.openai.gpt-5.6-sol`); on-demand
@@ -1133,6 +1304,84 @@ const MODEL_REGISTRY: ModelConfig[] = [
       input: 0.0000721,
       output: 0.000309,
       cacheRead: 0,
+      cacheWrite: 0
+    }
+  },
+
+  // Moonshot AI Kimi K3
+  // Moonshot's open-weight flagship: native vision input and a 1M-token context
+  // window. On bedrock-runtime it is reachable only through cross-region
+  // inference profiles (`us.moonshotai.kimi-k3` / `global.moonshotai.kimi-k3`);
+  // in-region invocation of the bare model ID is not offered, so no `base`
+  // profile is declared.
+  // The model reasons internally, but Converse returns an InternalServerException
+  // when reasoning content from an earlier turn is sent back in a multi-turn
+  // request, so `supportsThinking` stays false: that both keeps the
+  // Anthropic-style `thinking` field out of the request and makes the chat layer
+  // strip reasoningContent blocks from history before sending.
+  // The model also rejects both sampling fields on Converse ("This model
+  // doesn't support the temperature field" / "... the topP field"), so
+  // converseService sends maxTokens alone for it.
+  // Explicit prompt caching is offered only on the Responses and Chat
+  // Completions APIs, not Converse, so no `cache` block is declared — a
+  // cachePoint block would be rejected. Implicit caching still applies and is
+  // billed, so cache-read pricing is recorded.
+  // Pricing (US CRIS, per 1M in/out/cache-read): $3.30/$16.50/$0.33, stored per
+  // 1K. Global CRIS bills about 10% less ($3.00/$15.00/$0.30) but the registry
+  // keeps one rate per model, so the higher US rate is used.
+  {
+    baseId: 'kimi-k3',
+    name: 'Kimi K3',
+    provider: 'moonshotai',
+    category: 'text',
+    toolUse: true,
+    // The model card documents no output ceiling, so this matches the documented
+    // Kimi K2.5 cap as a conservative floor: selecting a model sets maxTokens to
+    // this value, and an over-high guess would fail validation on every request.
+    maxTokensLimit: 16384,
+    supportsThinking: false,
+    inferenceProfiles: [
+      {
+        type: 'global',
+        prefix: 'global',
+        regions: [
+          'us-east-1',
+          'us-east-2',
+          'us-west-1',
+          'us-west-2',
+          'ca-central-1',
+          'eu-central-1',
+          'eu-central-2',
+          'eu-north-1',
+          'eu-south-1',
+          'eu-south-2',
+          'eu-west-1',
+          'eu-west-2',
+          'eu-west-3',
+          'ap-northeast-1',
+          'ap-northeast-2',
+          'ap-northeast-3',
+          'ap-south-1',
+          'ap-south-2',
+          'ap-southeast-1',
+          'ap-southeast-2',
+          'ap-southeast-3',
+          'ap-southeast-4',
+          'sa-east-1'
+        ],
+        displaySuffix: '(Global)'
+      },
+      {
+        type: 'regional-us',
+        prefix: 'us',
+        regions: ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2', 'ca-central-1'],
+        displaySuffix: '(US)'
+      }
+    ],
+    pricing: {
+      input: 0.0033,
+      output: 0.0165,
+      cacheRead: 0.00033,
       cacheWrite: 0
     }
   },
@@ -1550,12 +1799,17 @@ export const getModelMaxTokens = (modelId: string): number => {
 
 /**
  * Get model configuration
+ *
+ * Matching is by substring so that a bare or prefixed model ID both resolve, but
+ * one base ID can be a prefix of another — `claude-opus-5` of `claude-opus-5-5`,
+ * `claude-fable-5` of `claude-fable-5-1` — so the longest matching base ID wins
+ * rather than whichever entry comes first in the registry.
  */
 export const getModelConfig = (modelId: string): ModelConfig | undefined => {
   const baseModelId = getBaseModelId(modelId)
-  return MODEL_REGISTRY.find(
+  return MODEL_REGISTRY.filter(
     (c) => baseModelId.includes(c.baseId) || baseModelId.includes(`${c.provider}.${c.baseId}`)
-  )
+  ).sort((a, b) => b.baseId.length - a.baseId.length)[0]
 }
 
 /**

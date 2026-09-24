@@ -330,11 +330,54 @@ export const api = {
     },
     openFolder: async (sessionId: string) => {
       return ipcRenderer.invoke('docker-sandbox-open-folder', { sessionId })
+    },
+    openPort: async (sessionId: string, port: number) => {
+      return ipcRenderer.invoke('docker-sandbox-open-port', { sessionId, port })
+    },
+    insights: async (sessionId: string, service?: string) => {
+      return ipcRenderer.invoke('docker-sandbox-insights', { sessionId, service })
+    },
+    compose: async (sessionId: string) => {
+      return ipcRenderer.invoke('docker-sandbox-compose', { sessionId })
+    },
+    activity: async (sessionId: string) => {
+      return ipcRenderer.invoke('docker-sandbox-activity', { sessionId })
+    },
+    // The interactive terminal. Reached only from the chat page — there is deliberately
+    // no tool handler that can drive these, so the model cannot open or type into a shell.
+    terminal: {
+      capability: async () => {
+        return ipcRenderer.invoke('docker-sandbox-terminal-capability')
+      },
+      open: async (
+        sessionId: string,
+        options?: { service?: string; cols?: number; rows?: number }
+      ) => {
+        return ipcRenderer.invoke('docker-sandbox-terminal-open', { sessionId, ...options })
+      },
+      attach: async (terminalId: string) => {
+        return ipcRenderer.invoke('docker-sandbox-terminal-attach', { terminalId })
+      },
+      input: async (terminalId: string, data: string) => {
+        return ipcRenderer.invoke('docker-sandbox-terminal-input', { terminalId, data })
+      },
+      resize: async (terminalId: string, cols: number, rows: number) => {
+        return ipcRenderer.invoke('docker-sandbox-terminal-resize', { terminalId, cols, rows })
+      },
+      backlog: async (terminalId: string) => {
+        return ipcRenderer.invoke('docker-sandbox-terminal-backlog', { terminalId })
+      },
+      close: async (terminalId: string) => {
+        return ipcRenderer.invoke('docker-sandbox-terminal-close', { terminalId })
+      }
     }
   },
   chatAttachments: {
     list: async (sessionId: string) => {
       return ipcRenderer.invoke('chat-attachments-list', { sessionId })
+    },
+    withFiles: async (sessionIds: string[]) => {
+      return ipcRenderer.invoke('chat-attachments-with-files', { sessionIds })
     },
     add: async (sessionId: string, files: { name: string; bytes: Uint8Array }[]) => {
       return ipcRenderer.invoke('chat-attachments-add', { sessionId, files })

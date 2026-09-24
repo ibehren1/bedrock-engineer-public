@@ -13,6 +13,14 @@ import {
 import { assertPortsAvailable, buildCompose, writeSandboxFiles } from './composeWriter'
 import { compose, ComposeContext, listProjectContainers, run } from './composeRunner'
 import {
+  containerStats,
+  cpuPercentBetween,
+  inspectContainer,
+  listProjectContainersViaEngine,
+  ratesBetween,
+  type ContainerSample
+} from './dockerEngine'
+import {
   execInSandbox,
   ExecTarget,
   invalidateSessionExecs,
@@ -20,6 +28,9 @@ import {
   readSandboxLogs,
   sendInputToSandbox
 } from './sandboxExec'
+import { clearActivity, setSandboxDirectoryResolver } from './sandboxActivity'
+import { closeSessionTerminals, type TerminalTarget } from './sandboxTerminal'
+import { pubSubManager } from '../../lib/pubsub-manager'
 import {
   CreateSandboxOptions,
   DEFAULT_SANDBOX_CONFIG,
@@ -39,6 +50,10 @@ import {
 const logger = createCategoryLogger('docker:sandbox')
 
 const METADATA_FILENAME = 'sandbox.json'
+
+/** Channel the chat page listens on so state changes do not wait for the next poll. */
+export const sandboxStateChannel = (sessionId: string): string =>
+  `docker-sandbox:state:${sessionId}`
 
 /** Cached availability probe. Docker state changes rarely; re-probe at most this often. */
 let availabilityCache: { value: DockerAvailability; at: number } | null = null
@@ -109,6 +124,11 @@ const getConfig = (): DockerSandboxConfig => {
   const stored = store.get('dockerSandboxTool') as DockerSandboxConfig | undefined
   return { ...DEFAULT_SANDBOX_CONFIG, ...(stored ?? {}) }
 }
+
+// The activity log lives in the sandbox folder, and that folder moves when a chat is
+// renamed. Injecting the lookup keeps sandboxActivity free of a circular import back
+// into this module.
+setSandboxDirectoryResolver(async (sessionId) => findSandboxDir(sessionId) ?? null)
 
 /**
  * Keep generated sandboxes out of the user's repository. Written once, at the root of
@@ -356,6 +376,10 @@ export const createSandbox = async (
     composeless: metadata.composeless
   })
 
+  // Sandboxes are usually created by the agent's first command, so tell the chat page
+  // now rather than leaving it to notice on its next poll.
+  void publishState(sessionId)
+
   return { metadata, warnings: built.warnings }
 }
 
@@ -446,6 +470,7 @@ export const ensureSandbox = async (sessionId: string): Promise<SandboxMetadata>
   const status = await getStatus(sessionId)
   if (status.state !== 'running') {
     await upSandbox(existing)
+    void publishState(sessionId)
   }
   return existing
 }
@@ -463,12 +488,40 @@ export const getStatus = async (sessionId: string): Promise<SandboxStatus> => {
     return { exists: true, state: 'stopped', metadata, containers: [] }
   }
 
-  const containers = await listProjectContainers(metadata.projectName)
+  // The Engine API answers in about a millisecond; `docker ps` costs a process spawn.
+  // That matters because the panel refreshes every few seconds while it is open.
+  let containers: SandboxStatus['containers']
+  try {
+    containers = await listProjectContainersViaEngine(metadata.projectName)
+  } catch {
+    containers = await listProjectContainers(metadata.projectName)
+  }
+
   return {
     exists: true,
     state: deriveState(metadata, containers),
     metadata,
     containers
+  }
+}
+
+/**
+ * Push the current status to the chat page.
+ *
+ * The renderer still polls, because pubsub has no replay and cannot notice a container
+ * the user stopped from their own terminal. These pushes exist so the common cases —
+ * the agent's first command creating a sandbox, or a stop/start from the panel — show up
+ * at once instead of up to a poll interval later.
+ */
+export const publishState = async (sessionId: string): Promise<void> => {
+  try {
+    const status = await getStatus(sessionId)
+    pubSubManager.publish(sandboxStateChannel(sessionId), { type: 'state', status })
+  } catch (error) {
+    logger.debug('Could not publish sandbox state', {
+      sessionId,
+      error: error instanceof Error ? error.message : String(error)
+    })
   }
 }
 
@@ -478,7 +531,9 @@ export const startSandbox = async (sessionId: string): Promise<SandboxStatus> =>
     throw new Error(`No sandbox exists for session ${sessionId}.`)
   }
   await upSandbox(metadata)
-  return getStatus(sessionId)
+  const status = await getStatus(sessionId)
+  pubSubManager.publish(sandboxStateChannel(sessionId), { type: 'state', status })
+  return status
 }
 
 export const stopSandbox = async (sessionId: string): Promise<SandboxStatus> => {
@@ -488,6 +543,9 @@ export const stopSandbox = async (sessionId: string): Promise<SandboxStatus> => 
   }
 
   invalidateSessionExecs(sessionId)
+  // The shell dies with its container; close it here so the panel reports an exit rather
+  // than sitting on a dead socket.
+  closeSessionTerminals(sessionId)
 
   const availability = await getAvailability()
   const ctx = toComposeContext(metadata, availability)
@@ -507,7 +565,9 @@ export const stopSandbox = async (sessionId: string): Promise<SandboxStatus> => 
   }
 
   logger.info('Sandbox stopped', { sessionId })
-  return getStatus(sessionId)
+  const status = await getStatus(sessionId)
+  pubSubManager.publish(sandboxStateChannel(sessionId), { type: 'state', status })
+  return status
 }
 
 /**
@@ -524,6 +584,7 @@ export const removeSandbox = async (
   }
 
   invalidateSessionExecs(sessionId)
+  closeSessionTerminals(sessionId)
 
   const availability = await getAvailability()
   const ctx = toComposeContext(metadata, availability)
@@ -549,6 +610,9 @@ export const removeSandbox = async (
     logger.warn('Removing sandbox files without Docker; containers may remain', { sessionId })
   }
 
+  // Before the folder goes: the log lives inside it, and clearing needs to resolve it.
+  await clearActivity(sessionId)
+
   let dataDeleted = false
   if (options.deleteData) {
     fs.rmSync(metadata.directory, { recursive: true, force: true })
@@ -560,7 +624,164 @@ export const removeSandbox = async (
   }
 
   logger.info('Sandbox removed', { sessionId, dataDeleted })
+  pubSubManager.publish(sandboxStateChannel(sessionId), {
+    type: 'state',
+    status: { exists: false, state: 'missing', containers: [] } satisfies SandboxStatus
+  })
   return { removed: true, dataDeleted }
+}
+
+/**
+ * Resolve the container a terminal should attach to.
+ *
+ * The renderer passes a session id and at most a service name — never a container name.
+ * If it could name a container, an XSS anywhere in rendered markdown would become a root
+ * shell in any container on the machine, sandbox or not.
+ */
+export const resolveTerminalTarget = async (
+  sessionId: string,
+  service?: string
+): Promise<TerminalTarget> => {
+  const metadata = readMetadata(sessionId)
+  if (!metadata) {
+    throw new Error(`No sandbox exists for session ${sessionId}.`)
+  }
+
+  // Validates `service` against the sandbox's own services and throws otherwise.
+  const target = await toExecTarget(metadata, service)
+  if (!target.containerName) {
+    throw new Error(`Could not resolve a container for session ${sessionId}.`)
+  }
+
+  return {
+    sessionId,
+    service: target.service,
+    containerName: target.containerName
+  }
+}
+
+export interface SandboxComposeFile {
+  /** False when the stack is driven by `docker run` because compose is unavailable. */
+  composeless: boolean
+  /** Absolute path of the compose file, for display. */
+  path?: string
+  contents?: string
+  error?: string
+}
+
+/**
+ * The generated compose file for a sandbox, read fresh from disk.
+ *
+ * Shown rather than reconstructed from metadata: what actually drives the containers is
+ * this file, including anything the agent authored in it that the metadata does not track.
+ */
+export const getComposeFile = async (sessionId: string): Promise<SandboxComposeFile> => {
+  const metadata = readMetadata(sessionId)
+  if (!metadata) {
+    throw new Error(`No sandbox exists for session ${sessionId}.`)
+  }
+  if (metadata.composeless) {
+    return { composeless: true }
+  }
+
+  try {
+    return {
+      composeless: false,
+      path: metadata.composeFile,
+      contents: fs.readFileSync(metadata.composeFile, 'utf-8')
+    }
+  } catch (error) {
+    return {
+      composeless: false,
+      path: metadata.composeFile,
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+}
+
+/** True when `port` is published by this sandbox. Guards the open-in-browser action. */
+export const isPublishedPort = (sessionId: string, port: number): boolean => {
+  const metadata = readMetadata(sessionId)
+  if (!metadata) return false
+  return metadata.services.some((service) => service.ports.some((mapping) => mapping.host === port))
+}
+
+export interface SandboxInsights {
+  containerName: string
+  service: string
+  image?: string
+  imageId?: string
+  status?: string
+  startedAt?: string
+  /** Percent of one core, in the units `docker stats` prints: 200% means two cores. */
+  cpuPercent?: number
+  memoryUsed?: number
+  memoryLimit?: number
+  /** Cumulative network totals since the container started. */
+  netRx?: number
+  netTx?: number
+  /** Network throughput since the previous sample, in bytes per second. */
+  netRxPerSecond?: number
+  netTxPerSecond?: number
+  /**
+   * Block IO totals and throughput. Undefined where the host does not report it, which
+   * includes Docker Desktop and OrbStack on macOS.
+   */
+  blockRead?: number
+  blockWrite?: number
+  blockReadPerSecond?: number
+  blockWritePerSecond?: number
+  /** Present when the figures could not be read, for display in the panel. */
+  error?: string
+}
+
+/** Previous CPU sample per container: a percentage needs two readings. */
+const statsSamples = new Map<string, ContainerSample>()
+
+/**
+ * Identity and resource use for a sandbox's container, for the panel's Overview tab.
+ * Polled only while the panel is open.
+ */
+export const getInsights = async (
+  sessionId: string,
+  service?: string
+): Promise<SandboxInsights> => {
+  const target = await resolveTerminalTarget(sessionId, service)
+  const insights: SandboxInsights = {
+    containerName: target.containerName,
+    service: target.service
+  }
+
+  try {
+    const inspected = await inspectContainer(target.containerName)
+    insights.image = inspected.Config.Image
+    insights.imageId = inspected.Image
+    insights.status = inspected.State.Status
+    insights.startedAt = inspected.State.StartedAt
+
+    if (inspected.State.Running) {
+      const sample = await containerStats(target.containerName)
+      insights.memoryUsed = sample.memoryUsed
+      insights.memoryLimit = sample.memoryLimit
+      insights.netRx = sample.netRx
+      insights.netTx = sample.netTx
+      insights.blockRead = sample.blockRead
+      insights.blockWrite = sample.blockWrite
+
+      const previous = statsSamples.get(target.containerName)
+      if (previous) {
+        insights.cpuPercent = cpuPercentBetween(previous, sample)
+        Object.assign(insights, ratesBetween(previous, sample))
+      }
+      statsSamples.set(target.containerName, sample)
+    } else {
+      statsSamples.delete(target.containerName)
+    }
+  } catch (error) {
+    insights.error = error instanceof Error ? error.message : String(error)
+  }
+
+  return insights
 }
 
 /**

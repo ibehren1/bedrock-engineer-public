@@ -635,6 +635,7 @@ This is where most work happens.
 │  Chat     │   Your messages and the agent's replies           │
 │  history  │   (tool calls shown inline, collapsible)          │
 │  list     │                                                  │
+│  📎 🐳    │                                                  │
 │           │                                                  │
 ├───────────┴──────────────────────────────────────────────────┤
 │ [MD] [Word] [PDF] [paperclip] [whale]        [stop] [new]    │  toolbar
@@ -644,6 +645,11 @@ This is where most work happens.
 │ [Agent ▾] [Model ▾] [Thinking ▾] [Plan/Act] [tools] [folder] │  controls
 └──────────────────────────────────────────────────────────────┘
 ```
+
+Each row in the chat history carries a **paperclip** when that chat has attached files and a **whale**
+when it has a Docker sandbox, so you can tell which conversations have something on disk behind them
+without opening each one. Both are drawn in the same colour as the rest of the row — they are labels,
+not buttons.
 
 ### 6.2 The three main controls
 
@@ -658,14 +664,14 @@ you can see what you are spending before you spend it.
 **Thinking** — how much the model is allowed to reason privately before it answers. More thinking
 gives better answers on hard problems, but costs more and takes longer.
 
-| Thinking setting | When to use it                                                                                                                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **None**         | Simple questions, quick lookups, chatting.                                                                                                                               |
-| **Adaptive**     | Let the model decide how hard to think. A good default on newer models.                                                                                                  |
-| **Quick** (1K)   | A little planning.                                                                                                                                                       |
-| **Normal** (4K)  | Everyday multi-step work.                                                                                                                                                |
-| **Deep** (16K)   | Hard debugging, tricky analysis, long plans.                                                                                                                             |
-| **Deeper** (32K) | The hardest problems. On models that use effort levels instead of a thinking budget (Grok 4.6, GPT-6 Astra, GPT-5.6), this asks for the highest effort the model offers. |
+| Thinking setting | When to use it                                                                                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **None**         | Simple questions, quick lookups, chatting.                                                                                                                         |
+| **Adaptive**     | Let the model decide how hard to think. A good default on newer models.                                                                                            |
+| **Quick** (1K)   | A little planning.                                                                                                                                                 |
+| **Normal** (4K)  | Everyday multi-step work.                                                                                                                                          |
+| **Deep** (16K)   | Hard debugging, tricky analysis, long plans.                                                                                                                       |
+| **Deeper** (32K) | The hardest problems. On models that use effort levels instead of a thinking budget (Grok 4.6, GPT-6, GPT-5.6), this asks for the highest effort the model offers. |
 
 Some models always think and cannot be turned down; the control will tell you when that is the case.
 
@@ -786,6 +792,9 @@ file with its size, and lets you:
 - **Delete** a single file on the spot
 - **Add** more files through a file picker
 - **Open the folder** in Finder, File Explorer, or your Linux file manager
+
+Chats that have files also show a small paperclip next to their title in the chat history, so you can
+spot them without opening each one.
 
 ### 7.3 How the agent sees them
 
@@ -1114,7 +1123,9 @@ internet or your files except the ones you hand it.
 
 #### `dockerSandbox`
 
-Gives the chat its own long-lived Linux container to work in. Full explanation in
+Gives the chat its own long-lived Linux container to work in. It also brings the sandbox panel, which
+shows the container's state, services and published ports, logs every command the agent runs there, and
+carries an interactive shell you can use yourself. Full explanation in
 [Section 10](#10-the-docker-sandbox).
 
 #### `screenCapture`
@@ -1225,9 +1236,11 @@ allow that pattern for the rest of the chat.
 
 A **whale icon** appears in the chat toolbar whenever the current chat has a container. Its menu can:
 
+- **Open the sandbox panel** (see [10.8](#108-the-sandbox-panel))
 - **Stop**, **start** or **remove** the container
-- Show the sandbox's folder name
 - **Open the sandbox folder** in Finder, File Explorer, or your Linux file manager
+
+Chats that have a sandbox also show a small whale next to their title in the chat history.
 
 Containers survive switching chats. They are stopped when you quit the app and come back with their
 installed packages intact when you return.
@@ -1257,6 +1270,84 @@ otherwise.
 - **Docker Compose** is used when available, and is required for stacks with more than one service.
 - **Voice chat does not support sandboxes.** It runs host commands under the allowed-commands list,
   the old way.
+- **The terminal needs Docker to be local.** Docker Desktop, OrbStack, Colima, Rancher Desktop and
+  rootless installs all work. If your Docker context points at a remote daemon, the Terminal tab is
+  disabled and explains why; everything else in the panel still works.
+
+### 10.8 The sandbox panel
+
+The panel slides in from the right-hand edge of the chat. Open it from the whale menu, or with the
+narrow tab on the right — the mirror image of the chat history's tab on the left. It only appears for
+chats that actually have a container, and it starts closed.
+
+Three tabs:
+
+**Overview** — what the container is and what it is doing: its name and image, how long it has been
+up, and CPU, memory, network and disk against the limits from
+[Settings → Tools → Docker Sandbox](#the-docker-sandbox-tool). Each service is listed with its state,
+and each published port is a button that opens `localhost:<port>` in your browser. The usual actions
+— open folder, start, stop, restart, remove — are at the bottom.
+
+CPU is shown the way `docker stats` shows it: 100% means one core fully used, so a container working
+across two cores reads 200%. It says _measuring…_ for the first few seconds after you open the tab,
+because a percentage needs two readings to compare.
+
+**Compose** — only for sandboxes that use Docker Compose. A diagram of the stack: which services
+exist, what image each runs, whether it is up, which published ports reach it from your browser
+(solid arrows) and which folders are mounted into it (dashed). Services in one stack can reach each
+other by service name, which the diagram notes, because that is the detail people most often miss.
+Click the diagram to open it full window, with zoom controls and Esc to close — worth it for a stack
+of several services, since the panel itself is only so wide. Below the diagram is the compose file
+itself, exactly as written to disk, with buttons to copy it or open its folder.
+
+**Terminal** — a real shell in the container. See [10.9](#109-the-interactive-terminal).
+
+**Activity** — every command the agent has run in this sandbox, newest first, with the time it
+started, how long it took, and how it ended:
+
+| Outcome                     | Meaning                                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **exit 0** / **exit 1** …   | The command finished, with that exit code.                                                                     |
+| **waiting for input**       | It stopped at a prompt. The agent can answer it; the row shows how many bytes were sent, never what they were. |
+| **detached**                | It looked like a server that had come up, so the agent stopped waiting. It is still running.                   |
+| **timed out, left running** | It outlived the per-command timeout. The agent moved on and the process was deliberately **not** killed.       |
+
+Rows are tagged **agent** or **you**, so a command the model ran is never confused with one you typed.
+Opening and closing a terminal shows up as a **you** row; what you type inside it does not, because
+reading commands back out of a live shell is not something that can be done reliably.
+
+The log is kept in the sandbox's own folder, so it survives quitting the app, and the newest 500
+entries are retained. Removing the sandbox removes the log with it.
+
+### 10.9 The interactive terminal
+
+The **Terminal** tab gives you a shell inside the chat's container — the same container the agent has
+been working in. A stack with more than one service gets a row of tabs, one per container, each with
+its own shell and its own scrollback; a dot shows which are running. It is a proper terminal: colours, `vim` and `htop`, tab completion, command history,
+Ctrl-C, and it resizes with the panel.
+
+This is the quickest way to see what the agent actually left behind, or to fix something yourself
+without describing it to the model first.
+
+**Read this once, then it will stop telling you:**
+
+- `/workspace` is your real project folder, mounted read-write. A `rm -rf` typed here deletes real
+  files. There is no undo and no confirmation.
+- Nothing you type is checked against the allowed-commands list. That list exists to protect your
+  machine from the model; this shell is you, in a container, on purpose.
+- The shell runs as **root**, so files it creates may end up owned by root on Linux.
+
+The app asks you to acknowledge that once, before the first time you open a terminal, and then
+remembers it.
+
+**The model cannot use this.** There is no tool for it, so agents, sub-agents and background tasks
+have no way to open a shell or type into yours. It is reachable only from this panel.
+
+A shell you open keeps running while you look at other tabs, collapse the panel, or switch chats — so
+a dev server you started by hand does not die when you look away. Switching between service tabs is
+free for the same reason: the shell lives outside the panel, and its recent output is replayed when
+you come back. It ends when the sandbox is stopped
+or removed, when the chat is deleted, or when you quit the app.
 
 ---
 
@@ -1520,11 +1611,13 @@ Useful when you know what the steps are but not the exact JSON syntax for expres
 | If you want…                                             | Use                                                     |
 | -------------------------------------------------------- | ------------------------------------------------------- |
 | A good all-round default                                 | **Claude Sonnet 5**                                     |
-| The strongest reasoning for hard problems                | **Claude Opus 5** or **Claude Fable 5.1**               |
+| The strongest reasoning for hard problems                | **Claude Opus 5.5** or **Claude Fable 5.1**             |
 | Speed and low cost for simple work                       | **Claude Haiku 4.5** or **Amazon Nova Lite**            |
 | The cheapest option for background tasks and chat titles | **Amazon Nova Micro** or **Nova Lite**                  |
 | A very large context window for huge documents           | **Claude Fable 5.1** (1M tokens) or **Grok 4.6** (500K) |
 | OpenAI's most capable model, cost no object              | **GPT-6 Astra** (1.05M tokens, $11/$55 per 1M)          |
+| A mid-priced OpenAI model for everyday work              | **GPT-6 Sol** ($2/$10 per 1M)                           |
+| The cheapest OpenAI model for high-volume work           | **GPT-6 Luna** ($0.10/$0.50 per 1M)                     |
 
 The model dropdown shows the price per million tokens in and out for each model, so you can compare
 before you commit.
@@ -1534,11 +1627,12 @@ before you commit.
 Which of these you see depends on your region and your **Visible Models** allowlist.
 
 **Anthropic (Claude):** Haiku 4.5, Sonnet 4, Sonnet 4.5, Sonnet 4.6, Sonnet 5, Opus 4, Opus 4.1,
-Opus 4.6, Opus 4.7, Opus 4.8, Opus 5, Fable 5, Fable 5.1
+Opus 4.6, Opus 4.7, Opus 4.8, Opus 5, Opus 5.5, Fable 5, Fable 5.1
 
 **Amazon (Nova):** Nova Micro, Nova Lite, Nova 2 Lite, Nova Pro, Nova Premier
 
-**OpenAI:** GPT-6 Astra, GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, GPT-OSS 20B, GPT-OSS 120B
+**OpenAI:** GPT-6 Astra, GPT-6 Sol, GPT-6 Luna, GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna,
+GPT-OSS 20B, GPT-OSS 120B
 
 **Others:** DeepSeek R1, Kimi K2.5, Grok 4.6
 
@@ -1706,6 +1800,9 @@ the conversation.
 - _…let the agent search the web?_ → `tavilySearch` plus a Tavily key,
   [Section 9.3](#93-web--search-tools)
 - _…let the agent run commands safely?_ → [Section 10](#10-the-docker-sandbox)
+- _…see what the agent is doing inside its container?_ → the sandbox panel,
+  [Section 10.8](#108-the-sandbox-panel)
+- _…get a shell inside the container myself?_ → [Section 10.9](#109-the-interactive-terminal)
 - _…let the agent run commands on my actual machine?_ → Allowed Commands,
   [Section 8.3](#83-the-agent-editor) — and read the safety note
 - _…let the agent analyze a spreadsheet?_ → `codeInterpreter`, [Section 9.5](#95-system-tools)
@@ -1908,6 +2005,21 @@ agent at all.
 
 Docker needs to be installed _and running_. Start Docker Desktop (or your Docker service) and try
 again. For multi-service sandboxes, Docker Compose is also required.
+
+### The sandbox terminal says it cannot reach Docker
+
+The terminal talks to Docker directly rather than through the `docker` command, so it needs a local
+Docker socket. Two cases:
+
+- **"This Docker context points at a remote daemon."** Your Docker context is a `tcp://` or `ssh://`
+  address. The terminal cannot attach to that, and neither can the rest of the sandbox in any useful
+  way — a remote daemon cannot mount your project folder either. Switch contexts with
+  `docker context use default` (or whichever local context you have) and reopen the panel.
+- **"No Docker socket at …"** or **"Permission denied …"** — Docker is not running, or your user
+  cannot open its socket. Start Docker, and on Linux add yourself to the `docker` group
+  (`sudo usermod -aG docker $USER`, then log out and back in).
+
+Everything else in the panel — state, services, ports and the activity log — keeps working either way.
 
 ### Web search does not work
 

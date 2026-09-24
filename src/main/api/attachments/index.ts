@@ -11,6 +11,7 @@ export {
   ensureAttachmentsDir,
   getAttachmentsRoot,
   listAttachments,
+  listSessionIdsWithAttachments,
   removeAllAttachments,
   removeAttachment,
   removeEveryAttachmentsFolder,

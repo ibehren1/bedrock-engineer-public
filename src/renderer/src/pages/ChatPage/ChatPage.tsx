@@ -18,6 +18,7 @@ import { useTokenAnalyticsModal, calculateAnalytics } from './modals/useTokenAna
 import { useTodoModal } from './modals/useTodoModal'
 import { HostCommandApprovalModal } from './modals/HostCommandApprovalModal'
 import { useChatSandbox } from './hooks/useChatSandbox'
+import { SandboxPanel } from './components/SandboxPanel'
 import { useChatAttachments } from './hooks/useChatAttachments'
 import { useChatHistory } from '@renderer/contexts/ChatHistoryContext'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -429,6 +430,8 @@ export default function ChatPage() {
   // 履歴は開いた状態で始める。ChatPage は画面遷移でアンマウントされるので、
   // Chat を開き直すたびに履歴が開く。
   const [isHistoryOpen, setIsHistoryOpen] = useState(true)
+  // サンドボックスパネルは既定で閉じる。履歴と違い、必要なときだけ開くもの。
+  const [isSandboxPanelOpen, setIsSandboxPanelOpen] = useState(false)
   const DEFAULT_TEXTAREA_HEIGHT = 72 // Default height (3 lines * 24px)
 
   const [textareaHeight, setTextareaHeight] = useState(DEFAULT_TEXTAREA_HEIGHT)
@@ -743,11 +746,59 @@ export default function ChatPage() {
                   onStop: handleStopSandbox,
                   onStart: handleStartSandbox,
                   onRemove: handleRemoveSandbox,
-                  onOpenFolder: handleOpenSandboxFolder
+                  onOpenFolder: handleOpenSandboxFolder,
+                  onOpenPanel: () => setIsSandboxPanelOpen(true)
                 }}
               />
             </div>
           </div>
+        </div>
+
+        {/* サンドボックスパネルのトグルバー - サンドボックスがあるチャットにのみ出す */}
+        {sandboxStatus.exists && (
+          // pb-52 matches the message area's reservation for the fixed input box, so the
+          // strip stays centred against the panel rather than the whole window.
+          <div className="flex items-center pb-52">
+            <Tooltip
+              content={t(
+                isSandboxPanelOpen ? 'dockerSandbox.panel.hide' : 'dockerSandbox.panel.show'
+              )}
+              placement="left"
+              animation="duration-500"
+            >
+              <div
+                onClick={() => setIsSandboxPanelOpen(!isSandboxPanelOpen)}
+                className="w-4 h-16 bg-raised cursor-pointer flex items-center justify-center transition-colors duration-200 rounded-container m-2"
+              >
+                <FiChevronRight
+                  className={`w-4 h-4 text-accent hover:text-accent-strong transition-transform duration-200 ${
+                    isSandboxPanelOpen ? '' : 'rotate-180'
+                  }`}
+                />
+              </div>
+            </Tooltip>
+          </div>
+        )}
+
+        {/* サンドボックスパネル - 幅アニメーション。内側は固定幅なので
+            アニメーション中にチャット列が詰まって見えない */}
+        {/* pb-52 keeps the panel clear of the fixed input box and its icons, the same
+            reservation the message list makes, so the input can stay full width. */}
+        <div
+          className={`bg-canvas flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden pb-52 ${
+            isSandboxPanelOpen && sandboxStatus.exists ? 'w-[40rem]' : 'w-0'
+          }`}
+        >
+          <SandboxPanel
+            sessionId={currentSessionId}
+            status={sandboxStatus}
+            isBusy={isSandboxBusy}
+            isOpen={isSandboxPanelOpen && sandboxStatus.exists}
+            onStart={handleStartSandbox}
+            onStop={handleStopSandbox}
+            onRemove={handleRemoveSandbox}
+            onOpenFolder={handleOpenSandboxFolder}
+          />
         </div>
       </div>
     </HelpSessionProvider>

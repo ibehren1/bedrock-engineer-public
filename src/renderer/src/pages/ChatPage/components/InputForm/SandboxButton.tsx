@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FaDocker } from 'react-icons/fa'
-import { FiFolder, FiPlay, FiSquare, FiTrash2 } from 'react-icons/fi'
+import { FiFolder, FiPlay, FiSidebar, FiSquare, FiTrash2 } from 'react-icons/fi'
 import type { ChatSandboxStatus } from '../../hooks/useChatSandbox'
-import { folderName } from '../../lib/folderName'
 
 type SandboxButtonProps = {
   status: ChatSandboxStatus
@@ -12,12 +11,16 @@ type SandboxButtonProps = {
   onStart: () => void
   onRemove: (deleteData: boolean) => void
   onOpenFolder: () => void
+  onOpenPanel: () => void
 }
 
 /**
  * Docker whale button for the chat toolbar, shown only when the current chat has a
  * sandbox. Opens upward because the toolbar sits at the bottom of the window — same
  * approach as ThinkingModeSelector.
+ *
+ * Deliberately just the actions: the container's state, services and published ports are
+ * shown by the sandbox panel, which this links to, rather than being repeated here.
  */
 export const SandboxButton: React.FC<SandboxButtonProps> = ({
   status,
@@ -25,7 +28,8 @@ export const SandboxButton: React.FC<SandboxButtonProps> = ({
   onStop,
   onStart,
   onRemove,
-  onOpenFolder
+  onOpenFolder,
+  onOpenPanel
 }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -53,10 +57,6 @@ export const SandboxButton: React.FC<SandboxButtonProps> = ({
         return t('dockerSandbox.menu.stateStopped')
     }
   }
-
-  const publishedPorts = (status.metadata?.services ?? []).flatMap((service) =>
-    service.ports.map((port) => ({ service: service.name, ...port }))
-  )
 
   const act = (action: () => void) => {
     setIsOpen(false)
@@ -87,27 +87,17 @@ export const SandboxButton: React.FC<SandboxButtonProps> = ({
               <span className="text-sm font-medium text-ink">{t('dockerSandbox.menu.title')}</span>
               <span className="text-xs text-ink-muted">{statusLabel()}</span>
             </div>
-
-            {status.metadata?.directory && (
-              <p
-                className="mt-1 text-xs font-mono text-ink-muted truncate"
-                title={status.metadata.directory}
-              >
-                {folderName(status.metadata.directory)}
-              </p>
-            )}
-
-            <p className="mt-1 text-xs text-ink-muted">
-              {(status.metadata?.services ?? []).map((service) => service.name).join(', ') || '—'}
-            </p>
-
-            {publishedPorts.length > 0 && (
-              <p className="mt-1 text-xs text-ink-muted">
-                {t('dockerSandbox.menu.ports')}:{' '}
-                {publishedPorts.map((port) => `${port.host}→${port.container}`).join(', ')}
-              </p>
-            )}
           </div>
+
+          <button
+            onClick={() => act(onOpenPanel)}
+            className="w-full text-left px-2.5 py-1 text-sm text-accent font-medium hover:bg-raised flex items-center gap-2"
+          >
+            <FiSidebar className="w-4 h-4" />
+            {t('dockerSandbox.menu.openPanel')}
+          </button>
+
+          <div className="my-1 mx-0.5 h-px bg-subtle" />
 
           <button
             onClick={() => act(onOpenFolder)}

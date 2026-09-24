@@ -103,6 +103,7 @@ export const chatPage = {
           statePartial: 'partly running',
           stateStopped: 'stopped',
           ports: 'Ports',
+          openPanel: 'Open sandbox panel',
           openFolder: 'Open sandbox folder',
           start: 'Start containers',
           stop: 'Stop containers',
@@ -118,6 +119,87 @@ export const chatPage = {
           stopped: 'Sandbox stopped',
           removed: 'Sandbox removed. Data folder kept.',
           removedWithData: 'Sandbox and its data folder removed.'
+        },
+        panel: {
+          title: 'Sandbox',
+          show: 'Show sandbox panel',
+          hide: 'Hide sandbox panel',
+          tabOverview: 'Overview',
+          tabCompose: 'Compose',
+          tabTerminal: 'Terminal',
+          tabActivity: 'Activity',
+          container: 'Container',
+          name: 'Name',
+          image: 'Image',
+          started: 'Started',
+          ago: '{{duration}} ago',
+          workspace: 'Workspace',
+          folder: 'Folder',
+          resources: 'Resources',
+          cpu: 'CPU',
+          memory: 'Memory',
+          network: 'Network',
+          disk: 'Disk',
+          totalInOut: '{{in}} in · {{out}} out',
+          totalReadWritten: '{{read}} read · {{written}} written',
+          diskUnavailable: 'not reported by Docker here',
+          diskHint:
+            "Disk counts the container's own filesystem. Work in /workspace or /data is your machine's disk and is not counted here.",
+          sampling: 'measuring…',
+          notRunning: 'Containers are not running, so there is nothing to measure.',
+          services: 'Services',
+          actions: 'Actions',
+          restart: 'Restart',
+          stateMissing: 'missing',
+          openPort: 'Open localhost:{{port}} in your browser',
+          openPortFailed: 'Could not open that port.'
+        },
+        terminal: {
+          warning: 'Real root shell. Nothing here is filtered or approved.',
+          stoppedTitle: 'Containers are stopped',
+          stoppedBody: 'Start the sandbox to open a shell in it.',
+          unavailableTitle: 'The terminal needs a local Docker socket',
+          ackTitle: 'This is a real shell in the container',
+          ackWorkspace:
+            '/workspace is {{path}}, mounted read-write. A typed rm -rf deletes real files. There is no undo.',
+          yourProjectFolder: 'your actual project folder',
+          ackNoFilter: 'Nothing you type is checked against the allowed-commands list.',
+          ackRoot: 'The shell runs as root, so files it creates may be owned by root.',
+          ackConfirm: 'I understand — open the terminal',
+          ackOnce: 'Asked once, then remembered.',
+          exited: 'The shell ended (exit {{code}}).',
+          reconnect: 'Reconnect'
+        },
+        compose: {
+          layout: 'Container layout',
+          layoutHint:
+            'Solid arrows are published ports; dashed ones are mounts. Services on the same stack can reach each other by service name.',
+          expandHint: 'Click the diagram to open it full window. Esc closes it.',
+          file: 'Compose file',
+          copy: 'Copy',
+          copied: 'Compose file copied',
+          noneTitle: 'This sandbox does not use Compose',
+          noneBody:
+            'Docker Compose was unavailable when the sandbox was created, so it runs as a single container started with docker run. Install Compose and recreate the sandbox to get a stack.'
+        },
+        activity: {
+          empty: 'Nothing has run in this sandbox yet.',
+          emptyHint: 'Commands the agent runs here will be listed, newest first.',
+          exitCode: 'exit {{code}}',
+          stdinSent: 'answered — {{bytes}} bytes sent',
+          storageNote: 'Kept in the sandbox folder, last 500 entries.',
+          source: {
+            agent: 'agent',
+            user: 'you'
+          },
+          outcome: {
+            running: 'running',
+            completed: 'finished',
+            failed: 'failed',
+            requiresInput: 'waiting for input',
+            detached: 'detached',
+            timeout: 'timed out, left running'
+          }
         },
         settings: {
           intro:
@@ -257,6 +339,7 @@ export const chatPage = {
           statePartial: '一部実行中',
           stateStopped: '停止中',
           ports: 'ポート',
+          openPanel: 'サンドボックスパネルを開く',
           openFolder: 'サンドボックスフォルダを開く',
           start: 'コンテナを起動',
           stop: 'コンテナを停止',
@@ -272,6 +355,88 @@ export const chatPage = {
           stopped: 'サンドボックスを停止しました',
           removed: 'サンドボックスを削除しました（データフォルダは保持）',
           removedWithData: 'サンドボックスとデータフォルダを削除しました'
+        },
+        panel: {
+          title: 'サンドボックス',
+          show: 'サンドボックスパネルを表示',
+          hide: 'サンドボックスパネルを隠す',
+          tabOverview: '概要',
+          tabCompose: 'Compose',
+          tabTerminal: 'ターミナル',
+          tabActivity: '実行履歴',
+          container: 'コンテナ',
+          name: '名前',
+          image: 'イメージ',
+          started: '起動',
+          ago: '{{duration}} 前',
+          workspace: 'ワークスペース',
+          folder: 'フォルダ',
+          resources: 'リソース',
+          cpu: 'CPU',
+          memory: 'メモリ',
+          network: 'ネットワーク',
+          disk: 'ディスク',
+          totalInOut: '受信 {{in}} · 送信 {{out}}',
+          totalReadWritten: '読み取り {{read}} · 書き込み {{written}}',
+          diskUnavailable: 'この環境の Docker では取得できません',
+          diskHint:
+            'ディスクはコンテナ自身のファイルシステムのみを計測します。/workspace や /data への読み書きはホスト側のディスクなので含まれません。',
+          sampling: '計測中…',
+          notRunning: 'コンテナが実行されていないため、計測できません。',
+          services: 'サービス',
+          actions: '操作',
+          restart: '再起動',
+          stateMissing: '未作成',
+          openPort: 'localhost:{{port}} をブラウザで開く',
+          openPortFailed: 'そのポートを開けませんでした。'
+        },
+        terminal: {
+          warning: '本物の root シェルです。フィルタも承認もありません。',
+          stoppedTitle: 'コンテナは停止中です',
+          stoppedBody: 'シェルを開くにはサンドボックスを起動してください。',
+          unavailableTitle: 'ターミナルにはローカルの Docker ソケットが必要です',
+          ackTitle: 'これはコンテナ内の本物のシェルです',
+          ackWorkspace:
+            '/workspace は {{path}} で、読み書き可能でマウントされています。rm -rf を入力すれば実際のファイルが消え、取り消せません。',
+          yourProjectFolder: '実際のプロジェクトフォルダ',
+          ackNoFilter: '入力したコマンドは許可コマンド一覧で検査されません。',
+          ackRoot:
+            'シェルは root で動作するため、作成されたファイルの所有者が root になる場合があります。',
+          ackConfirm: '理解しました — ターミナルを開く',
+          ackOnce: '確認は初回のみです。',
+          exited: 'シェルが終了しました（終了コード {{code}}）。',
+          reconnect: '再接続'
+        },
+        compose: {
+          layout: 'コンテナ構成',
+          layoutHint:
+            '実線は公開ポート、破線はマウントです。同じスタックのサービスはサービス名で相互に到達できます。',
+          expandHint: '図をクリックすると全画面で開きます。Esc で閉じます。',
+          file: 'Compose ファイル',
+          copy: 'コピー',
+          copied: 'Compose ファイルをコピーしました',
+          noneTitle: 'このサンドボックスは Compose を使用していません',
+          noneBody:
+            '作成時に Docker Compose が利用できなかったため、docker run による単一コンテナで動作しています。Compose を導入してサンドボックスを再作成するとスタックになります。'
+        },
+        activity: {
+          empty: 'このサンドボックスではまだ何も実行されていません。',
+          emptyHint: 'エージェントが実行したコマンドが新しい順に表示されます。',
+          exitCode: '終了コード {{code}}',
+          stdinSent: '応答しました — {{bytes}} バイト送信',
+          storageNote: 'サンドボックスフォルダに最新 500 件まで保存されます。',
+          source: {
+            agent: 'エージェント',
+            user: 'ユーザー'
+          },
+          outcome: {
+            running: '実行中',
+            completed: '完了',
+            failed: '失敗',
+            requiresInput: '入力待ち',
+            detached: 'バックグラウンド',
+            timeout: 'タイムアウト（実行は継続）'
+          }
         },
         settings: {
           intro:
