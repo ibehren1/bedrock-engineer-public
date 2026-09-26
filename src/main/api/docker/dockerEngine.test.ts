@@ -244,8 +244,23 @@ describe('ratesBetween', () => {
   })
 })
 
-// A throwaway Unix socket server stands in for the daemon, which exercises the real
-// http/net paths without needing Docker.
+// A throwaway socket server stands in for the daemon, which exercises the real
+// http/net paths without needing Docker. Windows has no filesystem sockets, so there
+// the stub listens on a named pipe, the same transport the real daemon uses there.
+const isWindows = process.platform === 'win32'
+
+let stubCounter = 0
+
+// Returns the path to listen/connect on plus the DOCKER_HOST string naming it.
+const stubEndpoint = (dir: string, name: string) => {
+  if (isWindows) {
+    const pipe = `docker-engine-test-${process.pid}-${stubCounter++}-${name}`
+    return { path: `\\\\.\\pipe\\${pipe}`, host: `npipe:////./pipe/${pipe}` }
+  }
+  const socketPath = join(dir, `${name}.sock`)
+  return { path: socketPath, host: `unix://${socketPath}` }
+}
+
 describe('engine transport against a stub socket', () => {
   let dir: string
   let socketPath: string
@@ -269,8 +284,9 @@ describe('engine transport against a stub socket', () => {
 
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), 'docker-engine-test-'))
-    socketPath = join(dir, 'docker.sock')
-    process.env.DOCKER_HOST = `unix://${socketPath}`
+    const endpoint = stubEndpoint(dir, 'docker')
+    socketPath = endpoint.path
+    process.env.DOCKER_HOST = endpoint.host
     connections = []
     resetDockerEndpointCache()
   })
@@ -369,7 +385,7 @@ describe('engine transport against a stub socket', () => {
   })
 
   it('explains a missing socket instead of leaking ENOENT', async () => {
-    process.env.DOCKER_HOST = `unix://${join(dir, 'not-there.sock')}`
+    process.env.DOCKER_HOST = stubEndpoint(dir, 'not-there').host
     resetDockerEndpointCache()
     await expect(engineRequest('GET', '/_ping')).rejects.toThrow(/Is Docker running\?/)
   })

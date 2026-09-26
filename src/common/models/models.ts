@@ -1077,8 +1077,7 @@ const MODEL_REGISTRY: ModelConfig[] = [
   // invocation of the bare model ID is not supported. Mid-tier GPT-6: the
   // everyday reasoning/coding model below Astra.
   // Pricing: $2.00/$10.00 per 1M in/out, $0.20 cache read, $2.50 cache write
-  // (stored per 1K). TBD — these are OpenAI's direct rates, used until AWS
-  // publishes Bedrock pricing for this model; revisit then.
+  // (stored per 1K).
   {
     baseId: 'gpt-6-sol',
     name: 'GPT-6 Sol',
@@ -1116,8 +1115,7 @@ const MODEL_REGISTRY: ModelConfig[] = [
   // invocation of the bare model ID is not supported. Fast/affordable tier of
   // GPT-6: high-volume classification, summarization, routing.
   // Pricing: $0.10/$0.50 per 1M in/out, $0.01 cache read, $0.125 cache write
-  // (stored per 1K). TBD — these are OpenAI's direct rates, used until AWS
-  // publishes Bedrock pricing for this model; revisit then.
+  // (stored per 1K).
   {
     baseId: 'gpt-6-luna',
     name: 'GPT-6 Luna',
